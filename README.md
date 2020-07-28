@@ -26,8 +26,10 @@ $$\text{ where } F\left(\theta, \phi, D^{val}\right)=\frac{1}{M} \sum_{i=1}^{M} 
 
 To solve the UL(Upper Level) problem, various methods are implemented to compute the gradients of meta parameters using the validation data, which will be introduced in the next section.
 
-## Available Algorithms 
- 1. Related papers
+## Related Algorithms 
+ 1. Management of Methods
+    ![PyBML Models](https://github.com/liuyaohua918/PyBML/blob/master/figures/model.png)
+ 2. Related Papers
     - [Hyperparameter optimization with approximate gradient(Implicit HG)](https://arxiv.org/abs/1602.02355)
     - [Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks(MAML)](https://arxiv.org/abs/1703.03400)
     - [On First-Order Meta-Learning Algorithms(FOMAML)](https://arxiv.org/abs/1803.02999)
@@ -37,8 +39,6 @@ To solve the UL(Upper Level) problem, various methods are implemented to compute
     - [Meta-Learning with warped gradient Descent(Warp-Grad))](https://arxiv.org/abs/1909.00025)
     - [DARTS: Differentiable Architecture Search(DARTS)](https://arxiv.org/pdf/1806.09055.pdf)
     - [A Generic First-Order Algorithmic Framework for Bi-Level Programming Beyond Lower-Level Singleton(BDA)](https://arxiv.org/pdf/2006.04045.pdf)
-  2. Management of Methods
-    ![PyBML Models](https://github.com/liuyaohua918/PyBML/blob/master/figures/model.png)
 
 ## Package Structure
 ![Package Structure](https://github.com/liuyaohua918/PyBML/blob/master/figures/uml10.png)
