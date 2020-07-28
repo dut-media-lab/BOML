@@ -4,6 +4,9 @@
 1. [Introduction ](#a1)<br>
 2. [Installation and requirements ](#a2)
 3. [Quickly build your bilevel meta-learning model ](#a3)
+    - [Core Modules ](#a31)
+    - [Core Built-in functions of BMLHOptimizer ](#a32)
+    - [Simple Training Example](#a33)
 4. [Modification and Extension ](#a4)
 5. [Author and liscense](#a5)
 
@@ -27,8 +30,9 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/pybml/require
 
   pip install py_bml
   ```
+ 
 ## Quickly build your bilevel meta-learning model <div3 id="a3"></div3>
-  - Core Modules:
+  - Core Modules: <div3 id="a31"></div3>
     1. Dataloader
        - Related: 
             - pybml.Dataloader.meta_omniglot <br>
@@ -133,7 +137,7 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/pybml/require
           - Method: return defined method type 
           - param_dict: return the dictionary that restores general parameters, like use_T,use_Warp, output shape of defined model, learn_lr, s, t, alpha, first_order.
        - Returns: an initialized instance of BMLHOptimizer
-  - Core Built-in functions of BMLHOptimizer
+  - Core Built-in functions of BMLHOptimizer: <div3 id="a32"></div3> 
     1. BMLHOptimizer.Meta_model:
        - Aliases: 
          - pybml.Core.BMLHOptimizer.Meta_model()
@@ -297,7 +301,7 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/pybml/require
           - online: default `False` if `True` performs the online version of the algorithms (i.e. does not reinitialize the state after at each run).
           - callback: optional callback function of signature (step (int), feed_dictionary, `tf.Session`) -> None that are called after every forward iteration.
        - Returns: None
-  - Simple Running Example
+  - Simple Running Example <div3 id="a33"></div3>
     ```
         from py_bml import utils
         from py_bml.script_helper import *
