@@ -468,7 +468,6 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/pybml/require
       
 ## Authors and license<div5 id="a5"></div5>
 MIT License
-MIT License
 
 Copyright (c) 2020 Yaohua Liu
 
