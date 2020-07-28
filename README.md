@@ -24,18 +24,18 @@ $$\phi^{*}:=\underset{\theta \in R^{n}, \phi \in R^{m}}{\arg \min } F\left(\thet
 
 $$\text{ where } F\left(\theta, \phi, D^{val}\right)=\frac{1}{M} \sum_{i=1}^{M} \ell \left(\theta_{i}^{*}, \phi,D_{i}^{t r}, D_{i}^{val}\right)$$
 
-To solve the UL(Upper Level) problem, various methods are implemented to compute the gradients of meta parameters using the validation data, which will be introduced in next section.
+To solve the UL(Upper Level) problem, various methods are implemented to compute the gradients of meta parameters using the validation data, which will be introduced in the next section.
 
 ## Available Algorithms 
+- [Hyperparameter optimization with approximate gradient(Implicit HG)](https://arxiv.org/abs/1602.02355)
 - [Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks(MAML)](https://arxiv.org/abs/1703.03400)
 - [On First-Order Meta-Learning Algorithms(FOMAML)](https://arxiv.org/abs/1803.02999)
 - [Bilevel Programming for Hyperparameter Optimization and Meta-Learning(Reverse HG)](http://export.arxiv.org/pdf/1806.04910)
 - [Truncated Back-propagation for Bilevel Optimization(Truncated Reverse HG)](https://arxiv.org/pdf/1810.10667.pdf)
 - [Gradient-Based Meta-Learning with Learned Layerwise Metric and Subspace(MTNet)](http://proceedings.mlr.press/v80/lee18a/lee18a.pdf)
 - [Meta-Learning with warped gradient Descent(Warp-Grad))](https://arxiv.org/abs/1909.00025)
-- [A Generic First-Order Algorithmic Framework for Bi-Level Programming Beyond Lower-Level Singleton(BDA)](https://arxiv.org/pdf/2006.04045.pdf)
 - [DARTS: Differentiable Architecture Search(DARTS)](https://arxiv.org/pdf/1806.09055.pdf)
-- [Hyperparameter optimization with approximate gradient(Implicit HG)](https://arxiv.org/abs/1602.02355)
+- [A Generic First-Order Algorithmic Framework for Bi-Level Programming Beyond Lower-Level Singleton(BDA)](https://arxiv.org/pdf/2006.04045.pdf)
 
 ## Package Structure
 ![Package Structure](https://github.com/liuyaohua918/PyBML/blob/master/figures/uml10.png)
