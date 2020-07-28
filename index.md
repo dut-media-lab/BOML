@@ -468,6 +468,7 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/pybml/require
       
 ## Authors and license<div5 id="a5"></div5>
 MIT License
+MIT License
 
 Copyright (c) 2020 Yaohua Liu
 
@@ -477,5 +478,4 @@ copies of the Software, and to permit persons to whom the Software is furnished 
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-© 2020 GitHub, Inc.
 
