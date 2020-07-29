@@ -1,7 +1,7 @@
 
-# PyBML - A Python Toolbox for Bilevel Meta Learning
+# PyBML - A Bilevel Optimization Library in Python for Multi-Task and Meta Learning
  
-The Toolbox implements popular bi-level optimization algorithms and provides useful interfaces to build your own few-shot learning neural network and quickly test its performance.
+PyBML provides interfaces to popular bilevel optimization algorithms, so that you could quickly build your own meta learning neural network and test its performance.
 
 ReadMe.md file contains recommended instruction for training Maml-based and Meta-representation in few-shot learning field. It's flexible to build your own networks or use structures with attached documentation.
 ## Meta Learning and Multitask Learning
