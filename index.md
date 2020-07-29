@@ -11,7 +11,7 @@
 5. [Author and liscense](#a5)
 
 ## Introduction <div1 id="a1"></div1>
-PyBML is a python toolbox for bilevel meta learning in few shot learning field. Before reading the documentation, you could refer to [View on GitHub](https://github.com/liuyaohua918/pybml/edit/master/README.md) for a brief introduction about meta learning and PyBML. <br>
+PyBML is a Bilevel Optimization Library in Python for Multi-Task and Meta Learning. Before reading the documentation, you could refer to [View on GitHub](https://github.com/liuyaohua918/pybml/edit/master/README.md) for a brief introduction about meta learning and PyBML. <br>
 Here we provide detailed instruction to quickly get down to your research, test performance of popular algorithms and new ideas.
 
 ## Installation and requirements  <div2 id="a2"></div2>
