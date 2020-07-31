@@ -2,6 +2,8 @@
 # PyBML - A Bilevel Optimization Library in Python for Multi-Task and Meta Learning
 ![Travis Status](https://travis-ci.org/liuyaohua918/PyBML.svg?branch=master)
 ![Language](https://img.shields.io/badge/language-Python-green.svg)
+![License](https://img.shields.io/badge/license-MIT-000000.svg)
+
 PyBML provides interfaces to popular bilevel optimization algorithms, so that you could quickly build your own meta learning neural network and test its performance.
 
 ReadMe.md file contains recommended instruction for training Maml-based and Meta-representation in few-shot learning field. It's flexible to build your own networks or use structures with attached documentation.
