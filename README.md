@@ -1,6 +1,7 @@
 
 # PyBML - A Bilevel Optimization Library in Python for Multi-Task and Meta Learning
 ![Travis Status](https://travis-ci.org/liuyaohua918/PyBML.svg?branch=master)
+![Travis](https://img.shields.io/travis/com/liuyaohua918/PyBML)
 ![Language](https://img.shields.io/badge/language-Python-green.svg)
 ![License](https://img.shields.io/badge/license-MIT-000000.svg)
 ![license](https://img.shields.io/github/languages/top/liuyaohua918/PyBML)
