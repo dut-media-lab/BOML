@@ -143,9 +143,9 @@ def meta_train(exp_dir, metasets, exs, pybml_ho, saver, sess, n_test_episodes, M
         n_train_batches = T
     else:
         n_train_batches = 1
-    train_batches = BatchQueueMock(metasets.train, n_train_batches, MBS, rand)
-    valid_batches = BatchQueueMock(metasets.validation, n_test_batches, MBS, rand)
-    test_batches = BatchQueueMock(metasets.test, n_test_batches, MBS, rand)
+    train_batches = BatchQueueMock(metasets.train, n_train_batches, MBS)
+    valid_batches = BatchQueueMock(metasets.validation, n_test_batches, MBS)
+    test_batches = BatchQueueMock(metasets.test, n_test_batches, MBS)
 
     start_time = time.time()
     print('\nIteration quantities: train_train acc, train_test acc, valid_test, acc'
