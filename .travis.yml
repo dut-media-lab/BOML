@@ -6,4 +6,4 @@ jobs:
           python: 3.7
 install: pip3 install -r requirements.txt
 script: cd train_script
-        python3 maml_train.py
+script: python3 maml_train.py
