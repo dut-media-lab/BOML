@@ -437,7 +437,7 @@ class BatchQueueMock:
         return [d for d in self.metadataset.generate(self.n_batches, self.batch_size, self.rand)]
 
 
-def get_rand_state(rand):
+def get_rand_state(rand=None):
     """
     Utility methods for getting a `RandomState` object.
 
