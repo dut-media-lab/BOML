@@ -3,6 +3,7 @@
 ![Travis Status](https://travis-ci.org/liuyaohua918/PyBML.svg?branch=master)
 ![Language](https://img.shields.io/badge/language-Python-brightgreen.svg)
 ![license](https://img.shields.io/github/license/liuyaohua918/PyBML)
+![Readthedocs](https://img.shields.io/readthedocs/pyBML)
 
 PyBML provides interfaces to popular bilevel optimization algorithms, so that you could quickly build your own meta learning neural network and test its performance.
 
