@@ -28,9 +28,9 @@ parser.add_argument('-etes', '--examples_test', type=int, default=15, metavar='N
 # Training options
 parser.add_argument('-s', '--seed', type=int, default=0, metavar='NUMBER',
                     help='seed for random number generators')
-parser.add_argument('-mbs', '--meta_batch_size', type=int, default=4, metavar='NUMBER',
+parser.add_argument('-mbs', '--meta_batch_size', type=int, default=2, metavar='NUMBER',
                     help='number of tasks sampled per meta-update')
-parser.add_argument('-nmi', '--n_meta_iterations', type=int, default=60000, metavar='NUMBER',
+parser.add_argument('-nmi', '--n_meta_iterations', type=int, default=500, metavar='NUMBER',
                     help='number of metatraining iterations.')
 parser.add_argument('-T', '--T', type=int, default=5, metavar='NUMBER',
                     help='number of inner updates during training.')
@@ -102,7 +102,7 @@ parser.add_argument('-te', '--test_episodes', type=int, default=600, metavar='NU
 # Testing options (put parser.mode = 'test')
 parser.add_argument('-exd', '--exp-dir', type=str, default='../logs', metavar='STRING',
                     help='directory of the experiment model files')
-parser.add_argument('-itt', '--iterations_to_test', type=str, default=[50000], metavar='STRING',
+parser.add_argument('-itt', '--iterations_to_test', type=str, default=[100], metavar='STRING',
                     help='meta_iteration to test (model file must be in "exp_dir")')
 parser.add_argument('-Notes', '--Notes', type=str, default='Notes',
                     help='Something important')
