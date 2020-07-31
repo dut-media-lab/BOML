@@ -5,4 +5,5 @@ jobs:
         - name: "PyBML test on Xenial Linux with Python 3.7"
           python: 3.7
 install: pip3 install -r requirements.txt
-script: python3 /train_script/maml_train.py || python /train_script/maml_train.py
+script: cd train_script
+        python3 maml_train.py
