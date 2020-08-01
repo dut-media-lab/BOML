@@ -50,7 +50,7 @@ To solve the UL(Upper Level) problem, various methods are implemented to compute
 
 ## Documentation 
 
-For more detailed information of basic function and construction process, please refer to our help page: [Help Documentation](https://liuyaohua918.github.io/PyBML/)
+For more detailed information of basic function and construction process, please refer to our help page: [Help Documentation](https://bmlsoc.github.io/PyBML/)
 
 It's flexible to build your own networks or use structures in py_bm.networks. Scripts in the directory named train_script are useful for basic training process.
 
