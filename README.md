@@ -19,6 +19,11 @@ In few-shot learning problems, we consider N-way K-shot classification tasks. Fo
 ## Bilevel Structured Model 
 Here We give definition of classical bilevel optimization problems.
 
+$$\begin{array}{c}
+\min _{\mathbf{x}} F\left(\mathbf{x},\left\{\mathbf{y}_{i}\right\}_{i=1}^{N}\right), \quad \text { s.t. } \quad \mathbf{y}_{i} \in \arg \min _{\mathbf{y}_{i}} f\left(\mathbf{x}, \mathbf{y}_{i}\right), i=1, \cdots, N \\
+\text { where } f\left(\mathbf{x}, \mathbf{y}_{i}\right)=\ell\left(\mathbf{x}, \mathbf{y}_{i}, \mathcal{D}_{t r}^{i}\right) \text { and } F\left(\mathbf{x},\left\{\mathbf{y}_{i}\right\}_{i=1}^{N}\right)=\sum_{i=1}^{N} \ell\left(\mathbf{x}, \mathbf{y}_{i}, \mathcal{D}_{\mathrm{val}}^{i}\right)
+\end{array}$$
+
 Lower-Level Problem:
 $$\theta^{*}:=\underset{\theta \in R^{n}}{\arg \min } \ell\left(\theta_{i}, \phi, D_{i}^{t r}, D_{i}^{v a l}\right)$$
 
