@@ -1,6 +1,9 @@
-[run]
-source=py_bml
+# configuration file for the coverage.py
 
+[run]
+source=py_bml/
+omit=
+    py
 [report]
 exclude_lines =
     if self.debug:
