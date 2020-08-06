@@ -1,5 +1,7 @@
 dist: xenial
 language: python
+after_success:
+    - bash <(curl -s https://codecov.io/bash)
 jobs:
     include:
         - name: "PyBML test on Xenial Linux with Python 3.7"
