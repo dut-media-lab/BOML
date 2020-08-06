@@ -6,7 +6,9 @@ jobs:
     include:
         - name: "PyBML test on Xenial Linux with Python 3.7"
           python: 3.7
-install: pip3 install -r requirements.txt
+install: 
+    - pip3 install -r requirements.txt
+    - pip install coverage
 script: 
     - cd train_script
     - python3 maml_train.py
