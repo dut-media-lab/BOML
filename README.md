@@ -1,13 +1,13 @@
 
-# PyBOML - A Bilevel Optimization Library in Python for Multi-Task and Meta Learning
-![Travis Status](https://travis-ci.com/bmlsoc/PyBOML.svg?branch=master)
+# BOML - A Bilevel Optimization Library in Python for Multi-Task and Meta Learning
+![Travis Status](https://travis-ci.com/bmlsoc/BOML.svg?branch=master)
 ![license](https://img.shields.io/badge/license-MIT-000000.svg)
 ![Documentation Status](https://readthedocs.org/projects/pybml/badge/?version=latest)
 ![Language](https://img.shields.io/badge/language-Python-brightgreen.svg)
 
 
 
-PyBOML is a modularized optimization library that unifies several ML algorithms into a common bilevel optimization framework. It provides interfaces to implement popular bilevel optimization algorithms, so that you could quickly build your own meta learning neural network and test its performance.
+BOML is a modularized optimization library that unifies several ML algorithms into a common bilevel optimization framework. It provides interfaces to implement popular bilevel optimization algorithms, so that you could quickly build your own meta learning neural network and test its performance.
 
 ReadMe.md file contains recommended instruction for training Maml-based and Meta-representation in few-shot learning field. It's flexible to build your own networks or use structures with attached documentation.
 ## Meta Learning and Multitask Learning
@@ -34,7 +34,7 @@ To solve the UL(Upper Level) problem, various methods are implemented to compute
 
 ## Related Algorithms 
  1. Management of Methods
-    ![PyBOML Models](https://github.com/liuyaohua918/PyBMOL/blob/master/figures/model.png)
+    ![BOML Models](https://github.com/liuyaohua918/BMOL/blob/master/figures/model.png)
  2. Related Papers
     - [Hyperparameter optimization with approximate gradient(Implicit HG)](https://arxiv.org/abs/1602.02355)
     - [Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks(MAML)](https://arxiv.org/abs/1703.03400)
@@ -47,11 +47,11 @@ To solve the UL(Upper Level) problem, various methods are implemented to compute
     - [A Generic First-Order Algorithmic Framework for Bi-Level Programming Beyond Lower-Level Singleton(BDA)](https://arxiv.org/pdf/2006.04045.pdf)
 
 ## Package Structure
-![Package Structure](https://github.com/liuyaohua918/PyBOML/blob/master/figures/uml10.png)
+![Package Structure](https://github.com/liuyaohua918/BOML/blob/master/figures/uml10.png)
 
 ## Documentation 
 
-For more detailed information of basic function and construction process, please refer to our help page: [Help Documentation](https://bmlsoc.github.io/PyBOML/)
+For more detailed information of basic function and construction process, please refer to our help page: [Help Documentation](https://bmlsoc.github.io/BOML/)
 
 It's flexible to build your own networks or use structures in py_bm.networks. Scripts in the directory named train_script are useful for basic training process.
 
