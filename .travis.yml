@@ -11,5 +11,5 @@ install:
     - pip install coverage
 script: 
     - cd train_script
-    - python3 maml_train.py
-    - coverage run -m unittest discover
+    # - python3 maml_train.py
+    - coverage run -m unittest maml_train.py
