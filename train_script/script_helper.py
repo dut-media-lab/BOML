@@ -30,7 +30,7 @@ parser.add_argument('-s', '--seed', type=int, default=0, metavar='NUMBER',
                     help='seed for random number generators')
 parser.add_argument('-mbs', '--meta_batch_size', type=int, default=2, metavar='NUMBER',
                     help='number of tasks sampled per meta-update')
-parser.add_argument('-nmi', '--n_meta_iterations', type=int, default=500, metavar='NUMBER',
+parser.add_argument('-nmi', '--n_meta_iterations', type=int, default=200, metavar='NUMBER',
                     help='number of metatraining iterations.')
 parser.add_argument('-T', '--T', type=int, default=5, metavar='NUMBER',
                     help='number of inner updates during training.')
@@ -96,7 +96,7 @@ parser.add_argument('-pi', '--print-interval', type=int, default=100, metavar='N
                     help='number of meta-train iterations before print')
 parser.add_argument('-si', '--save_interval', type=int, default=100, metavar='NUMBER',
                     help='number of meta-train iterations before save')
-parser.add_argument('-te', '--test_episodes', type=int, default=600, metavar='NUMBER',
+parser.add_argument('-te', '--test_episodes', type=int, default=200, metavar='NUMBER',
                     help='number of episodes for testing')
 
 # Testing options (put parser.mode = 'test')
