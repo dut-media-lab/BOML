@@ -13,3 +13,4 @@ script:
     - cd train_script
     # - python3 maml_train.py
     - coverage run maml_train.py
+    - coverage run meta_repr_train.py
