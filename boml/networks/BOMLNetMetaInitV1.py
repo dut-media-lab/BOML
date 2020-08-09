@@ -83,9 +83,9 @@ class BOMLNetMetaInitV1(BOMLNet):
         if self.use_T:
             # hyper parameters of transformation layer
             for i in range(len(self.dim_hidden)):
-                self.model_param_dict['conv' + str(i) + '_z'] = network_utils.get_identity(self, self.dim_hidden[0],
+                self.model_param_dict['conv' + str(i) + '_z'] = network_utils.get_identity(self.dim_hidden[0],
                                                                                   name='conv' + str(i) + '_z', conv=True)
-            self.model_param_dict['w' + str(len(self.dim_hidden)) + '_z'] = network_utils.get_identity(self, self.dims[-1],
+            self.model_param_dict['w' + str(len(self.dim_hidden)) + '_z'] = network_utils.get_identity(self.dims[-1],
                                                                                               name='w' + str(len(self.dim_hidden)) + '_z', conv=False)
         elif self.use_Warp:
             for i in range(len(self.dim_hidden)):
