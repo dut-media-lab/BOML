@@ -138,11 +138,7 @@ def meta_train(exp_dir, metasets, exs, pybml_ho, saver, sess, n_test_episodes, M
             saver.restore(sess, model_file)
 
     ''' Meta-Train '''
-    if 'Reptile' in pybml_ho.param_dict.keys():
-        n_train_batches = T
-    else:
-        n_train_batches = 1
-    train_batches = BatchQueueMock(metasets.train, n_train_batches, MBS)
+    train_batches = BatchQueueMock(metasets.train, 1, MBS)
     valid_batches = BatchQueueMock(metasets.validation, n_test_batches, MBS)
     test_batches = BatchQueueMock(metasets.test, n_test_batches, MBS)
 
@@ -151,8 +147,6 @@ def meta_train(exp_dir, metasets, exs, pybml_ho, saver, sess, n_test_episodes, M
           ' test_test acc mean(std) over %d episodes' % n_test_episodes)
     with sess.as_default():
         inner_losses = []
-        train_set, test_set = boml.read_dataset(DATASETS_FOLDER)
-        train_set = list(boml.augment_dataset(train_set))
         for meta_it in range(resume_itr, n_meta_iterations):
             tr_fd, v_fd = feed_dicts(train_batches.get_all_batches()[0], exs)
             pybml_ho.run(tr_fd, v_fd)
@@ -179,9 +173,9 @@ def meta_train(exp_dir, metasets, exs, pybml_ho, saver, sess, n_test_episodes, M
                     t = sess.run(["t:0"])[0]
                     print('t: {}'.format(t))
 
-                train_result = accuracy_on(train_batches, exs, pybml_ho, sess, evals_T)
-                test_result = accuracy_on(test_batches, exs, pybml_ho, sess, evals_T)
-                valid_result = accuracy_on(valid_batches, exs, pybml_ho, sess, evals_T)
+                train_result = accuracy_on(train_batches, exs, pybml_ho, sess, T)
+                test_result = accuracy_on(test_batches, exs, pybml_ho, sess, T)
+                valid_result = accuracy_on(valid_batches, exs, pybml_ho, sess, T)
                 train_train = (np.mean(train_result[0]), np.std(train_result[0]))
                 train_test = (np.mean(train_result[1]), np.std(train_result[1]))
                 valid_test = (np.mean(valid_result[1]), np.std(valid_result[1]))
