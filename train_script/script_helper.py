@@ -1,12 +1,13 @@
 import argparse
 import os
-
-import tensorflow as tf
-import numpy as np
 import time
-import py_bml
-import py_bml.DataLoader as dl
-from py_bml.utils import feed_dicts, BatchQueueMock, save_obj, load_obj
+
+import numpy as np
+import tensorflow as tf
+
+import boml
+import boml.data_loader as dl
+from boml.utils import feed_dicts, BatchQueueMock, save_obj, load_obj
 
 DATASETS_FOLDER = '../omniglot_resized'
 
@@ -30,7 +31,7 @@ parser.add_argument('-s', '--seed', type=int, default=0, metavar='NUMBER',
                     help='seed for random number generators')
 parser.add_argument('-mbs', '--meta_batch_size', type=int, default=2, metavar='NUMBER',
                     help='number of tasks sampled per meta-update')
-parser.add_argument('-nmi', '--n_meta_iterations', type=int, default=200, metavar='NUMBER',
+parser.add_argument('-nmi', '--n_meta_iterations', type=int, default=500, metavar='NUMBER',
                     help='number of metatraining iterations.')
 parser.add_argument('-T', '--T', type=int, default=5, metavar='NUMBER',
                     help='number of inner updates during training.')
@@ -60,13 +61,10 @@ parser.add_argument('-lralpha', '--learn_alpha', type=bool, default=False, metav
                     help='True if alpha is an hyperparameter')
 parser.add_argument('-learn_alpha_itr', '--learn_alpha_itr', type=bool, default=False, metavar='BOOLEAN',
                     help='learn alpha iteration wise')
-parser.add_argument('-scalor', '--scalor', type=float, default=0.0, metavar='NUMBER',
-                    help='scalor for controlling the regularization coefficient')
-parser.add_argument('-regularization', '--regularization', type=str, default=None, metavar='STRING',
-                    help='L1 or L2 or no regularization measure to apply')
+
 parser.add_argument('-alpha', '--alpha', type=float, default=0.0, metavar='NUMBER',
                     help='factor for controlling the ratio of gradients')
-parser.add_argument('-md', '--method', type=str, default='Simple', metavar='STRING',
+parser.add_argument('-md', '--method', type=str, default='MetaInit', metavar='STRING',
                     help='choose which method to use,[Trad, Aggr,Simple]')
 parser.add_argument('-i_d', '--inner_method', type=str, default='Simple', metavar='STRING',
                     help='choose which method to use,[Trad, Aggr,Simple]')
@@ -96,7 +94,7 @@ parser.add_argument('-pi', '--print-interval', type=int, default=100, metavar='N
                     help='number of meta-train iterations before print')
 parser.add_argument('-si', '--save_interval', type=int, default=100, metavar='NUMBER',
                     help='number of meta-train iterations before save')
-parser.add_argument('-te', '--test_episodes', type=int, default=200, metavar='NUMBER',
+parser.add_argument('-te', '--test_episodes', type=int, default=600, metavar='NUMBER',
                     help='number of episodes for testing')
 
 # Testing options (put parser.mode = 'test')
@@ -111,6 +109,7 @@ args = parser.parse_args()
 exp_string = str(args.classes) + 'way_' + str(args.examples_train) + 'shot_' + str(args.meta_batch_size) + \
              'mbs' + str(args.T) + 'T' + str(args.clip_value) + 'clip' + str(args.alpha) + 'alpha' + str(args.inner_method) +\
              'inner_method' + str(args.outer_method) + 'outer_method'+str(args.meta_lr) + 'meta_lr' + str(args.lr) + 'lr' + str(args.Notes) + 'Notes'
+
 
 def meta_train(exp_dir, metasets, exs, pybml_ho, saver, sess, n_test_episodes, MBS, seed, resume, T,
                n_meta_iterations, print_interval, save_interval):
@@ -152,98 +151,59 @@ def meta_train(exp_dir, metasets, exs, pybml_ho, saver, sess, n_test_episodes, M
           ' test_test acc mean(std) over %d episodes' % n_test_episodes)
     with sess.as_default():
         inner_losses = []
-        if 'Reptile' in pybml_ho.param_dict.keys():
-            evals_T = 50
-        else:
-            evals_T = T
-        train_set, test_set = py_bml.read_dataset(DATASETS_FOLDER)
-        train_set = list(py_bml.augment_dataset(train_set))
+        train_set, test_set = boml.read_dataset(DATASETS_FOLDER)
+        train_set = list(boml.augment_dataset(train_set))
         for meta_it in range(resume_itr, n_meta_iterations):
-            if 'Reptile' not in pybml_ho.param_dict.keys():
-                tr_fd, v_fd = feed_dicts(train_batches.get_all_batches()[0], exs)
-                pybml_ho.run(tr_fd, v_fd)
-                outer_losses = []
-                for _, ex in enumerate(exs):
-                    outer_losses.append(sess.run(ex.errors['validation'], py_bml.utils.merge_dicts(tr_fd, v_fd)))
-                outer_losses_moments = (np.mean(outer_losses), np.std(outer_losses))
-                results['outer_losses']['mean'].append(outer_losses_moments[0])
-                results['outer_losses']['std'].append(outer_losses_moments[1])
-            else:
-                pybml_ho.run(train_batches=train_set)
-                tr_fd, v_fd = feed_dicts(train_batches.get_all_batches()[0], exs)
-                outer_losses = []
-                for _, ex in enumerate(exs):
-                    outer_losses.append(sess.run(ex.errors['validation'], py_bml.utils.merge_dicts(tr_fd, v_fd)))
-                outer_losses_moments = (np.mean(outer_losses), np.std(outer_losses))
-                results['outer_losses']['mean'].append(outer_losses_moments[0])
-                results['outer_losses']['std'].append(outer_losses_moments[1])
+            tr_fd, v_fd = feed_dicts(train_batches.get_all_batches()[0], exs)
+            pybml_ho.run(tr_fd, v_fd)
+            outer_losses = []
+            for _, ex in enumerate(exs):
+                outer_losses.append(sess.run(ex.errors['validation'], boml.utils.merge_dicts(tr_fd, v_fd)))
+            outer_losses_moments = (np.mean(outer_losses), np.std(outer_losses))
+            results['outer_losses']['mean'].append(outer_losses_moments[0])
+            results['outer_losses']['std'].append(outer_losses_moments[1])
             duration = time.time() - start_time
             results['time'].append(duration)
 
             if meta_it % print_interval == 0 or meta_it == n_meta_iterations - 1:
                 results['iterations'].append(meta_it)
                 results['episodes'].append(meta_it * MBS)
-                if 'Reptile' not in pybml_ho.param_dict.keys():
+                if 'alpha' in pybml_ho.param_dict.keys():
+                    alpha_moment = pybml_ho.param_dict['alpha'].eval()
+                    print('alpha_itr' + str(meta_it) + ': ', alpha_moment)
+                    results['alpha'].append(alpha_moment)
+                if 's' in pybml_ho.param_dict.keys():
+                    s = sess.run(["s:0"])[0]
+                    print('s: {}'.format(s))
+                if 't' in pybml_ho.param_dict.keys():
+                    t = sess.run(["t:0"])[0]
+                    print('t: {}'.format(t))
 
-                    if 'alpha' in pybml_ho.param_dict.keys():
-                        alpha_moment = pybml_ho.param_dict['alpha'].eval()
-                        print('alpha_itr' + str(meta_it) + ': ', alpha_moment)
-                        results['alpha'].append(alpha_moment)
-                    if 's' in pybml_ho.param_dict.keys():
-                        s = sess.run(["s:0"])[0]
-                        print('s: {}'.format(s))
-                    if 't' in pybml_ho.param_dict.keys():
-                        t = sess.run(["t:0"])[0]
-                        print('t: {}'.format(t))
+                train_result = accuracy_on(train_batches, exs, pybml_ho, sess, evals_T)
+                test_result = accuracy_on(test_batches, exs, pybml_ho, sess, evals_T)
+                valid_result = accuracy_on(valid_batches, exs, pybml_ho, sess, evals_T)
+                train_train = (np.mean(train_result[0]), np.std(train_result[0]))
+                train_test = (np.mean(train_result[1]), np.std(train_result[1]))
+                valid_test = (np.mean(valid_result[1]), np.std(valid_result[1]))
+                test_test = (np.mean(test_result[1]), np.std(test_result[1]))
 
-                    train_result = accuracy_on(train_batches, exs, pybml_ho, sess, evals_T)
-                    test_result = accuracy_on(test_batches, exs, pybml_ho, sess, evals_T)
-                    valid_result = accuracy_on(valid_batches, exs, pybml_ho, sess, evals_T)
-                    train_train = (np.mean(train_result[0]), np.std(train_result[0]))
-                    train_test = (np.mean(train_result[1]), np.std(train_result[1]))
-                    valid_test = (np.mean(valid_result[1]), np.std(valid_result[1]))
-                    test_test = (np.mean(test_result[1]), np.std(test_result[1]))
+                results['train_train']['mean'].append(train_train[0])
+                results['train_test']['mean'].append(train_test[0])
+                results['valid_test']['mean'].append(valid_test[0])
+                results['test_test']['mean'].append(test_test[0])
 
-                    results['train_train']['mean'].append(train_train[0])
-                    results['train_test']['mean'].append(train_test[0])
-                    results['valid_test']['mean'].append(valid_test[0])
-                    results['test_test']['mean'].append(test_test[0])
+                results['train_train']['std'].append(train_train[1])
+                results['train_test']['std'].append(train_test[1])
+                results['valid_test']['std'].append(valid_test[1])
+                results['test_test']['std'].append(test_test[1])
 
-                    results['train_train']['std'].append(train_train[1])
-                    results['train_test']['std'].append(train_test[1])
-                    results['valid_test']['std'].append(valid_test[1])
-                    results['test_test']['std'].append(test_test[1])
+                results['inner_losses'] = inner_losses
 
-                    results['inner_losses'] = inner_losses
+                print('mean outer losses: {}'.format(outer_losses_moments[0]))
 
-                    print('mean outer losses: {}'.format(outer_losses_moments[0]))
-
-                    print(
-                        'it %d, ep %d (%.5fs): %.5f, %.5f, %.5f, %.5f' % (meta_it, meta_it * MBS, duration, train_train[0],
-                                                                          train_test[0], valid_test[0], test_test[0]))
-                else:
-                    train_batch, test_batch = py_bml.utils.split_train_test(
-                        py_bml.utils.sample_mini_dataset(test_set,
-                                                         pybml_ho.param_dict['output_shape'],
-                                                         pybml_ho.param_dict['num_shots']+1))
-                    eval_inner_iters =50
-                    eval_inner_batch_size=5
-                    mini_dataset = py_bml.utils.mini_batches(train_batch, eval_inner_batch_size, eval_inner_iters, False)
-                    sess.run(pybml_ho.outergradient.initialization)
-                    for i in range(eval_inner_iters):
-                        mini_batch_feed_dict = py_bml.utils.feed_test_dicts(mini_batch=mini_dataset.__next__(), exs=exs,
-                                                                      num_classes=pybml_ho.param_dict['output_shape'])
-                        sess.run([ex.optimizers['apply_updates'] for ex in exs], mini_batch_feed_dict)
-
-                    mini_batch_feed_dict = py_bml.utils.feed_test_dicts(test_batch,exs,num_classes=pybml_ho.param_dict['output_shape'])
-                    test_acc = []
-                    test_acc.append(
-                        sess.run([ex.scores['accuracy'] for ex in exs], feed_dict=mini_batch_feed_dict))
-                    print(
-                        'it %d, ep %d (%.5fs): %.5f, %.5f' % (meta_it, meta_it * MBS, duration,np.mean(test_acc), np.std(test_acc)))
-                    results['test_test']['mean'].append(np.mean(test_acc))
-
-                    results['test_test']['std'].append(np.std(test_acc))
+                print(
+                    'it %d, ep %d (%.5fs): %.5f, %.5f, %.5f, %.5f' % (meta_it, meta_it * MBS, duration, train_train[0],
+                                                                      train_test[0], valid_test[0], test_test[0]))
                 lr = sess.run(["lr:0"])[0]
                 print('lr: {}'.format(lr))
 

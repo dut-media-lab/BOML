@@ -1,0 +1,772 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="Python">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Indexes &#8212; PyBML 1.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to PyBML&#39;s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="indexes">
+<h1>Indexes<a class="headerlink" href="#indexes" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="contents-div0-id-a0-div0">
+<h2>Contents <div0 id="a0"></div0><a class="headerlink" href="#contents-div0-id-a0-div0" title="Permalink to this headline">¶</a></h2>
+<ol class="simple">
+<li><a class="reference external" href="#a1">Introduction </a><br></li>
+<li><a class="reference external" href="#a2">Installation and requirements </a></li>
+<li><a class="reference external" href="#a3">Quickly build your bilevel meta-learning model </a><ul>
+<li><a class="reference external" href="#a31">core Modules </a></li>
+<li><a class="reference external" href="#a32">core Built-in functions of BOMLOptimizer </a></li>
+<li><a class="reference external" href="#a33">Simple Training Example</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="#a4">Modification and Extension </a></li>
+<li><a class="reference external" href="#a5">Author and liscense</a></li>
+</ol>
+</div>
+<div class="section" id="introduction-div1-id-a1-div1">
+<h2>Introduction <div1 id="a1"></div1><a class="headerlink" href="#introduction-div1-id-a1-div1" title="Permalink to this headline">¶</a></h2>
+<p>boml is a Bilevel Optimization Library in Python for Multi-Task and Meta Learning. Before reading the documentation, you could refer to <a class="reference external" href="https://github.com/liuyaohua918/boml/edit/master/README">View on GitHub</a> for a brief introduction about meta learning and boml. <br>
+Here we provide detailed instruction to quickly get down to your research, test performance of popular algorithms and new ideas.</p>
+</div>
+<div class="section" id="installation-and-requirements-div2-id-a2-div2">
+<h2>Installation and requirements  <div2 id="a2"></div2><a class="headerlink" href="#installation-and-requirements-div2-id-a2-div2" title="Permalink to this headline">¶</a></h2>
+<p>boml implements various meta learning algorithms based on <a class="reference external" href="https://www.tensorflow.org/install/pip">TensorFlow</a>, which is one of the most popular macheine learning platform. Besides, <a class="reference external" href="https://numpy.org/install/">Numpy</a> and basical image processing modules are required for  installation. <br>
+We also provide <a class="reference external" href="https://github.com/liuyaohua918/boml/requirements.txt">requirements.txt</a> as reference for version control.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>1. Install from GitHub page：
+
+git clone https://github.com/liuyaohua918/boml.git
+
+python setup.py install 
+
+pip install requirements.txt
+
+2. use pip instruction
+
+pip install boml
+</pre></div>
+</div>
+</div>
+<div class="section" id="quickly-build-your-bilevel-meta-learning-model-div3-id-a3-div3">
+<h2>Quickly build your bilevel meta-learning model <div3 id="a3"></div3><a class="headerlink" href="#quickly-build-your-bilevel-meta-learning-model-div3-id-a3-div3" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">Core Modules: <div3 id="a31"></div3></p>
+<ol>
+<li><p class="first">data_loader</p>
+<ul class="simple">
+<li>Related:<ul>
+<li>boml.data_loader.meta_omniglot <br></li>
+<li>boml.data_loader.meta_mini_imagenet <br></li>
+<li>boml.data_loader.mnist <br></li>
+</ul>
+</li>
+</ul>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">boml</span><span class="o">.</span><span class="n">meta_omniglot</span><span class="p">(</span>
+    <span class="n">folder</span><span class="o">=</span><span class="n">DATA_FOLDER</span><span class="p">,</span> 
+    <span class="n">std_num_classes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+    <span class="n">examples_train</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+    <span class="n">examples_test</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+    <span class="n">one_hot_enc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+    <span class="n">_rand</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+    <span class="n">n_splits</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="n">boml</span><span class="o">.</span><span class="n">meta_mini_imagenet</span><span class="p">(</span>
+  <span class="n">folder</span><span class="o">=</span><span class="n">DATA_FOLDER</span><span class="p">,</span> 
+  <span class="n">sub_folders</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+  <span class="n">std_num_classes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+  <span class="n">examples_train</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+  <span class="n">examples_test</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+  <span class="n">resize</span><span class="o">=</span><span class="mi">84</span><span class="p">,</span> 
+  <span class="n">one_hot_enc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+  <span class="n">load_all_images</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+  <span class="n">h5</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+</pre></div>
+</div>
+<p>boml.data_loader manages different datasets and generate bathes of tasks for training and testing.</p>
+<ul>
+<li><p class="first">Args：<br></p>
+<ul class="simple">
+<li>folder: root folder name. Use os module to modify the path to the datasets<br></li>
+<li>std_num_classes: standard number of classes for N-way classification<br>
+- examples_train:standard number of examples to be picked in each generated per classes for training (eg .1 shot, examples_train=1)<br></li>
+<li>examples_test: standard number of examples to be picked in each generated per classes for testing</li>
+<li>one_hot_enc: one hot encoding<br></li>
+<li>_rand: random seed or RandomState for generate training, validation, testing meta-datasets split<br></li>
+<li>n_splits: num classes per split<br></li>
+</ul>
+</li>
+<li><p class="first">Usage:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">boml</span><span class="o">.</span><span class="n">meta_omniglot</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">num_classes</span><span class="p">,</span>
+                        <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">num_examples</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">examples_test</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Returns: an initialized instance of data loader</p>
+</li>
+</ul>
+</li>
+<li><p class="first">Experiment</p>
+<ul class="simple">
+<li>Aliases:<ul>
+<li>boml.data_loader.Experiment</li>
+</ul>
+</li>
+</ul>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">boml</span><span class="o">.</span><span class="n">Experiment</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+    <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>boml.Experiment manages inputs, outputs and task-specific parameters.</p>
+<ul class="simple">
+<li>Args:<ul>
+<li>dataset: initialized instance of data_loader<br></li>
+<li>dtype: default tf.float32<br></li>
+</ul>
+</li>
+<li>Attributes:<br><ul>
+<li>x: input placeholder of input for your defined lower level problem<br></li>
+<li>y: label placeholder of output for yourdefined lower level problem<br></li>
+<li>x_:input placeholder of input for your defined upper level problem<br></li>
+<li>y_:label placeholder of output for your defined upper level problem<br></li>
+<li>model: used to restore the task-specific model <br></li>
+<li>errors: dictionary to restore defined loss functions of different levels<br></li>
+<li>scores: dictionary to restore defined accuracies functions<br></li>
+<li>optimizers: dictonary to restore optimized chosen for inner and outer loop optimization<br></li>
+</ul>
+</li>
+<li>Usage:</li>
+</ul>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">ex</span> <span class="o">=</span> <span class="n">boml</span><span class="o">.</span><span class="n">Experiment</span><span class="p">(</span><span class="n">datasets</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">)</span>
+<span class="n">ex</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="s1">&#39;training&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">boml</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">cross_entropy_loss</span><span class="p">(</span><span class="n">pred</span><span class="o">=</span><span class="n">ex</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">out</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">ex</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;HyperOptim&#39;</span><span class="p">)</span>
+<span class="n">ex</span><span class="o">.</span><span class="n">scores</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">out</span><span class="p">),</span> <span class="mi">1</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="n">ex</span><span class="o">.</span><span class="n">optimizers</span><span class="p">[</span><span class="s1">&#39;apply_updates&#39;</span><span class="p">],</span> <span class="n">_</span> <span class="o">=</span> <span class="n">boml</span><span class="o">.</span><span class="n">BOMLOptSGD</span><span class="p">(</span><span class="n">learning_rate</span><span class="o">=</span><span class="n">lr0</span><span class="p">)</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="s1">&#39;training&#39;</span><span class="p">],</span><span class="n">var_list</span><span class="o">=</span><span class="n">ex</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">var_list</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Returns: an initialized instance of Experiment</li>
+</ul>
+</li>
+<li><p class="first">BOMLOptimizer</p>
+<ul class="simple">
+<li>Aliases:<ul>
+<li>boml.core.BOMLOptimizer</li>
+</ul>
+</li>
+</ul>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">boml</span><span class="o">.</span><span class="n">BOMLOptimizer</span><span class="p">(</span>
+    <span class="n">Method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+    <span class="n">inner_method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+    <span class="n">outer_method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+    <span class="n">truncate_iter</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">experiments</span><span class="o">=</span><span class="p">[]</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>BOMLOptimizer is the main class in <code class="docutils literal"><span class="pre">boml</span></code>, which takes responsibility for the whole process of model construnction and back propagation.</p>
+<ul class="simple">
+<li>Args:<ul>
+<li>Method: define basic method for following training process, it should be included in [<code class="docutils literal"><span class="pre">HyperOptim</span></code>, <code class="docutils literal"><span class="pre">BilevelOptim</span></code>], <code class="docutils literal"><span class="pre">HyperOptim</span></code> type includes methods like <code class="docutils literal"><span class="pre">MAML</span></code>, <code class="docutils literal"><span class="pre">FOMAML</span></code>, <code class="docutils literal"><span class="pre">TNet</span></code>, <code class="docutils literal"><span class="pre">WarpGrad</span></code>; <code class="docutils literal"><span class="pre">BilevelOptim</span></code> type includes methods like <code class="docutils literal"><span class="pre">BDA</span></code>, <code class="docutils literal"><span class="pre">RHG</span></code>, <code class="docutils literal"><span class="pre">TRHG</span></code>, <code class="docutils literal"><span class="pre">Implicit</span> <span class="pre">HG</span></code>, <code class="docutils literal"><span class="pre">DARTS</span></code>;<br></li>
+<li>inner_method: method chosen for solving LLproblem, including [<code class="docutils literal"><span class="pre">Trad</span></code> ,<code class="docutils literal"><span class="pre">Simple</span></code>, <code class="docutils literal"><span class="pre">Aggr</span></code>], <code class="docutils literal"><span class="pre">BilevelOptim</span></code> type choose either <code class="docutils literal"><span class="pre">Trad</span></code> for traditional optimization strategies or <code class="docutils literal"><span class="pre">Aggr</span></code> for Gradient Aggragation optimization 'HyperOptim' type should choose <code class="docutils literal"><span class="pre">Simple</span></code>, and set specific parameters for detailed method choices like FOMAML or TNet.<br></li>
+<li>outer_method: method chosen for solving LLproblem, including [<code class="docutils literal"><span class="pre">Reverse</span></code> ,<code class="docutils literal"><span class="pre">Simple</span></code>, <code class="docutils literal"><span class="pre">Forward</span></code>, <code class="docutils literal"><span class="pre">Implcit</span></code>], <code class="docutils literal"><span class="pre">HyperOptim</span></code> type should choose Simple, and set specific parameters for detailed method choices like <code class="docutils literal"><span class="pre">FOMAML</span></code></li>
+<li>truncate_iter: specific parameter for <code class="docutils literal"><span class="pre">Truncated</span> <span class="pre">RHG</span></code> method, defining number of iterations to truncate in the Back propagation process<br></li>
+<li>experiments: list of experiment objects that has already been initialized <br></li>
+</ul>
+</li>
+<li>Usage:</li>
+</ul>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">ex</span> <span class="o">=</span> <span class="n">boml</span><span class="o">.</span><span class="n">Experiment</span><span class="p">(</span><span class="n">boml</span><span class="o">.</span><span class="n">meta_omniglot</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">15</span><span class="p">))</span>
+<span class="n">boml_ho</span> <span class="o">=</span> <span class="n">boml</span><span class="o">.</span><span class="n">BOMLOptimizer</span><span class="p">(</span>
+    <span class="n">Method</span><span class="o">=</span><span class="s1">&#39;HyperOptim&#39;</span><span class="p">,</span> 
+    <span class="n">inner_method</span><span class="o">=</span><span class="s1">&#39;Simple&#39;</span><span class="p">,</span> 
+    <span class="n">outer_method</span><span class="o">=</span><span class="s1">&#39;Simple&#39;</span><span class="p">,</span>
+    <span class="n">experiments</span><span class="o">=</span><span class="n">ex</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Utility functions:<ul>
+<li>learning_rate(): returns defined inner learning rate</li>
+<li>meta_learning_rate(): returns defined outer learning rate</li>
+<li>Method: return defined method type</li>
+<li>param_dict: return the dictionary that restores general parameters, like use_T,use_Warp, output shape of defined model, learn_lr, s, t, alpha, first_order.</li>
+</ul>
+</li>
+<li>Returns: an initialized instance of BOMLOptimizer</li>
+</ul>
+</li>
+</ol>
+</li>
+<li><p class="first">Core Built-in functions of BOMLOptimizer: <div3 id="a32"></div3></p>
+<ol>
+<li><p class="first">BOMLOptimizer.Meta_model:</p>
+<ul class="simple">
+<li>Aliases:<ul>
+<li>boml.core.BOMLOptimizer.Meta_model()</li>
+</ul>
+</li>
+</ul>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">boml</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">BOMLOptimizer</span><span class="o">.</span><span class="n">Meta_model</span><span class="p">(</span>
+    <span class="n">_input</span><span class="p">,</span> 
+    <span class="n">dataset</span><span class="p">,</span> 
+    <span class="n">meta_model</span><span class="o">=</span><span class="s1">&#39;v1&#39;</span><span class="p">,</span> 
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Hyper_Net&#39;</span><span class="p">,</span> 
+    <span class="n">use_T</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+    <span class="n">use_Warp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">model_args</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>This method must be called once at first to build meta modules and initialize meta parameters and neural networks.</p>
+<ul class="simple">
+<li>Args:<ul>
+<li>_input: orginal input for neural network construction;</li>
+<li>dataset: which dataset to use for training and testing. It should be initialized before being passed into the function</li>
+<li>meta_model: model chosen for neural network construction, <code class="docutils literal"><span class="pre">v1</span></code> for C4L with fully connected layer,<code class="docutils literal"><span class="pre">v2</span></code> for Residual blocks with fully connected layer.</li>
+<li>name: name for Meta model modules used for BOMLNet initialization</li>
+<li>use_T: whether to use T layer for C4L neural networks</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p class="first">BOMLOptimizer.Base_model:</p>
+<ul class="simple">
+<li>Aliases:<ul>
+<li>boml.core.BOMLOptimizer.Base_model()</li>
+</ul>
+</li>
+</ul>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">boml</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">BOMLOptimizer</span><span class="o">.</span><span class="n">Base_model</span><span class="p">(</span>
+    <span class="n">_input</span><span class="p">,</span> 
+    <span class="n">meta_learner</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Task_Net&#39;</span><span class="p">,</span>
+    <span class="n">weights_initializer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros_initializer</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>This method has to be called for every experiment and takes responsibility for defining task-specific modules and inner optimizers.</p>
+<ul class="simple">
+<li>Args:<ul>
+<li>_input: orginal input for neural network construction of task-specific module;</li>
+<li>meta_learner: returned value of Meta_model function, which is a instance of BOMLNet or its child classes</li>
+<li>name: name for Base model modules used for BOMLNet initialization</li>
+<li>weights_initializer: initializer function for task_specific network, called by 'BilevelOptim' method</li>
+</ul>
+</li>
+<li>Returns: task-specific model part</li>
+</ul>
+</li>
+<li><p class="first">BOMLOptimizer.ll_problem:</p>
+<ul class="simple">
+<li>Aliases:
+- boml.core.BOMLOptimizer.ll_problem()</li>
+</ul>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">boml</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">BOMLOptimizer</span><span class="o">.</span><span class="n">ll_problem</span><span class="p">(</span>
+      <span class="n">inner_objective</span><span class="p">,</span>
+      <span class="n">learning_rate</span><span class="p">,</span> 
+      <span class="n">T</span><span class="p">,</span> 
+      <span class="n">inner_objective_optimizer</span><span class="o">=</span><span class="s1">&#39;SGD&#39;</span><span class="p">,</span> 
+      <span class="n">outer_objective</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+      <span class="n">learn_lr</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+      <span class="n">alpha_init</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> 
+      <span class="n">s</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> 
+      <span class="n">learn_alpha</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+      <span class="n">learn_st</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+      <span class="n">learn_alpha_itr</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+      <span class="n">var_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+      <span class="n">init_dynamics_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+      <span class="n">first_order</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+      <span class="n">loss_func</span><span class="o">=</span><span class="n">utils</span><span class="o">.</span><span class="n">cross_entropy_loss</span><span class="p">,</span> 
+      <span class="n">momentum</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+      <span class="n">beta1</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+      <span class="n">beta2</span><span class="o">=</span><span class="mf">0.999</span><span class="p">,</span>
+      <span class="n">regularization</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+      <span class="n">experiment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+      <span class="n">scalor</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> 
+      <span class="o">**</span><span class="n">inner_kargs</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>After construction of neural networks, solutions to lower level problems should be regulated in ll_problem.</p>
+<ul class="simple">
+<li>Args:<ul>
+<li>inner_objective: loss function for the inner optimization problem</li>
+<li>learning_rate: step size for inner loop optimization</li>
+<li>T: numbers of steps for inner gradient descent optimization</li>
+<li>inner_objective_optimizer: Optimizer type for the outer parameters, should be in list [<code class="docutils literal"><span class="pre">SGD</span></code>,<code class="docutils literal"><span class="pre">Momentum</span></code>,<code class="docutils literal"><span class="pre">Adam</span></code>]</li>
+<li>outer_objective: loss function for the outer optimization problem, which need to be claimed in BDA agorithm</li>
+<li>alpha_init: initial value of ratio of inner objective to outer objective in BDA algorithm</li>
+<li>s,t: coefficients of aggregation of inner and outer objectives in BDA algorithm, default to be 1.0</li>
+<li>learn_alpha: specify parameter for BDA algorithm to decide whether to initialize alpha as a hyper parameter</li>
+<li>learn_alpha_itr: parameter for BDA algorithm to specify whether to initialize alpha as a vector, of which every dimension's value is step-wise scale factor fot the optimization process</li>
+<li>learn_st: specify parameter for BDA algorithm to decide whether to initialize s and t as hyper parameters</li>
+<li>first_order: specific parameter to define whether to use implement first order MAML, default to be <code class="docutils literal"><span class="pre">FALSE</span></code></li>
+<li>loss_func: specifying which type of loss function is used for the maml-based method, which should be consistent with the form to compute the inner objective</li>
+<li>momentum: specific parameter for Optimizer.BOMLOptMomentum to set initial value of momentum</li>
+<li>beta1, beta2: specific parameter for Optimizer.BOMLOptMomentum to set initial value of Adam</li>
+<li>regularization: whether to add regularization terms in the inner objective</li>
+<li>experiment: instance of Experiment to use in the Lower Level Problem, especifially needed in the <code class="docutils literal"><span class="pre">HyperOptim</span></code> type of method.</li>
+<li>scalor: coefficient of regularization term in the objective function.</li>
+<li>var_list: optional list of variables (of the inner optimization problem)from</li>
+<li>init_dynamics_dict: optional dictrionary that defines Phi_0 (see <code class="docutils literal"><span class="pre">OptimizerDict.set_init_dynamics</span></code>)</li>
+<li>inner_kargs: optional arguments to pass to <code class="docutils literal"><span class="pre">boml.core.optimizer.minimize</span></code></li>
+</ul>
+</li>
+<li>Returns: task-specific model part</li>
+</ul>
+</li>
+<li><p class="first">BOMLOptimizer.ul_problem</p>
+<ul>
+<li><p class="first">Aliases:</p>
+<ul>
+<li><p class="first">boml.core.BOMLOptimizer.ul_problem()</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">boml</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">BOMLOptimizer</span><span class="o">.</span><span class="n">ul_Problem</span><span class="p">(</span>
+    <span class="n">outer_objective</span><span class="p">,</span> 
+    <span class="n">meta_learning_rate</span><span class="p">,</span> 
+    <span class="n">inner_grad</span><span class="p">,</span>
+    <span class="n">meta_param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+    <span class="n">outer_objective_optimizer</span><span class="o">=</span><span class="s1">&#39;Adam&#39;</span><span class="p">,</span> 
+    <span class="n">Reptile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+    <span class="n">Darts</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+    <span class="n">epsilon</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">beta1</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span><span class="n">beta2</span><span class="o">=</span><span class="mf">0.999</span><span class="p">,</span> 
+    <span class="n">momentum</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> 
+    <span class="n">global_step</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</li>
+</ul>
+<p>This method define upper level problems and choose optimizers to optimize meta parameters, which should be called afer ll_problem.</p>
+<ul class="simple">
+<li>Args:<ul>
+<li>outer_objective: scalar tensor for the outer objective</li>
+<li>meta_learning_rate: step size for outer loop optimization</li>
+<li>inner_grad: Returned value of boml.BOMLOptimizer.LLProblem()</li>
+<li>meta_param: optional list of outer parameters and model parameters</li>
+<li>outer_objective_optimizer: Optimizer type for the outer parameters, should be in list [<code class="docutils literal"><span class="pre">SGD</span></code>,<code class="docutils literal"><span class="pre">Momentum</span></code>,<code class="docutils literal"><span class="pre">Adam</span></code>]</li>
+<li>Reptile: BOOLEAN, specific parameters to define whether to implement <code class="docutils literal"><span class="pre">Reptile</span></code> algorithm</li>
+<li>Darts: BOOLEAN, specific parameters to define whether to implement 'DARTS' algorithm</li>
+<li>epsilon: Float, cofffecients to be used in DARTS algorithm</li>
+<li>momentum: specific parameters to be used to initialize <code class="docutils literal"><span class="pre">Momentum</span></code> algorithm</li>
+<li>beta1, beta2: specific parameters to be used to initialize <code class="docutils literal"><span class="pre">Adam</span></code></li>
+<li>global_step: optional global step. By default tries to use the last variable in the collection GLOBAL_STEP</li>
+</ul>
+</li>
+<li>Returns：meta_param list, used for debugging</li>
+</ul>
+</li>
+<li><p class="first">Aggregate_all:</p>
+<ul>
+<li><p class="first">Aliases:</p>
+<ul class="simple">
+<li>boml.core.BOMLOptimizer.Aggregate_all()</li>
+</ul>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">boml</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">BOMLOptimizer</span><span class="o">.</span><span class="n">Aggregate_all</span><span class="p">(</span>
+    <span class="n">aggregation_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+    <span class="n">gradient_clip</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Args:</p>
+<ul class="simple">
+<li>aggregation_fn:Optional operation to aggregate multiple outer_gradients (for the same meta parameter),by (default: reduce_mean)</li>
+<li>gradient_clip: optional operation to clip the aggregated outer gradients</li>
+</ul>
+</li>
+<li><p class="first">Returns: None
+Finally, Aggregate_all has to be called to aggregate gradient of different tasks, and define operations to apply outer gradients and update meta parametes.</p>
+</li>
+</ul>
+</li>
+<li><p class="first">run:</p>
+<ul class="simple">
+<li>Aliases:<ul>
+<li>boml.core.BOMLOptimizer.run()</li>
+</ul>
+</li>
+</ul>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">boml</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">BOMLOptimizer</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">inner_objective_feed_dicts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">outer_objective_feed_dicts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">train_batches</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">initializer_feed_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+    <span class="n">session</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+    <span class="n">online</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">_skip_hyper_ts</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+    <span class="n">_only_hyper_ts</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+    <span class="n">callback</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Args:<ul>
+<li>inner_objective_feed_dicts: an optional feed dictionary for the inner problem. Can be a function of step, which accounts for, e.g. stochastic gradient descent.</li>
+<li>outer_objective_feed_dicts: an optional feed dictionary for the outer optimization problem (passed to the evaluation of outer objective). Can be a function of hyper-iterations steps (i.e. global variable), which may account for, e.g. stochastic evaluation of outer objective.</li>
+<li>train_batches: used for Reptile Algorithm, which needs to generates mini batches of images and labels during one training step</li>
+<li>initializer_feed_dict:  an optional feed dictionary for the initialization of inner problems variables. Can be a function of hyper-iterations steps (i.e. global variable), which may account for, e.g. stochastic initialization.</li>
+<li>session: optional session</li>
+<li>online: default <code class="docutils literal"><span class="pre">False</span></code> if <code class="docutils literal"><span class="pre">True</span></code> performs the online version of the algorithms (i.e. does not reinitialize the state after at each run).</li>
+<li>callback: optional callback function of signature (step (int), feed_dictionary, <code class="docutils literal"><span class="pre">tf.Session</span></code>) -&gt; None that are called after every forward iteration.</li>
+</ul>
+</li>
+<li>Returns: None</li>
+</ul>
+</li>
+</ol>
+</li>
+<li><p class="first">Simple Running Example <div3 id="a33"></div3></p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>    from boml import utils
+    from boml.script_helper import *
+    dataset = boml.meta_omniglot(args.num_classes, (args.examples_train, args.examples_test))
+    ex = boml.BOMLExperiment(dataset)
+    # build network structure and define hyperparameters
+    boml_ho = boml.BOMLOptimizer(&#39;HyperOptim&#39;, &#39;Aggr&#39;, &#39;Reverse&#39;)
+    meta_learner = boml_ho.Meta_learner(ex.x, dataset, &#39;v1&#39;, args.use_T)
+    ex.model = boml_ho.Base_learner(meta_learner.out, meta_learner)
+    # define Lower-level problems
+    loss_inner = utils.cross_entropy_loss(ex.model.out, ex.y)
+    inner_grad = boml_ho.LL_problem(loss_inner, args.lr, args.T, experiment=ex)
+    # define Upper-level problems
+    loss_outer = utils.cross_entropy_loss(ex.model.re_forward(ex.x_).out, ex.y_)
+    boml_ho.UL_problem(loss_outer, args.mlr, inner_grad, hyper_list=boml.extension.hyperparameters())
+    boml_ho.Aggregate_all()
+    # meta training step
+    with utils.get_default_session():
+        for itr in range(args.meta_train_iterations):
+            train_batch = BatchQueueMock(dataset.train, 1,args.meta_batch_size，utils.get_rand_state())
+            tr_fd, v_fd = feed_dicts(train_batch)
+            boml_ho.run(tr_fd, v_fd)
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="modification-and-extension-div4-id-a4-div4">
+<h2>Modification and extension  <div4 id="a4"></div4><a class="headerlink" href="#modification-and-extension-div4-id-a4-div4" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Extensible Base Calsses and Modules<ol>
+<li>BOMLNet<ul>
+<li>Aliases：<ul>
+<li>boml.networks.BOMLNet</li>
+</ul>
+</li>
+<li>Methods to be overridden:<ul>
+<li>forward()：
+uses defined convolutional neural networks with initial input</li>
+<li>re_forward(new_input):
+reuses defined convolutional with new input and update the output results</li>
+<li>create_outer_parameters():
+this method creates parameters of upper level problems, and adds them to define collections called <code class="docutils literal"><span class="pre">METAPARAMETERS</span></code><ul>
+<li>Args:<ul>
+<li>var_collections: collections to restore meta parameters created in the so called scope</li>
+</ul>
+</li>
+<li>Returns: dictionary that indexes the outer parameters</li>
+</ul>
+</li>
+<li>create_model_parameters():
+this method creates model parameters of upper level problems like <code class="docutils literal"><span class="pre">T</span> <span class="pre">layer</span></code> or <code class="docutils literal"><span class="pre">Warp</span> <span class="pre">Layer</span></code> , and adds them to define collections called <code class="docutils literal"><span class="pre">METAPARAMETERS</span></code></li>
+</ul>
+</li>
+<li>Utility functions:<ul>
+<li>get_conv_weight(bmlnet, layer, initializer):<ul>
+<li>Args:<ul>
+<li>bmlnet: initialized instance of BOMLNet</li>
+<li>layer: int32, the layer-th weight of convolutional block to be created</li>
+<li>initializer: the tensorflow initializer used to initialize the filters
+-Returns: created parameter</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>get_bias_weight(bmlnet, layer, initializer):<ul>
+<li>Args:<ul>
+<li>bmlnet: initialized instance of BOMLNet</li>
+<li>layer: int32, the layer-th bias of convolutional block to be created</li>
+<li>initializer: the tensorflow initializer used to initialize the bias</li>
+</ul>
+</li>
+<li>Returns: created parameter</li>
+</ul>
+</li>
+<li>get_identity(dim, name, conv=True):<ul>
+<li>Args:<ul>
+<li>dim: the dimension of identity metrix</li>
+<li>name: name to initialize the metrix</li>
+<li>conv: BOOLEAN , whether initialize the metrix or initialize the real value, default to be True</li>
+</ul>
+</li>
+<li>Returns: the created parameter</li>
+</ul>
+</li>
+<li>conv_block(bmlnet, cweight, bweight):
+uses defined convolutional weight and bias with current ouput of bmlnet<ul>
+<li>Args:<ul>
+<li>bmlnet: initialized instance of BOMLNet</li>
+<li>cweight: parameter of convolutional filter</li>
+<li>bweight: parameter of bias for convolutional neural networks</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>conb_block_t(bmlnet, conv_weight, conv_bias, zweight):
+uses defined convolutional weight, bias, and weights of t layer  with current ouput of bmlnet<ul>
+<li>Args:<ul>
+<li>bmlnet: initialized instance of BOMLNet</li>
+<li>cweight: parameter of convolutional filter</li>
+<li>bweight: parameter of bias for convolutional neural networks</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>conv_block_warp(bmlnet, cweight, bweight, zweight, zbias):
+uses defined convolutional weight, bias and filters of warp layer  with current ouput of bmlnet<ul>
+<li>Args:<ul>
+<li>bmlnet: initialized instance of BOMLNet</li>
+<li>cweight: parameter of convolutional filter</li>
+<li>bweight: parameter of bias for convolutional neural networks</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>BOMLInnerGrad<ul>
+<li>Aliases:<ul>
+<li>boml.LLProblem.BOMLInnerGrad</li>
+</ul>
+</li>
+<li>Methods to be overridden:<ul>
+<li>compute_gradients(bml_opt, loss_inner, loss_outer=None,inner_method=None, param_dict=OrderedDict(), var_list=None, **inner_kargs):
+delivers equivalent functionality to the method called compute_gradients() in <code class="docutils literal"><span class="pre">tf.train.Optimizer</span></code></li>
+<li>Args:<ul>
+<li>bml_opt: instance of boml.optimizers.BOMLOpt, which is automatically create by the method in <code class="docutils literal"><span class="pre">boml.core.BOMLOptimizer</span></code></li>
+<li>loss_inner: inner objective, which could be passed by <code class="docutils literal"><span class="pre">boml.core.BOMLOptimizer.ll_problem</span></code> or called directly.</li>
+<li>loss_outer: outer objective,which could be passed automatically by <code class="docutils literal"><span class="pre">boml.core.BOMLOptimizer.ll_problem</span></code>, or called directly</li>
+<li>param_dict: automatically passed by 'boml.core.BOMLOptimizer.ll_problem'</li>
+<li>var_list: list of lower level variables</li>
+<li>inner_kargs: optional arguments, which are same as <code class="docutils literal"><span class="pre">tf.train.Optimizer</span></code></li>
+</ul>
+</li>
+<li>Returns：self</li>
+</ul>
+</li>
+<li>Utility functions:<ul>
+<li>apply_updates():
+Descent step, as returned by <code class="docutils literal"><span class="pre">tf.train.Optimizer.apply_gradients</span></code>.</li>
+<li>initialization():
+a list of operations that return the values of the state variables for this learning dynamics after the execution of the initialization operation. If an initial dynamics is set, then it also executed.</li>
+<li>state():
+A generator for all the state variables (optimized variables and possibly auxiliary variables) being optimized</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>BOMLOuterGrad<ul>
+<li>Aliases:<ul>
+<li>boml.ul_problem.BOMLOuterGrad</li>
+</ul>
+</li>
+<li>Methods to be overridden:<ul>
+<li>compute_gradients(outer_objective, bml_inner_grad, meta_param=None):<ul>
+<li>Args:<ul>
+<li>bml_inner_grad: OptimzerDict object resulting from the inner objective optimization.</li>
+<li>outer_objective: A loss function for the outer parameters (scalar tensor)</li>
+<li>meta_param: Optional list of outer parameters to consider. If not provided will get all variables in the hyperparameter collection in the current scope.</li>
+</ul>
+</li>
+<li>Returns: list of meta parameters involved in the computation</li>
+</ul>
+</li>
+<li>apply_gradients( inner_objective_feed_dicts=None, outer_objective_feed_dicts=None, initializer_feed_dict=None, param_dict=OrderedDict(), train_batches=None, experiments= [], global_step=None, session=None, online=False, callback=None)<ul>
+<li>Args:<ul>
+<li>inner_objective_feed_dicts: Optional feed dictionary for the inner objective</li>
+<li>outer_objective_feed_dicts: Optional feed dictionary for the outer objective
+(note that this is not used in ForwardHG since hypergradients are not
+variables)</li>
+<li>initializer_feed_dict: Optional feed dictionary for the inner objective</li>
+<li>global_step: Optional global step for the optimization process</li>
+<li>param_dict: dictionary of parameters passed by <code class="docutils literal"><span class="pre">boml.core.BOMLOptimizer</span></code></li>
+<li>train_batches: mini batches of data, needed when Reptile Algorithm are implemented</li>
+<li>session: Optional session (otherwise will take the default session)</li>
+<li>experiments: list of instances of <code class="docutils literal"><span class="pre">Experiment</span></code>, needed when Reptile Algorithm are implemented</li>
+<li>online: Performs the computation of the outer gradient in the online (or &quot;real time&quot;) mode. Note that <code class="docutils literal"><span class="pre">ReverseHG</span></code> and <code class="docutils literal"><span class="pre">ForwardHG</span></code> behave differently.</li>
+<li>callback: callback funciton for the forward optimization</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Utility functions:<ul>
+<li>hgrads_hvars(hyper_list=None, aggregation_fn=None, process_fn=None):
+Method for getting outergradient and outer parameters as required by apply_gradient methods from tensorflow optimizers.
+- Args：
+- meta_param: Optional list of outer parameters to consider. If not provided will get all variables in the hyperparameter collection in the current scope.
+- aggregation_fn: Optional operation to aggregate multiple hypergradients (for the same hyperparameter),
+by default reduce_mean
+- process_fn: Optional operation like clipping to be applied.</li>
+<li>initialization():
+Returns groups of operation that initializes the variables in the computational graph</li>
+<li>state():
+returns current state values of lower level variables</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>BOMLOpt<ul>
+<li>Aliases:<ul>
+<li>boml.optimizers.BOMLOpt</li>
+</ul>
+</li>
+<li>Methods to be overridden:<ul>
+<li>minimize(loss_inner, var_list=None, global_step=None, gate_gradients=tf.train.Optimizer.GATE_OP,
+aggregation_method=None, colocate_gradients_with_ops=False, name=None, grad_loss=None):<ul>
+<li>Returns: an <code class="docutils literal"><span class="pre">bml_inner_grad</span></code> object relative to this minimization, same as <code class="docutils literal"><span class="pre">tf.train.Optimizer.minimize.</span></code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Utility functions:<ul>
+<li>learning_rate():
+- Returns: the step size of this optimizer</li>
+</ul>
+</li>
+<li>Utility Functions<ul>
+<li>get_dafault_session():
+get and return the default tensorflow session</li>
+</ul>
+</li>
+<li>BatchQueueMock:
+generates batches of taskes and feed them into corresponding placeholders.</li>
+</ul>
+</li>
+</ol>
+</li>
+<li>Utility Modules:<ul>
+<li>get_default_session():
+gets and returns the default tensorflow session</li>
+<li>BatchQueueMock():
+responsible for generates batches of taskes and feed them into corresponding placeholders.</li>
+<li>cross_entropy_loss(pred, label, method):
+return loss function that matches different methods in [<code class="docutils literal"><span class="pre">BilevelOptim</span></code>,<code class="docutils literal"><span class="pre">HyperOptim</span></code>]</li>
+<li>vectorize_all(var_list, name=None):
+Vectorize the variables in the list named var_list with the given name</li>
+<li>remove_from_collectinon(key,*var_list):
+removes the variables in the var_list according to the given Graph key</li>
+<li>set_gpu():
+set primary parameters of GPU configuration.</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="authors-and-license-div5-id-a5-div5">
+<h2>Authors and license<div5 id="a5"></div5><a class="headerlink" href="#authors-and-license-div5-id-a5-div5" title="Permalink to this headline">¶</a></h2>
+<p>MIT License</p>
+<p>Copyright (c) 2020 Yaohua Liu</p>
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &quot;Software&quot;), to deal
+in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+<p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Indexes</a><ul>
+<li><a class="reference internal" href="#contents-div0-id-a0-div0">Contents <div0 id="a0"></div0></a></li>
+<li><a class="reference internal" href="#introduction-div1-id-a1-div1">Introduction <div1 id="a1"></div1></a></li>
+<li><a class="reference internal" href="#installation-and-requirements-div2-id-a2-div2">Installation and requirements  <div2 id="a2"></div2></a></li>
+<li><a class="reference internal" href="#quickly-build-your-bilevel-meta-learning-model-div3-id-a3-div3">Quickly build your bilevel meta-learning model <div3 id="a3"></div3></a></li>
+<li><a class="reference internal" href="#modification-and-extension-div4-id-a4-div4">Modification and extension  <div4 id="a4"></div4></a></li>
+<li><a class="reference internal" href="#authors-and-license-div5-id-a5-div5">Authors and license<div5 id="a5"></div5></a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to PyBML's documentation!</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/Contents.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, BMLS.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/Contents.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
