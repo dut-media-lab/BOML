@@ -1,7 +1,8 @@
 # configuration file for the coverage.py
 
 [run]
-source=py_bml/
+source=boml/
+omit= boml/data_loader
 
 [report]
 exclude_lines =
