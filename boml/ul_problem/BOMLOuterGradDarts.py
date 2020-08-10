@@ -15,7 +15,7 @@ RAISE_ERROR_ON_DETACHED = False
 
 class BOMLOuterGradDarts(BOMLOuterGrad):
 
-    def __init__(self, inner_method='Darts', truncate_iter=-1, name='BMLOuterGradOneStage'):
+    def __init__(self, inner_method='Darts', truncate_iter=-1, name='BMLOuterGradDarts'):
         """
        Utility method to initialize truncated reverse HG (not necessarily online),
        :param truncate_iter: Maximum number of iterations that will be stored
@@ -74,9 +74,9 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
                                                                      fin_diff_part)]))
 
             left_diff = tf.gradients(loss_func(pred=model.re_forward(task_parameter=left_diff_0).out,
-                                               label=ex.y, method='BileveOptim'), xs=meta_param)
+                                               label=ex.y, method='Metarepr'), xs=meta_param)
             right_diff = tf.gradients(loss_func(pred=model.re_forward(task_parameter=right_diff_0).out,
-                                                label=ex.y, method='BilevelOptim'), xs=meta_param)
+                                                label=ex.y, method='MetaRepr'), xs=meta_param)
 
             grad_param = [tf.divide(tf.add(right_dif, -left_dif), 2 * self.Epsilon)
                           for right_dif, left_dif in zip(right_diff, left_diff)]
