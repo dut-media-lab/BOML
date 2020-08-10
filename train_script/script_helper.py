@@ -13,7 +13,7 @@ DATASETS_FOLDER = '../omniglot_resized'
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-m', '--mode', type=str, default="train", metavar='STRING',
+parser.add_argument('-md', '--mode', type=str, default="train", metavar='STRING',
                     help='mode, can be train or test')
 
 # Dataset/method options
