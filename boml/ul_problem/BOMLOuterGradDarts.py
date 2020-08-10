@@ -15,7 +15,7 @@ RAISE_ERROR_ON_DETACHED = False
 
 class BOMLOuterGradDarts(BOMLOuterGrad):
 
-    def __init__(self, inner_method='Reverse', truncate_iter=-1, name='BMLOuterGradDarts'):
+    def __init__(self, inner_method='Darts', truncate_iter=-1, name='BMLOuterGradOneStage'):
         """
        Utility method to initialize truncated reverse HG (not necessarily online),
        :param truncate_iter: Maximum number of iterations that will be stored
