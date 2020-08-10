@@ -74,7 +74,7 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
                                                                      fin_diff_part)]))
 
             left_diff = tf.gradients(loss_func(pred=model.re_forward(task_parameter=left_diff_0).out,
-                                               label=ex.y, method='Metarepr'), xs=meta_param)
+                                               label=ex.y, method='MetaRepr'), xs=meta_param)
             right_diff = tf.gradients(loss_func(pred=model.re_forward(task_parameter=right_diff_0).out,
                                                 label=ex.y, method='MetaRepr'), xs=meta_param)
 
