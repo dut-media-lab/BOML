@@ -345,8 +345,8 @@ class BOMLOptimizer(object):
             setattr(self.outergradient,'Epsilon', epsilon)
         if self.outer_method == 'Darts' and (not hasattr(self.outergradient, 'Epsilon')):
             assert self.param_dict['T'] == 1, 'Darts requires single gradient step to optimize task parameters'
-            assert isinstance(self._outer_gradient, getattr(hyper_grads, 'BOMLOuterGradReverse')), \
-                'Wrong name for outer method,should be in list [Simple]'
+            assert isinstance(self._outer_gradient, getattr(hyper_grads, 'BOMLOuterGradDarts')), \
+                'Wrong name for outer method,should be in list [Darts]'
             setattr(self.outergradient, 'Epsilon', tf.cast(0.0, tf.float32))
             setattr(self.outergradient, 'param_dict', self.param_dict)
         if self.outer_method == 'Implicit' and (not hasattr(self.outergradient, 'tolerance')):
