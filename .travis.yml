@@ -6,7 +6,8 @@ jobs:
           python: 3.7
 install: 
     - pip3 install -r requirements.txt
-    - pip install coverage
+    #- pip install coverage
+    - pip install codecov 
 script: 
     - cd train_script
     # - python3 maml_train.py
@@ -22,5 +23,5 @@ script:
     - coverage combine
 
 after_success:
-    - bash <(curl -s https://codecov.io/bash)
+    - codecov .
 
