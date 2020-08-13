@@ -1,9 +1,11 @@
 # configuration file for the coverage.py
 
 [run]
-source=boml/
-omit= boml/data_loader
-
+parallel=True
+source=boml
+omit= 
+    boml/data_loader
+    train_script
 [report]
 exclude_lines =
     if self.debug:
