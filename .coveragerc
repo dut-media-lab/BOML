@@ -2,7 +2,10 @@
 
 [run]
 parallel=True
-source=boml
+source=
+    boml/ll_problem
+    boml/ul_problem
+    
 omit= 
     boml/data_loader
     train_script
