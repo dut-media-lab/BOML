@@ -34,8 +34,6 @@ def build(metasets, learn_lr, learn_alpha, learn_alpha_itr, learn_st, lr0, MBS, 
                                              use_T=use_T)
 
     for k, ex in enumerate(exs):
-        # print(k)  # DEBUG
-        # with tf.device(available_devices[k % len(available_devices)]):
         repr_out = hyper_repr_model.re_forward(ex.x).out
         repr_out_val = hyper_repr_model.re_forward(ex.x_).out
         ex.model = boml_ho.base_learner(_input=repr_out, meta_learner=hyper_repr_model,
@@ -57,7 +55,7 @@ def build(metasets, learn_lr, learn_alpha, learn_alpha_itr, learn_st, lr0, MBS, 
                                         var_list=ex.model.var_list)
 
         boml_ho.ul_problem(outer_objective=ex.errors['validation'], inner_grad=optim_dict,
-                           outer_objective_optimizer='Adam', meta_learning_rate=mlr0,
+                           outer_objective_optimizer='Momentum', meta_learning_rate=mlr0,
                            meta_param=tf.get_collection(boml.extension.GraphKeys.METAPARAMETERS))
 
     boml_ho.aggregate_all(gradient_clip=process_fn)
