@@ -49,7 +49,7 @@ class BOMLNetMiniMetaInitV2(BOMLNet):
         for i in range(len(self.dim_resnet)):
             self.outer_param_dict['res' + str(i + 1) + 'id'] = tf.get_variable(
                         name='res' + str(i + 1) + 'id',
-                        shape=[1, 1,  1, 1, self.channels if i == 0 else self.dim_resnet[i], self.dim_resnet[i]],
+                        shape=[1, 1, self.channels if i == 0 else self.dim_resnet[i-1], self.dim_resnet[i]],
                         dtype=self.datatype, initializer=self.conv_initializer)
             for j in range(3):
                 if i == 0:
