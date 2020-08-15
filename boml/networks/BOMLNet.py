@@ -6,7 +6,7 @@ import tensorflow.contrib.layers as tcl
 from tensorflow.python.training import slot_creator
 
 from boml.extension import GraphKeys
-from boml.setup_model.network_utils import filter_vars
+from boml.networks.network_utils import filter_vars
 from boml.utils import remove_from_collection, as_tuple_or_list
 
 
