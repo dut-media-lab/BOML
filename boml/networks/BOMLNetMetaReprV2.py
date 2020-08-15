@@ -4,8 +4,8 @@ import tensorflow as tf
 from tensorflow.contrib import layers as tcl
 
 import boml.extension
-from boml.setup_model import network_utils
-from boml.setup_model.BOMLNet import BOMLNet
+from boml.networks import network_utils
+from boml.networks.BOMLNet import BOMLNet
 
 
 class BOMLNetMiniMetaReprV2(BOMLNet):

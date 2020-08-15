@@ -5,9 +5,9 @@ import tensorflow as tf
 from tensorflow.contrib.layers.python import layers
 
 from boml.extension import GraphKeys
-from boml.setup_model import network_utils
-from boml.setup_model.BOMLNet import BOMLNet
-from boml.setup_model.network_utils import as_tuple_or_list
+from boml.networks import network_utils
+from boml.networks.BOMLNet import BOMLNet
+from boml.networks.network_utils import as_tuple_or_list
 from boml.utils import remove_from_collection
 
 

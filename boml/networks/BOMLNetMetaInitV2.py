@@ -1,6 +1,6 @@
 from boml.extension import remove_from_collection
-from boml.setup_model import network_utils
-from boml.setup_model.BOMLNet import *
+from boml.networks import network_utils
+from boml.networks.BOMLNet import *
 
 
 class BOMLNetMiniMetaInitV2(BOMLNet):
