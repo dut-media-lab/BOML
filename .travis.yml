@@ -19,7 +19,7 @@ script:
     - coverage run -p meta_repr_train.py  --mode=train --dataset=omniglot --classes=5 --examples_train=1 --examples_test=15 --meta_batch_size=1 --n_meta_iterations=100 --T=1 --meta-lr=0.001 --lr=0.1 --method=MetaRepr --inner_method=Aggr --outer_method=Reverse --logdir=../tmp/ --alpha=0.7 --print-interval=100 --save_interval=100 --Notes=toolkit_test_BDA
     - coverage run -p meta_repr_train.py  --mode=train --dataset=omniglot --classes=5 --examples_train=1 --examples_test=15 --meta_batch_size=1 --n_meta_iterations=100 --T=1 --meta-lr=0.001 --lr=0.1 --method=MetaRepr --inner_method=Trad --outer_method=Darts --logdir=../tmp/ --print-interval=100 --save_interval=100 --Notes=toolkit_test_DARTS
     - coverage run -p meta_repr_train.py  --mode=train --dataset=omniglot --classes=5 --examples_train=1 --examples_test=15 --meta_batch_size=1 --n_meta_iterations=100 --T=1 --meta-lr=0.001 --lr=0.1 --method=MetaRepr --inner_method=Trad --outer_method=Implicit --logdir=../tmp/ --print-interval=100 --save_interval=100 --Notes=toolkit_test_Implicit
-    - ls 
+    - coverage run -p test_setup_model.py
     - coverage combine
 
 after_success:
