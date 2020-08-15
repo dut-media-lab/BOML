@@ -1,7 +1,11 @@
-import boml
+
+import sys
+import os
+sys.path.append('../')
+os.environ['DATASETS_FOLDER'] = '../'
+os.environ['EXPERIMENTS_FOLDER'] = '../'
+import boml as boml
 import tensorflow as tf
-
-
 #def test_meta_init_v2():
 _input_1 = tf.ones(dtype=tf.float32, shape=(5, 28, 28, 1),name='input_28_28')
 _input_2 = tf.ones(dtype=tf.float32, shape=(5, 84, 84, 3),name='input_84_84')
