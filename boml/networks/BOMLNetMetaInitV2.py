@@ -81,7 +81,7 @@ class BOMLNetMiniMetaInitV2(BOMLNet):
 
     def _forward(self):
         if self.task_parameter is None:
-            self.task_parameter = self.create_initial_parameter(primary_hyperparameter=self.outer_param_dict)
+            self.task_parameter = self.create_initial_parameter(primary_outerparameter=self.outer_param_dict)
 
         def residual_block(x, i):
             skipc = tf.nn.conv2d(input=x,filter=self.task_parameter['res'+str(i+1)+'id'],
