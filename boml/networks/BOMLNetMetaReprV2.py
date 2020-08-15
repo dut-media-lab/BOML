@@ -4,17 +4,17 @@ import tensorflow as tf
 from tensorflow.contrib import layers as tcl
 
 import boml.extension
-from boml.networks import network_utils
-from boml.networks.BOMLNet import BOMLNet
+from boml.setup_model import network_utils
+from boml.setup_model.BOMLNet import BOMLNet
 
 
 class BOMLNetMiniMetaReprV2(BOMLNet):
 
-    def __init__(self, _input, name=None, deterministic_initialization=False, outer_param_dict=OrderedDict(), model_param_dict=OrderedDict(),
+    def __init__(self, _input, name='BMLNetMetaReprMini', deterministic_initialization=False, outer_param_dict=OrderedDict(), model_param_dict=OrderedDict(),
                  use_T=False, reuse=False, outer_method='Reverse'):
         self.var_coll = boml.extension.METAPARAMETERS_COLLECTIONS
-        super().__init__(_input=_input, name=name,outer_param_dict=outer_param_dict, model_param_dict=model_param_dict,
-                         deterministic_initialization=deterministic_initialization,reuse=reuse)
+        super().__init__(_input=_input, name=name, outer_param_dict=outer_param_dict, model_param_dict=model_param_dict,
+                         deterministic_initialization=deterministic_initialization, reuse=reuse)
         self.outer_method = outer_method
         self.use_T = use_T
         self.betas = self.filter_vars('beta')
@@ -63,7 +63,7 @@ class BOMLNetMiniMetaReprV2(BOMLNet):
 
 
 class BOMLNetOmniglotMetaReprV2(BOMLNet):
-    def __init__(self, _input, name='BMLNetC4LMetaRepr', deterministic_initialization=False, outer_param_dict=OrderedDict(),
+    def __init__(self, _input, name='BMLNetMetaReprOmniglot', deterministic_initialization=False, outer_param_dict=OrderedDict(),
                  model_param_dict=OrderedDict(),use_T=False, reuse=False, outer_method='Reverse'):
         self.var_coll = boml.extension.METAPARAMETERS_COLLECTIONS
         super().__init__(_input=_input, outer_param_dict=outer_param_dict,model_param_dict=model_param_dict,
@@ -118,4 +118,4 @@ if __name__ == '__main__':
     inp = tf.placeholder(tf.float32, (None, 84, 84, 3))
     net = BOMLNetMiniMetaReprV2(inp)
     print(net.out)
-    print(boml.extension.meta_parameters())
+    print(boml.extension.metaparameters())

@@ -6,7 +6,7 @@ import tensorflow as tf
 from tensorflow.contrib.layers.python import layers
 
 from boml import extension
-from boml.networks.BOMLNet import BOMLNet
+from boml.setup_model.BOMLNet import BOMLNet
 
 
 class BOMLNetMetaReprV1(BOMLNet):

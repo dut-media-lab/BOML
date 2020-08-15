@@ -10,91 +10,91 @@ import tensorflow as tf
 from tensorflow.contrib import layers
 
 
-def conv_block(bmlnet, cweight, bweight):
+def conv_block(bomlnet, cweight, bweight):
 
     """ Perform, conv, batch norm, nonlinearity, and max pool """
-    if bmlnet.max_pool:
-        conv_out = tf.add(tf.nn.conv2d(bmlnet.out, cweight, bmlnet.no_stride, 'SAME'), bweight)
+    if bomlnet.max_pool:
+        conv_out = tf.add(tf.nn.conv2d(bomlnet.out, cweight, bomlnet.no_stride, 'SAME'), bweight)
     else:
-        conv_out = tf.add(tf.nn.conv2d(bmlnet.out, cweight, bmlnet.stride, 'SAME'), bweight)
-    if bmlnet.batch_norm is not None:
-        batch_out = bmlnet.batch_norm(conv_out, activation_fn=bmlnet.activation,
-                                    variables_collections=bmlnet.var_collections)
+        conv_out = tf.add(tf.nn.conv2d(bomlnet.out, cweight, bomlnet.stride, 'SAME'), bweight)
+    if bomlnet.batch_norm is not None:
+        batch_out = bomlnet.batch_norm(conv_out, activation_fn=bomlnet.activation,
+                                    variables_collections=bomlnet.var_collections)
     else:
-        batch_out = bmlnet.activation(conv_out)
-    if bmlnet.max_pool:
-        final_out = tf.nn.max_pool(batch_out, bmlnet.stride, bmlnet.stride, 'VALID')
+        batch_out = bomlnet.activation(conv_out)
+    if bomlnet.max_pool:
+        final_out = tf.nn.max_pool(batch_out, bomlnet.stride, bomlnet.stride, 'VALID')
         return final_out
     else:
         return batch_out
 
 
-def conv_block_t(bmlnet, conv_weight, conv_bias, zweight):
+def conv_block_t(bomlnet, conv_weight, conv_bias, zweight):
     """ Perform, conv, batch norm, nonlinearity, and max pool """
-    if bmlnet.max_pool:
-        conv_out = tf.add(tf.nn.conv2d(bmlnet.out, conv_weight, bmlnet.no_stride, 'SAME'), conv_bias)
+    if bomlnet.max_pool:
+        conv_out = tf.add(tf.nn.conv2d(bomlnet.out, conv_weight, bomlnet.no_stride, 'SAME'), conv_bias)
     else:
-        conv_out = tf.add(tf.nn.conv2d(bmlnet.out, conv_weight, bmlnet.stride, 'SAME'), conv_bias)
-    conv_output = tf.nn.conv2d(conv_out, zweight, bmlnet.no_stride, 'SAME')
+        conv_out = tf.add(tf.nn.conv2d(bomlnet.out, conv_weight, bomlnet.stride, 'SAME'), conv_bias)
+    conv_output = tf.nn.conv2d(conv_out, zweight, bomlnet.no_stride, 'SAME')
 
-    if bmlnet.batch_norm is not None:
-        batch_out = layers.batch_norm(conv_output, activation_fn=bmlnet.activation,
-                                      variables_collections=bmlnet.var_collections,)
+    if bomlnet.batch_norm is not None:
+        batch_out = layers.batch_norm(conv_output, activation_fn=bomlnet.activation,
+                                      variables_collections=bomlnet.var_collections,)
     else:
-        batch_out = bmlnet.activation(conv_output)
-    if bmlnet.max_pool:
-        final_out = tf.nn.max_pool(batch_out, bmlnet.stride, bmlnet.stride, 'VALID')
+        batch_out = bomlnet.activation(conv_output)
+    if bomlnet.max_pool:
+        final_out = tf.nn.max_pool(batch_out, bomlnet.stride, bomlnet.stride, 'VALID')
         return final_out
     else:
         return batch_out
 
 
-def conv_block_warp(bmlnet, cweight, bweight, zweight, zbias):
+def conv_block_warp(bomlnet, cweight, bweight, zweight, zbias):
     """ Perform, conv, batch norm, nonlinearity, and max pool """
-    if bmlnet.max_pool:
-        conv_out = tf.add(tf.nn.conv2d(bmlnet.out, cweight, bmlnet.no_stride, 'SAME'), bweight)
+    if bomlnet.max_pool:
+        conv_out = tf.add(tf.nn.conv2d(bomlnet.out, cweight, bomlnet.no_stride, 'SAME'), bweight)
     else:
-        conv_out = tf.add(tf.nn.conv2d(bmlnet.out, cweight, bmlnet.stride, 'SAME'), bweight)
+        conv_out = tf.add(tf.nn.conv2d(bomlnet.out, cweight, bomlnet.stride, 'SAME'), bweight)
 
-    conv_output = tf.add(tf.nn.conv2d(conv_out, zweight, bmlnet.no_stride, 'SAME'), zbias)
+    conv_output = tf.add(tf.nn.conv2d(conv_out, zweight, bomlnet.no_stride, 'SAME'), zbias)
 
-    if bmlnet.batch_norm is not None:
-        batch_out = layers.batch_norm(conv_output, activation_fn=bmlnet.activation,
-                                      variables_collections=bmlnet.var_collections, )
+    if bomlnet.batch_norm is not None:
+        batch_out = layers.batch_norm(conv_output, activation_fn=bomlnet.activation,
+                                      variables_collections=bomlnet.var_collections, )
     else:
-        batch_out = bmlnet.activation(conv_output)
-    if bmlnet.max_pool:
-        final_out = tf.nn.max_pool(batch_out, bmlnet.stride, bmlnet.stride, 'VALID')
+        batch_out = bomlnet.activation(conv_output)
+    if bomlnet.max_pool:
+        final_out = tf.nn.max_pool(batch_out, bomlnet.stride, bomlnet.stride, 'VALID')
         return final_out
     else:
         return batch_out
 
 
-def get_conv_weight(bmlnet, layer, initializer):
+def get_conv_weight(bomlnet, layer, initializer):
     if layer == 0:
         return tf.get_variable('conv' + str(layer),
-                               [bmlnet.kernel, bmlnet.kernel, bmlnet.channels, bmlnet.dim_hidden[0]],
-                               initializer=initializer, dtype=bmlnet.datatype)
+                               [bomlnet.kernel, bomlnet.kernel, bomlnet.channels, bomlnet.dim_hidden[0]],
+                               initializer=initializer, dtype=bomlnet.datatype)
     else:
         return tf.get_variable('conv' + str(layer),
-                               [bmlnet.kernel, bmlnet.kernel, bmlnet.dim_hidden[layer - 1], bmlnet.dim_hidden[layer]],
-                               initializer=initializer, dtype=bmlnet.datatype)
+                               [bomlnet.kernel, bomlnet.kernel, bomlnet.dim_hidden[layer - 1], bomlnet.dim_hidden[layer]],
+                               initializer=initializer, dtype=bomlnet.datatype)
 
 
-def get_warp_weight(bmlnet, layer, initializer):
+def get_warp_weight(bomlnet, layer, initializer):
     return tf.get_variable('conv' + str(layer)+'_z',
-                           [bmlnet.kernel, bmlnet.kernel, bmlnet.dim_hidden[layer - 1], bmlnet.dim_hidden[layer]],
-                           initializer=initializer, dtype=bmlnet.datatype)
+                           [bomlnet.kernel, bomlnet.kernel, bomlnet.dim_hidden[layer - 1], bomlnet.dim_hidden[layer]],
+                           initializer=initializer, dtype=bomlnet.datatype)
 
 
-def get_warp_bias(bmlnet, layer, initializer):
-    return tf.get_variable('bias' + str(layer)+'_z', [bmlnet.dim_hidden[layer]], initializer=initializer,
-                           dtype=bmlnet.datatype)
+def get_warp_bias(bomlnet, layer, initializer):
+    return tf.get_variable('bias' + str(layer)+'_z', [bomlnet.dim_hidden[layer]], initializer=initializer,
+                           dtype=bomlnet.datatype)
 
 
-def get_bias_weight(bmlnet, layer, initializer):
-    return tf.get_variable('bias' + str(layer), [bmlnet.dim_hidden[layer]], initializer=initializer,
-                           dtype=bmlnet.datatype)
+def get_bias_weight(bomlnet, layer, initializer):
+    return tf.get_variable('bias' + str(layer), [bomlnet.dim_hidden[layer]], initializer=initializer,
+                           dtype=bomlnet.datatype)
 
 
 def get_identity(dim, name, conv=True):

@@ -6,7 +6,7 @@ import tensorflow.contrib.layers as tcl
 from tensorflow.python.training import slot_creator
 
 from boml.extension import GraphKeys
-from boml.networks.network_utils import filter_vars
+from boml.setup_model.network_utils import filter_vars
 from boml.utils import remove_from_collection, as_tuple_or_list
 
 
@@ -19,14 +19,11 @@ class BOMLNet(object):
     def __init__(self, _input, outer_param_dict=OrderedDict(), model_param_dict=OrderedDict(),task_parameter=None, var_collections=None, name=None,
                  deterministic_initialization=False, reuse=False):
         """
-        Creates an object that represent a network. Important attributes of a Network object are
-
-        `var_list`: list of tf.Variables that constitute the parameters of the model
-
-        `inp`: list, first element is `_input` and last should be output of the model. Other entries can be
-        hidden layers activations.
-
-        :param _input: tf.Tensor, input of this model.
+        Creates an object that creates model parameters and defines the network structure.
+        :param _input: the input shape for defined network
+        :param outer_param_dict: type of OrderedDict to restore parameters to optimize in the upper level
+        :param model_param_dict: type of OrderedDict to restore parameters of special model like Iteration Warping
+        :param task_parameter: type of OrderedDict to restore parameters to optimize in the lower level
         """
         super(BOMLNet, self).__init__()
 

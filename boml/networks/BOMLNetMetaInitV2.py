@@ -1,6 +1,6 @@
 from boml.extension import remove_from_collection
-from boml.networks import network_utils
-from boml.networks.BOMLNet import *
+from boml.setup_model import network_utils
+from boml.setup_model.BOMLNet import *
 
 
 class BOMLNetMiniMetaInitV2(BOMLNet):
@@ -24,6 +24,7 @@ class BOMLNetMiniMetaInitV2(BOMLNet):
         self.output_weight_initializer = output_weight_initializer
         self.use_T = use_T
         self.use_Warp = use_Warp
+
         super().__init__(_input=_input, outer_param_dict=outer_param_dict,model_param_dict=model_param_dict,
                          var_collections=var_collections, name=name,
                          deterministic_initialization=deterministic_initialization, reuse=reuse)
