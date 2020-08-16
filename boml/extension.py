@@ -120,7 +120,7 @@ def get_outerparameter(name, initializer=None, shape=None, dtype=None, collectio
         return tf.convert_to_tensor(_tmp_lst.tolist(), name=name)
 
 
-def hyperparameters(scope=None):
+def metaparameters(scope=None):
     """
     List of variables in the collection HYPERPARAMETERS.
 
@@ -129,4 +129,4 @@ def hyperparameters(scope=None):
     :param scope: (str) an optional scope.
     :return: A list of tensors (usually variables)
     """
-    return tf.get_collection(GraphKeys.HYPERPARAMETERS, scope=scope)
+    return tf.get_collection(GraphKeys.METAPARAMETERS, scope=scope)

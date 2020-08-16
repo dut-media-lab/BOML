@@ -10,6 +10,7 @@ import tensorflow as tf
 # def test_meta_init_v2():
 _input_1 = tf.placeholder(tf.float32, (None, 28, 28, 1))
 _input_2 = tf.placeholder(tf.float32, (None, 84, 84, 3))
+boml_meta_repr_v1= boml.BOMLNetMiniMetaReprV1(_input_1)
 boml_meta_init_v2_omniglot = boml.BOMLNetOmniglotMetaInitV2(_input_1, dim_output=5)
 boml_meta_init_v2 = boml.BOMLNetMiniMetaInitV2(_input_2, dim_output=5)
 boml_meta_repr_v2_omniglot = boml.BOMLNetOmniglotMetaReprV2(_input_1)

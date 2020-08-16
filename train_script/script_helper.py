@@ -6,14 +6,14 @@ import numpy as np
 import tensorflow as tf
 
 import boml
-import boml.data_loader as dl
+import boml.load_data as dl
 from boml.utils import feed_dicts, BatchQueueMock, save_obj, load_obj
 
 DATASETS_FOLDER = '../omniglot_resized'
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-mo', '--mode', type=str, default="train", metavar='STRING',
+parser.add_argument('-m', '--mode', type=str, default="train", metavar='STRING',
                     help='mode, can be train or test')
 
 # Dataset/method options
