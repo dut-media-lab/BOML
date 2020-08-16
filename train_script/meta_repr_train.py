@@ -51,13 +51,13 @@ def build(metasets, learn_lr, learn_alpha, learn_alpha_itr, learn_st, lr0, MBS, 
         ex.optimizers['apply_updates'], _ = boml.BOMLOptSGD(learning_rate=lr0).minimize(ex.errors['training'],
                                                                                          var_list=ex.model.var_list)
         optim_dict = boml_ho.ll_problem(inner_objective=inner_objective, learning_rate=lr0,
-                                        inner_objective_optimizer='Momentum', outer_objective=ex.errors['validation'],
+                                        inner_objective_optimizer='SGD', outer_objective=ex.errors['validation'],
                                         alpha_init=alpha_itr, s=1.0, t=1.0, T=T,experiment=ex,learn_lr=learn_lr,
                                         learn_alpha_itr=learn_alpha_itr, learn_alpha=learn_alpha, learn_st=learn_st,
                                         var_list=ex.model.var_list)
 
         boml_ho.ul_problem(outer_objective=ex.errors['validation'], inner_grad=optim_dict,
-                           outer_objective_optimizer='Adam', meta_learning_rate=mlr0,
+                           outer_objective_optimizer='Momentum', meta_learning_rate=mlr0,
                            meta_param=tf.get_collection(boml.extension.GraphKeys.METAPARAMETERS))
 
     boml_ho.aggregate_all(gradient_clip=process_fn)

@@ -3,12 +3,11 @@
 [run]
 parallel=True
 source=
-    boml/ll_problem
-    boml/ul_problem
-    
+    boml/ll_problem/*
+    boml/ul_problem/*
 omit= 
-    boml/data_loader
-    train_script
+    boml/data_loader/*
+    train_script/*
 [report]
 exclude_lines =
     if self.debug:
