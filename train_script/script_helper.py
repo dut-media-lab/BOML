@@ -78,9 +78,9 @@ parser.add_argument('-fo', '--first_order', type=bool, default=False, metavar='B
                     help='whether to implement FOMAML, short for First Order MAML')
 parser.add_argument('-ds', '--darts', type=bool, default=False, metavar='BOOLEAN',
                     help='whether to implement Darts Method')
-parser.add_argument('-io', '--inner_opt', type=bool, default='SGD', metavar='STRING',
+parser.add_argument('-io', '--inner_opt', type=str, default='SGD', metavar='STRING',
                     help='the typer of inner optimizer, which should be listed in [SGD,Adam,Momentum]')
-parser.add_argument('-oo', '--outer_opt', type=bool, default='Adam', metavar='STRING',
+parser.add_argument('-oo', '--outer_opt', type=str, default='Adam', metavar='STRING',
                     help='the typer of outer optimizer, which should be listed in [SGD,Adam,Momentum]')
 
 
