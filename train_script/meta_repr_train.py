@@ -131,15 +131,9 @@ def build_and_test(metasets, exp_dir, method, inner_method, outer_method, use_T=
 def main():
     print(args.__dict__)
 
-    try:
-        if args.dataset == 'omniglot':
-            metasets = map_dict[args.dataset]['data_loader'](std_num_classes=args.classes, examples_train=
-            args.examples_train, examples_test=args.examples_test)
-        elif args.dataset == 'miniimagenet':
-            metasets = map_dict[args.dataset]['data_loader'](std_num_classes=args.classes, examples_train=
-            args.examples_train, examples_test=args.examples_test)
-    except KeyError:
-        raise ValueError('dataset FLAG must be omniglot or miniimagenet')
+    if args.dataset == 'omniglot':
+        metasets = map_dict[args.dataset]['data_loader'](std_num_classes=args.classes, examples_train=
+        args.examples_train, examples_test=args.examples_test)
 
     weights_initializer = tf.contrib.layers.xavier_initializer() if args.xavier else tf.zeros_initializer
 
