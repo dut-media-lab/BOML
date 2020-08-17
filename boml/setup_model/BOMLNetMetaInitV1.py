@@ -13,7 +13,7 @@ from boml.utils import remove_from_collection
 
 class BOMLNetMetaInitV1(BOMLNet):
     def __init__(self, _input, dim_output, name='BMLNetC4LHO', outer_param_dict=OrderedDict(), model_param_dict=None,
-                 task_parameter=None,use_T=False, use_Warp=False,activation=tf.nn.relu, var_collections=tf.GraphKeys.MODEL_VARIABLES,
+                 task_parameter=None,use_T=False, use_Warp=False,outer_method='Simple',activation=tf.nn.relu, var_collections=tf.GraphKeys.MODEL_VARIABLES,
                  conv_initializer=tf.contrib.layers.xavier_initializer_conv2d(tf.float32),
                  output_weight_initializer=tf.contrib.layers.xavier_initializer(tf.float32), norm=layers.batch_norm,
                  data_type=tf.float32, channels=1, dim_hidden=[64, 64, 64, 64], kernel=3, max_pool=False,
@@ -31,6 +31,7 @@ class BOMLNetMetaInitV1(BOMLNet):
         self.bias_initializer = tf.zeros_initializer(tf.float32)
         self.conv_initializer = conv_initializer
         self.output_weight_initializer = output_weight_initializer
+        self.outer_method=outer_method
         self.use_T = use_T
         self.use_Warp = use_Warp
 
@@ -127,20 +128,20 @@ class BOMLNetMetaInitV1(BOMLNet):
                                   dim_output=self.dims[-1], name=self.name, activation=self.activation,
                                   outer_param_dict=self.outer_param_dict, model_param_dict=self.model_param_dict,
                                   task_parameter=self.task_parameter if len(task_parameter.keys()) == 0 else task_parameter
-                                  , use_T=self.use_T, use_Warp=self.use_Warp,
+                                  , use_T=self.use_T, use_Warp=self.use_Warp,outer_method=self.outer_method,
                                   var_collections=self.var_collections, dim_hidden=self.dim_hidden,
                                   output_weight_initializer=self.output_weight_initializer, max_pool=self.max_pool,
                                   deterministic_initialization=self.deterministic_initialization, reuse=True)
 
 
 def BOMLNetOmniglotMetaInitV1(_input, dim_output, outer_param_dict=OrderedDict(), model_param_dict=OrderedDict(),
-                        batch_norm=layers.batch_norm, name='BMLNetC4LOmniglot', use_T=False, use_Warp=False,**model_args):
-    return BOMLNetMetaInitV1(_input=_input, name=name, dim_output=dim_output, model_param_dict=model_param_dict,
+                        batch_norm=layers.batch_norm, name='BMLNetC4LOmniglot',outer_method='Simple', use_T=False, use_Warp=False,**model_args):
+    return BOMLNetMetaInitV1(_input=_input, name=name, dim_output=dim_output, model_param_dict=model_param_dict, outer_method=outer_method,
                               outer_param_dict=outer_param_dict, norm=batch_norm, use_T=use_T, use_Warp=use_Warp, **model_args)
 
 
 def BOMLNetMiniMetaInitV1(_input, dim_output, outer_param_dict=OrderedDict(),model_param_dict =OrderedDict(),
-                    batch_norm=layers.batch_norm, name='BMLNetC4LMini', use_T=False, use_Warp=False,**model_args):
+                    batch_norm=layers.batch_norm, name='BMLNetC4LMini',outer_method='Simple', use_T=False, use_Warp=False,**model_args):
     return BOMLNetMetaInitV1(_input=_input, name=name, dim_output=dim_output, use_T=use_T, use_Warp=use_Warp,
-                              outer_param_dict=outer_param_dict, model_param_dict=model_param_dict, norm=batch_norm, channels=3, dim_hidden=[32, 32, 32, 32],
+                              outer_param_dict=outer_param_dict, model_param_dict=model_param_dict,outer_method=outer_method, norm=batch_norm, channels=3, dim_hidden=[32, 32, 32, 32],
                               max_pool=True, **model_args)

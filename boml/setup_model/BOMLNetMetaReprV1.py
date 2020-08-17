@@ -74,76 +74,22 @@ class BOMLNetMetaReprV1(BOMLNet):
         if self.use_T:
             # hyper parameters of transformation layer
             for i in range(len(self.dim_hidden)):
-                self.model_param_dict['conv' + str(i) + '_z'] = self.get_identity(self.dim_hidden[0],
+                self.model_param_dict['conv' + str(i) + '_z'] = network_utils.get_identity(self.dim_hidden[0],
                                                                                   name='conv' + str(i) + '_z',
                                                                                   conv=True)
-            self.model_param_dict['w' + str(len(self.dim_hidden)) + '_z'] = self.get_identity(self.dims[-1],
+            self.model_param_dict['w' + str(len(self.dim_hidden)) + '_z'] = network_utils.get_identity(self.dims[-1],
                                                                                               name='w' + str(len(
                                                                                                   self.dim_hidden)) + '_z',
                                                                                               conv=False)
         elif self.use_Warp:
             for i in range(len(self.dim_hidden)):
-                self.model_param_dict['conv' + str(i) + '_z'] = self.get_warp_weight(layer=i,
+                self.model_param_dict['conv' + str(i) + '_z'] = network_utils.get_warp_weight(self,layer=i,
                                                                                      initializer=self.conv_initializer)
-                self.model_param_dict['bias' + str(i) + '_z'] = self.get_warp_bias(layer=i,
+                self.model_param_dict['bias' + str(i) + '_z'] = network_utils.get_warp_bias(self,layer=i,
                                                                                    initializer=self.bias_initializer)
         [tf.add_to_collections(var_collections, model_param) for model_param in self.model_param_dict.values()]
 
         return self.model_param_dict
-
-    def conv_block(self, cweight, bweight):
-        """ Perform, conv, batch norm, nonlinearity, and max pool """
-        if self.max_pool:
-            conv_out = tf.add(tf.nn.conv2d(self.out, cweight, self.no_stride, 'SAME'), bweight)
-        else:
-            conv_out = tf.add(tf.nn.conv2d(self.out, cweight, self.stride, 'SAME'), bweight)
-        if self.batch_norm:
-            batch_out = layers.batch_norm(inputs=conv_out, activation_fn=self.activation,
-                                          variables_collections=self.var_collections)
-        else:
-            batch_out = self.activation(conv_out)
-        if self.max_pool:
-            final_out = tf.nn.max_pool(batch_out, self.stride, self.stride, 'VALID')
-            return final_out
-        else:
-            return batch_out
-
-    def conv_block_t(self, cweight, bweight, zweight):
-        """ Perform, conv, batch norm, nonlinearity, and max pool """
-        if self.max_pool:
-            conv_out = tf.add(tf.nn.conv2d(self.out, cweight, self.no_stride, 'SAME'), bweight)
-        else:
-            conv_out = tf.add(tf.nn.conv2d(self.out, cweight, self.stride, 'SAME'), bweight)
-        conv_output = tf.nn.conv2d(conv_out, zweight, self.no_stride, 'SAME')
-
-        if self.batch_norm:
-            batch_out = layers.batch_norm(inputs=conv_output, activation_fn=self.activation,
-                                          variables_collections=self.var_collections)
-        else:
-            batch_out = self.activation(conv_output)
-        if self.max_pool:
-            final_out = tf.nn.max_pool(batch_out, self.stride, self.stride, 'VALID')
-            return final_out
-        else:
-            return batch_out
-
-    def get_identity(self, dim, name, conv=True):
-        return tf.get_variable(initializer=tf.eye(dim, batch_shape=[1, 1]), name=name, dtype=self.datatype) \
-            if conv else self.get_identity(initializer=tf.eye(dim), name=name, dtype=self.datatype)
-
-    def get_conv_weight(self, layer, initializer):
-        if layer == 0:
-            return tf.get_variable(name='conv' + str(layer),
-                                   shape=[self.kernel, self.kernel, self.channels, self.dim_hidden[0]],
-                                   initializer=initializer, dtype=self.datatype)
-        else:
-            return tf.get_variable(name='conv' + str(layer), shape=
-            [self.kernel, self.kernel, self.dim_hidden[layer - 1], self.dim_hidden[layer]],
-                                   initializer=initializer, dtype=self.datatype)
-
-    def get_bias_weight(self, layer, initializer):
-        return tf.get_variable(name='bias' + str(layer), shape=
-        [self.dim_hidden[layer]], initializer=initializer)
 
     def _forward(self):
         '''
@@ -155,15 +101,15 @@ class BOMLNetMetaReprV1(BOMLNet):
 
         for i in range(len(self.dim_hidden)):
             if self.use_T:
-                self + self.conv_block_t(self.outer_param_dict['conv' + str(i)], self.outer_param_dict['bias' + str(i)],
+                self + network_utils.conv_block_t(self, self.outer_param_dict['conv' + str(i)], self.outer_param_dict['bias' + str(i)],
                                          self.model_param_dict['conv' + str(i) + '_z'])
             elif self.use_Warp:
-                self + self.conv_block_Warp(self.outer_param_dict['conv' + str(i)],
+                self + network_utils.conv_block_warp(self, self.outer_param_dict['conv' + str(i)],
                                             self.outer_param_dict['bias' + str(i)],
                                             self.model_param_dict['conv' + str(i) + '_z'],
                                             self.model_param_dict['bias' + str(i) + '_z'])
             else:
-                self + self.conv_block(self.outer_param_dict['conv' + str(i)], self.outer_param_dict['bias' + str(i)])
+                self + self.conv_block(self, self.outer_param_dict['conv' + str(i)], self.outer_param_dict['bias' + str(i)])
         if self.flatten:
             flattened_shape = reduce(lambda a, v: a * v, self.layers[-1].get_shape().as_list()[1:])
             self + tf.reshape(self.out, shape=(-1, flattened_shape), name='representation')
@@ -182,6 +128,7 @@ class BOMLNetMetaReprV1(BOMLNet):
                                  output_weight_initializer=self.output_weight_initializer, max_pool=self.max_pool,
                                  deterministic_initialization=self.deterministic_initialization, reuse=True,
                                  outer_method=self.outer_method)
+
 
 def BOMLNetOmniglotMetaReprV1(_input, outer_param_dict=OrderedDict(),model_param_dict=OrderedDict(),
                               batch_norm=layers.batch_norm, name='BMLNetC4LOmniglot', use_T=False,

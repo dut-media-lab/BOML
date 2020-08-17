@@ -6,7 +6,7 @@ from boml.setup_model.BOMLNet import *
 class BOMLNetMiniMetaInitV2(BOMLNet):
     def __init__(self, _input, dim_output, name='BMLNetResHO', outer_param_dict=OrderedDict(), model_param_dict=OrderedDict(),
                  task_parameter=None,activation=tf.nn.relu,
-                 var_collections=tf.GraphKeys.MODEL_VARIABLES,
+                 var_collections=tf.GraphKeys.MODEL_VARIABLES,outer_method='Simple',
                  conv_initializer=tf.contrib.layers.xavier_initializer_conv2d(tf.float32),
                  output_weight_initializer=tcl.xavier_initializer(tf.float32),batch_norm=True,
                  data_type=tf.float32, channels=3, dim_resnet=[64, 96, 128, 256], kernel=3,
@@ -23,6 +23,7 @@ class BOMLNetMiniMetaInitV2(BOMLNet):
         self.conv_initializer = conv_initializer
         self.output_weight_initializer = output_weight_initializer
         self.use_T = use_T
+        self.outer_method = outer_method
         self.use_Warp = use_Warp
 
         super().__init__(_input=_input, outer_param_dict=outer_param_dict,model_param_dict=model_param_dict,
@@ -114,7 +115,7 @@ class BOMLNetMiniMetaInitV2(BOMLNet):
 
     def re_forward(self, new_input=None, task_parameter=OrderedDict()):
         return BOMLNetMiniMetaInitV2(_input=new_input if (new_input is not None) else self.layers[0],
-                                      dim_output=self.dims[-1], name=self.name, activation=self.activation,
+                                      dim_output=self.dims[-1], name=self.name, activation=self.activation,outer_method=self.outer_method,
                                       outer_param_dict=self.outer_param_dict, model_param_dict=self.model_param_dict,
                                       task_parameter=self.task_parameter if len(task_parameter.keys()) == 0 else task_parameter,
                                       var_collections=self.var_collections, output_weight_initializer=self.output_weight_initializer,
@@ -124,7 +125,7 @@ class BOMLNetMiniMetaInitV2(BOMLNet):
 class BOMLNetOmniglotMetaInitV2(BOMLNet):
     def __init__(self, _input, dim_output, name='Omniglot_ResNet', outer_param_dict=OrderedDict(),model_param_dict=OrderedDict(),
                  task_parameter=None, activation=tf.nn.relu, var_collections=tf.GraphKeys.MODEL_VARIABLES,
-                 conv_initializer=tcl.xavier_initializer(tf.float32),
+                 conv_initializer=tcl.xavier_initializer(tf.float32),outer_method='Simple',
                  output_weight_initializer=tf.zeros_initializer(tf.float32), batch_norm=True,
                  data_type=tf.float32, channels=1, dim_resnet=[64, 96], dim_hidden=64, kernel=3, max_pool=False,
                  deterministic_initialization=False, reuse=False,use_T=False,use_Warp=False):
@@ -143,6 +144,7 @@ class BOMLNetOmniglotMetaInitV2(BOMLNet):
         self.conv_initializer = conv_initializer
         self.output_weight_initializer = output_weight_initializer
         self.use_T = use_T
+        self.outer_method = outer_method,
         self.use_Warp = use_Warp
         super().__init__(_input=_input, outer_param_dict=outer_param_dict,model_param_dict=model_param_dict,
                          var_collections=var_collections, name=name,
@@ -232,7 +234,7 @@ class BOMLNetOmniglotMetaInitV2(BOMLNet):
                                           dim_output=self.dims[-1], name=self.name, activation=self.activation,
                                           outer_param_dict=self.outer_param_dict, model_param_dict=self.model_param_dict,
                                           task_parameter=task_parameter if task_parameter is not None else self.task_parameter,
-                                          var_collections=self.var_collections,
+                                          var_collections=self.var_collections,outer_method=self.outer_method,
                                           output_weight_initializer=self.output_weight_initializer,
                                           deterministic_initialization=self.deterministic_initialization, reuse=True,
                                           use_T=self.use_T, use_Warp=self.use_Warp)

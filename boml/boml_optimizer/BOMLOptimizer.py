@@ -53,10 +53,6 @@ class BOMLOptimizer(object):
             outer_method = 'Reverse'
         elif self.inner_method == 'Simple' and outer_method == 'Simple':
             outer_method = 'Simple'
-        elif self.inner_method == 'Trad' and outer_method == 'Implicit':
-            outer_method = 'Implicit'
-        elif self.inner_method == 'Trad' and outer_method == 'Forward':
-            outer_method = 'Forward'
         elif self.inner_method == 'Trad' and outer_method == 'Darts':
             outer_method = 'Darts'
         else:
@@ -295,7 +291,7 @@ class BOMLOptimizer(object):
         return inner_grad
 
     def ul_problem(self, outer_objective, meta_learning_rate, inner_grad,
-                   meta_param=None, outer_objective_optimizer='Adam', reptile=False, epsilon=1.0,
+                   meta_param=None, outer_objective_optimizer='Adam', epsilon=1.0,
                    beta1=0.9, beta2=0.999, momentum=0.5, tolerance=lambda _k: 0.1 * (0.9 ** _k), global_step=None):
         """
         Set the outer optimization problem and the descent procedure for the optimization of the
@@ -337,17 +333,11 @@ class BOMLOptimizer(object):
                 raise IndexError
         assert isinstance(self._outer_gradient, getattr(hyper_grads, 'BOMLOuterGrad')), \
             'Wrong name for inner method,should be in list \n [Reverse, Simple, Forward, Implicit]'
-        if 'Reptile' not in self.param_dict.keys() and reptile:
-            assert isinstance(self._outer_gradient, getattr(hyper_grads, 'BOMLOuterGradSimple')), \
-                'Wrong name for outer method,should be in list [Simple]'
-            self.param_dict['Reptile'] = reptile
-            setattr(self.outergradient, 'Reptile', True)
-            setattr(self.outergradient,'Epsilon', epsilon)
         if self.outer_method == 'Darts' and (not hasattr(self.outergradient, 'Epsilon')):
             assert self.param_dict['T'] == 1, 'Darts requires single gradient step to optimize task parameters'
             assert isinstance(self._outer_gradient, getattr(hyper_grads, 'BOMLOuterGradDarts')), \
                 'Wrong name for outer method,should be in list [Darts]'
-            setattr(self.outergradient, 'Epsilon', tf.cast(0.0, tf.float32))
+            setattr(self.outergradient, 'Epsilon', tf.cast(epsilon, tf.float32))
             setattr(self.outergradient, 'param_dict', self.param_dict)
         if self.outer_method == 'Implicit' and (not hasattr(self.outergradient, 'tolerance')):
             self.outergradient.set_tolerance(tolerance=tolerance)

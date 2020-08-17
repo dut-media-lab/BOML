@@ -10,13 +10,15 @@ from boml.setup_model.BOMLNet import BOMLNet
 
 class BOMLNetMiniMetaReprV2(BOMLNet):
 
-    def __init__(self, _input, name='BMLNetMetaReprMini', deterministic_initialization=False, outer_param_dict=OrderedDict(), model_param_dict=OrderedDict(),
-                 use_T=False, reuse=False, outer_method='Reverse'):
+    def __init__(self, _input, name='BMLNetMetaReprMini', deterministic_initialization=False,
+                 outer_param_dict=OrderedDict(), model_param_dict=OrderedDict(),
+                 use_T=False, use_Warp=False,reuse=False, outer_method='Reverse'):
         self.var_coll = boml.extension.METAPARAMETERS_COLLECTIONS
         super().__init__(_input=_input, name=name, outer_param_dict=outer_param_dict, model_param_dict=model_param_dict,
                          deterministic_initialization=deterministic_initialization, reuse=reuse)
         self.outer_method = outer_method
         self.use_T = use_T
+        self.use_Warp = use_Warp
         self.betas = self.filter_vars('beta')
         self.moving_means = self.filter_vars('moving_mean')
         self.moving_variances = self.filter_vars('moving_variance')
@@ -64,13 +66,14 @@ class BOMLNetMiniMetaReprV2(BOMLNet):
 
 class BOMLNetOmniglotMetaReprV2(BOMLNet):
     def __init__(self, _input, name='BMLNetMetaReprOmniglot', deterministic_initialization=False, outer_param_dict=OrderedDict(),
-                 model_param_dict=OrderedDict(),use_T=False, reuse=False, outer_method='Reverse'):
+                 model_param_dict=OrderedDict(),use_T=False,use_Warp=False, reuse=False, outer_method='Reverse'):
         self.var_coll = boml.extension.METAPARAMETERS_COLLECTIONS
         super().__init__(_input=_input, outer_param_dict=outer_param_dict,model_param_dict=model_param_dict,
                          deterministic_initialization=deterministic_initialization, name=name,
                          reuse=reuse)
         self.outer_method = outer_method
         self.use_T = use_T
+        self.use_Warp = use_Warp
         self.betas = self.filter_vars('beta')
         self.moving_means = self.filter_vars('moving_mean')
         self.moving_variances = self.filter_vars('moving_variance')

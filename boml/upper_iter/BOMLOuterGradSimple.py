@@ -54,22 +54,6 @@ class BOMLOuterGradSimple(BOMLOuterGrad):
 
             return meta_param
 
-    def _state_feed_dict_generator(self, history, T_or_generator):
-        for t, his in zip(utils.solve_int_or_generator(T_or_generator), history):
-            yield t, utils.merge_dicts(
-                *[od.state_feed_dict(h) for od, h in zip(sorted(self._optimizer_dicts), his)]
-            )
-
-    @staticmethod
-    def _create_hyper_gradients(hyper_grads, meta_param):
-        hyper_gradients = [slot_creator.create_slot(v.initialized_value(), utils.val_or_zero(der, v), 'alpha')
-                           for v, der in zip(meta_param, hyper_grads)]
-        [tf.add_to_collection(boml.extension.GraphKeys.OUTERGRADIENTS, hyper_grad) for hyper_grad in
-         hyper_gradients]
-        boml.extension.remove_from_collection(boml.extension.GraphKeys.GLOBAL_VARIABLES, *hyper_gradients)
-        # this prevents the 'automatic' initialization with tf.global_variables_initializer.
-        return hyper_gradients
-
     def apply_gradients(self, inner_objective_feed_dicts=None, outer_objective_feed_dicts=None,
                         initializer_feed_dict=None, param_dict=OrderedDict(), train_batches=None, experiments =[], global_step=None, session=None,
                         online=False, callback=None):

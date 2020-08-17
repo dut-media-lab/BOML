@@ -129,7 +129,6 @@ class BOMLInnerGradSimple(BOMLInnerGradTrad):
 
         return self._iteration
 
-    @property
     def initialization(self):
         """
         :return: a list of operations that return the values of the state variables for this
@@ -146,58 +145,6 @@ class BOMLInnerGradSimple(BOMLInnerGradTrad):
                     # return the initialized value
 
         return self._initialization
-
-    @property
-    def dynamics(self):
-        """
-        :return: A generator for the dynamics (state_variable_{k+1})
-        """
-        return self._dynamics.values()
-
-    @property
-    def dynamics_dict(self):
-        return self._dynamics
-
-    @property
-    def state(self):
-        """
-        :return: A generator for all the state variables (optimized variables and possibly auxiliary variables)
-        being optimized
-        """
-        return self._dynamics.keys()  # overridden in Adam
-
-    def _state_read(self):
-        """
-        :return: generator of read value op for the state variables
-        """
-        return [v.read_value() for v in self.state]  # not sure about read_value vs value
-
-    def state_feed_dict(self, his):
-        """
-        Builds a feed dictionary of (past) states
-        """
-        return {v: his[k] for k, v in enumerate(self.state)}
-
-    def set_init_dynamics(self, init_dictionary):
-        """
-        With this function is possible to set an initializer for the dynamics. Multiple calls of this method on the
-        same variable will override the dynamics.
-
-        :param init_dictionary: a dictionary of (state_variable: tensor or variable, that represents the initial
-                                dynamics Phi_0.
-        """
-        if self._init_dyn is None:
-            self._init_dyn = OrderedDict([(v, tf.identity(v)) for v in self.state])  # do nothing
-        for k, v in init_dictionary.items():
-            assert k in self._init_dyn, 'Can set initial dynamics only for state variables in this object, got %s' % k
-            self._init_dyn[k] = v
-
-    @property
-    def init_dynamics(self):
-        """
-        :return: The initialization dynamics if it has been set, or `None` otherwise.
-        """
-        return None if self._init_dyn is None else list(self._init_dyn.items())
 
     def __lt__(self, other):  # make OptimizerDict sortable
         # TODO be sure that this is consistent
