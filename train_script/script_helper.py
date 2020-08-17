@@ -268,11 +268,10 @@ def meta_test_up_to_T(exp_dir, metasets, exs, pybml_ho, saver, sess, c_way, k_sh
     meta_test_str = str(c_way) + 'way_' + str(k_shot) + 'shot_' + str(lr) + 'lr' + str(n_test_episodes) + 'ep'
 
     n_test_batches = n_test_episodes // MBS
-    rand = dl.get_rand_state(seed)
 
-    valid_batches = BatchQueueMock(metasets.validation, n_test_batches, MBS, rand)
-    test_batches = BatchQueueMock(metasets.test, n_test_batches, MBS, rand)
-    train_batches = BatchQueueMock(metasets.train, n_test_batches, MBS, rand)
+    valid_batches = BatchQueueMock(metasets.validation, n_test_batches, MBS)
+    test_batches = BatchQueueMock(metasets.test, n_test_batches, MBS)
+    train_batches = BatchQueueMock(metasets.train, n_test_batches, MBS)
 
     print('\nMeta-testing {} (over {} eps)...'.format(meta_test_str, n_test_episodes))
 
