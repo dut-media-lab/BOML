@@ -7,15 +7,19 @@ source=
     boml/upper_iter/*
 omit= 
     boml/load_data/*
-	boml/setup_model/network_utils.py
+    boml/setup_model/network_utils.py
     train_script/*
+    
 [report]
 exclude_lines =
-    if self.debug:
     pragma: no cover
+    def __repr__
+    if self.debug:
+    if settings.DEBUG
+    raise AssertionError
     raise NotImplementedError
+    if 0:
     if __name__ == .__main__.:
+    __version__
+    if verbose
 ignore_errors = True
-omit =
-    boml/load_data/*
-	train_script/*
