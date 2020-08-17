@@ -98,7 +98,7 @@ def build_and_test(metasets, exp_dir,method, inner_method, outer_method, use_T=F
     exs, pybml_ho, saver = build(metasets, learn_lr, lr0,
                                  MBS, T, mlr0,process_fn,method, inner_method, outer_method, use_T,use_Warp, first_order)
 
-    sess = tf.Session(config=boml.utils.GPU_CONFIG())
+    sess = tf.Session(config=boml.utils.set_gpu())
 
     meta_test_up_to_T(exp_dir, metasets, exs, pybml_ho, saver, sess, args.classes, args.examples_train, lr0,
                       n_test_episodes, MBS, seed, T, iterations_to_test)
