@@ -53,6 +53,8 @@ class BOMLOptimizer(object):
             outer_method = 'Reverse'
         elif self.inner_method == 'Simple' and outer_method == 'Simple':
             outer_method = 'Simple'
+        elif self.inner_method == 'Trad' and outer_method == 'Implicit':
+            outer_method = 'Implicit'
         elif self.inner_method == 'Trad' and outer_method == 'Darts':
             outer_method = 'Darts'
         else:
