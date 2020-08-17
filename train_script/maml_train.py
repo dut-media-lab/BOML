@@ -50,7 +50,7 @@ def build(metasets, learn_lr, lr0, MBS, T, mlr0, process_fn=None, method='MetaIn
 def train_and_test(metasets, name_of_exp,method, inner_method, outer_method, use_T=False, use_Warp=False,
                    first_order=False, logdir='logs/', seed=None, lr0=0.04, learn_lr=False,
                    mlr0=0.001, mlr_decay=1.e-5,T=5, resume=True, MBS=4, n_meta_iterations=5000, process_fn=None, save_interval=5000, print_interval=5000,
-                   n_test_episodes=1000, alpha=0.0, threshold=0.0):
+                   n_test_episodes=1000, alpha=0.0):
     params = locals()
     print('params: {}'.format(params))
 
@@ -82,8 +82,7 @@ def train_and_test(metasets, name_of_exp,method, inner_method, outer_method, use
 # training and testing function
 def build_and_test(metasets, exp_dir,method, inner_method, outer_method, use_T=False,use_Warp=False, first_order=False,
                    seed=None, lr0=0.04, T=5, MBS=4,
-                   process_fn=None, n_test_episodes=600, iterations_to_test=list(range(100000)), scalor=0.0,
-                   regularization=None, alpha=0.0, threshold=0.0):
+                   process_fn=None, n_test_episodes=600, iterations_to_test=list(range(100000)),alpha=0.0):
     params = locals()
     print('params: {}'.format(params))
 
@@ -97,8 +96,7 @@ def build_and_test(metasets, exp_dir,method, inner_method, outer_method, use_T=F
     tf.set_random_seed(seed)
 
     exs, pybml_ho, saver = build(metasets, learn_lr, lr0,
-                                 MBS, T, mlr0,process_fn, scalor,
-                                 regularization,alpha,method, inner_method, outer_method, use_T,use_Warp, first_order)
+                                 MBS, T, mlr0,process_fn,alpha,method, inner_method, outer_method, use_T,use_Warp, first_order)
 
     sess = tf.Session(config=boml.utils.GPU_CONFIG())
 
