@@ -128,7 +128,7 @@ def main():
                        n_test_episodes=args.test_episodes)
 
     elif args.mode == 'test':
-        build_and_test(metasets, exp_dir=args.exp_dir,method=args.method, inner_method=args.inner_method,
+        build_and_test(metasets, exp_dir=args.expdir,method=args.method, inner_method=args.inner_method,
                        outer_method=args.outer_method, use_T=args.use_T, use_Warp=args.use_Warp,
                        first_order=args.first_order, seed=args.seed, lr0=args.lr,
                        T=args.T, MBS=args.meta_batch_size, process_fn=process_fn,
