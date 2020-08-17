@@ -1,7 +1,8 @@
 ignore:
-  - "boml/train_script/**/*"
-  - "boml/load_data"
+  - "boml/load_data/**/*"
   - "boml/utils.py"
+  - "boml/upper_iter/BOMLOuterGrad.py"
+  - "boml/setup_model/network_utils.py"
   
 coverage:
   status:
