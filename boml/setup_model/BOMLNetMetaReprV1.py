@@ -109,7 +109,7 @@ class BOMLNetMetaReprV1(BOMLNet):
                                             self.model_param_dict['conv' + str(i) + '_z'],
                                             self.model_param_dict['bias' + str(i) + '_z'])
             else:
-                self + self.conv_block(self, self.outer_param_dict['conv' + str(i)], self.outer_param_dict['bias' + str(i)])
+                self + network_utils.conv_block(self, self.outer_param_dict['conv' + str(i)], self.outer_param_dict['bias' + str(i)])
         if self.flatten:
             flattened_shape = reduce(lambda a, v: a * v, self.layers[-1].get_shape().as_list()[1:])
             self + tf.reshape(self.out, shape=(-1, flattened_shape), name='representation')
