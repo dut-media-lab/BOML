@@ -223,7 +223,7 @@ class BOMLOptimizer(object):
             elif inner_objective_optimizer == 'Adam':
                 self.io_opt = getattr(bml_optimizer, '%s%s' % ('BOMLOpt', 'Adam'))(
                     learning_rate=self._learning_rate, beta1=beta1,beta2=beta2, name=inner_objective_optimizer)
-            elif:
+            elif inner_objective_optimizer == 'Momentum':
                 self.io_opt = getattr(bml_optimizer, '%s%s' % ('BOMLOpt', 'Momentum'))(
                     learning_rate=self._learning_rate, momentum=momentum, name=inner_objective_optimizer)
             else:
