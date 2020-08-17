@@ -74,6 +74,49 @@ class BOMLInnerGradAggr(BOMLInnerGradTrad):
                 combine_grads.append((ll_part + ul_part, inner_grads[_][1]))
         return combine_grads
 
+    @property
+    def apply_updates(self):
+        """
+        Descent step, as returned by `tf.train.Optimizer.apply_gradients`.
+        :return:
+        """
+        assert self._updates_op is not None, 'descent step operation must be initialized before being called'
+        return self._updates_op
+
+    @property
+    def iteration(self):
+        """
+        Performs a descent step (as return by `tf.train.Optimizer.apply_gradients`) and computes the values of
+        the variables after it.
+
+        :return: A list of operation that, after performing one iteration, return the value of the state variables
+                    being optimized (possibly including auxiliary variables)
+        """
+        if self._iteration is None:
+            with tf.control_dependencies([self._updates_op]):  # ?
+                self._iteration = self._state_read()  # performs an iteration and returns the
+                # value of all variables in the state (ordered according to dyn)
+
+        return self._iteration
+
+    @property
+    def initialization(self):
+        """
+        :return: a list of operations that return the values of the state variables for this
+                    learning dynamics after the execution of the initialization operation. If
+                    an initial dynamics is set, then it also executed.
+        """
+        if self._initialization is None:
+            with tf.control_dependencies([tf.variables_initializer(self.state)]):
+                if self._init_dyn is not None:  # create assign operation for initialization
+                    self._initialization = [k.assign(v) for k, v in self._init_dyn.items()]
+                    # return these new initialized values (and ignore variable initializers)
+                else:
+                    self._initialization = self._state_read()  # initialize state variables and
+                    # return the initialized value
+
+        return self._initialization
+
     def __lt__(self, other):  # make OptimizerDict sortable
         # TODO be sure that this is consistent
         assert isinstance(other, BOMLInnerGradAggr)

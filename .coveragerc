@@ -3,10 +3,11 @@
 [run]
 parallel=True
 source=
-    boml/ll_problem/*
-    boml/ul_problem/*
+    boml/lower_iter/*
+    boml/upper_iter/*
 omit= 
-    boml/data_loader/*
+    boml/load_data/*
+	boml/setup_model/network_utils.py
     train_script/*
 [report]
 exclude_lines =
@@ -16,4 +17,5 @@ exclude_lines =
     if __name__ == .__main__.:
 ignore_errors = True
 omit =
-    boml/data_loader
+    boml/load_data/*
+	train_script/*
