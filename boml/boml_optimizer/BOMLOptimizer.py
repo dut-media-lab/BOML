@@ -217,14 +217,18 @@ class BOMLOptimizer(object):
             self.param_dict['learning_rate'] = self.learning_rate
         if self.io_opt is None:
             if self.inner_method == 'Simple' or inner_objective_optimizer == 'SGD':
-                self.io_opt = getattr(bml_optimizer, '%s%s' % ('BOMLOpt', 'SGD'))(
+                self.io_opt = getattr(bml_optimizer, '%s%s' % ('BOMLOpt', inner_objective_optimizer))(
                     learning_rate=self._learning_rate, name=inner_objective_optimizer)
+
             elif inner_objective_optimizer == 'Adam':
                 self.io_opt = getattr(bml_optimizer, '%s%s' % ('BOMLOpt', 'Adam'))(
                     learning_rate=self._learning_rate, beta1=beta1,beta2=beta2, name=inner_objective_optimizer)
-            else:
+            elif:
                 self.io_opt = getattr(bml_optimizer, '%s%s' % ('BOMLOpt', 'Momentum'))(
                     learning_rate=self._learning_rate, momentum=momentum, name=inner_objective_optimizer)
+            else:
+                self.io_opt = getattr(bml_optimizer, '%s%s' % ('BOMLOpt', inner_objective_optimizer))(
+                    learning_rate=self._learning_rate, name=inner_objective_optimizer)
         assert isinstance(self.io_opt, getattr(bml_optimizer, 'BOMLOpt')), 'Must use an optimizer that extends ' \
                                                                           'the class boml.optimizers' \
                                                                           'found {} instead'.format(type(self.io_opt))
