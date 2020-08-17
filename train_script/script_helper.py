@@ -76,10 +76,12 @@ parser.add_argument('-u_W', '--use_Warp', type=bool, default=False, metavar='BOO
                     help='whether use Warp layer to implement Warp-MAML')
 parser.add_argument('-fo', '--first_order', type=bool, default=False, metavar='BOOLEAN',
                     help='whether to implement FOMAML, short for First Order MAML')
-parser.add_argument('-re', '--reptile', type=bool, default=False, metavar='BOOLEAN',
-                    help='whether to implement Reptile method')
 parser.add_argument('-ds', '--darts', type=bool, default=False, metavar='BOOLEAN',
                     help='whether to implement Darts Method')
+parser.add_argument('-io', '--inner_opt', type=bool, default=False, metavar='STRING',
+                    help='the typer of inner optimizer, which should be listed in [SGD,Adam,Momentum]')
+parser.add_argument('-oo', '--outer_opt', type=bool, default=False, metavar='STRING',
+                    help='the typer of outer optimizer, which should be listed in [SGD,Adam,Momentum]')
 
 
 
@@ -98,7 +100,7 @@ parser.add_argument('-te', '--test_episodes', type=int, default=600, metavar='NU
                     help='number of episodes for testing')
 
 # Testing options (put parser.mode = 'test')
-parser.add_argument('-exd', '--exp-dir', type=str, default='../logs', metavar='STRING',
+parser.add_argument('-exd', '--expdir', type=str, default='../logs', metavar='STRING',
                     help='directory of the experiment model files')
 parser.add_argument('-itt', '--iterations_to_test', type=str, default=[100], metavar='STRING',
                     help='meta_iteration to test (model file must be in "exp_dir")')

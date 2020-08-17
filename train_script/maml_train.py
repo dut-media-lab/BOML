@@ -33,12 +33,12 @@ def build(metasets, learn_lr, lr0, MBS, T, mlr0, process_fn=None, method='MetaIn
         ex.optimizers['apply_updates'], _ = pybml.BOMLOptSGD(learning_rate=lr0).minimize(ex.errors['training'],
                                                                                          var_list=ex.model.var_list)
         optim_dict = pybml_ho.ll_problem(inner_objective=ex.errors['training'], learning_rate=lr0,
-                                         inner_objective_optimizer='SGD',
+                                         inner_objective_optimizer=args.inner_opt,
                                          T=T, experiment=ex, var_list=ex.model.var_list, learn_lr=learn_lr,
                                          first_order=first_order)
         ex.errors['validation'] = boml.utils.cross_entropy(pred=ex.model.re_forward(ex.x_).out, label=ex.y_, method=method)
         pybml_ho.ul_problem(outer_objective=ex.errors['validation'], meta_learning_rate=mlr0, inner_grad=optim_dict,
-                            outer_objective_optimizer='SGD',
+                            outer_objective_optimizer=args.outer_opt,
                             meta_param=tf.get_collection(boml.extension.GraphKeys.METAPARAMETERS))
 
     pybml_ho.aggregate_all(gradient_clip=process_fn)
@@ -128,7 +128,7 @@ def main():
                        n_test_episodes=args.test_episodes)
 
     elif args.mode == 'test':
-        build_and_test(metasets, args.exp_dir,method=args.method, inner_method=args.inner_method,
+        build_and_test(metasets, exp_dir=args.exp_dir,method=args.method, inner_method=args.inner_method,
                        outer_method=args.outer_method, use_T=args.use_T, use_Warp=args.use_Warp,
                        first_order=args.first_order, seed=args.seed, lr0=args.lr,
                        T=args.T, MBS=args.meta_batch_size, process_fn=process_fn,
