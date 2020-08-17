@@ -56,8 +56,8 @@ class BOMLNetMetaReprV1(BOMLNet):
     def create_outer_parameters(self):
 
         for i in range(len(self.dim_hidden)):
-            self.outer_param_dict['conv' + str(i)] = network_utils.get_conv_weight(layer=i, initializer=self.conv_initializer)
-            self.outer_param_dict['bias' + str(i)] = network_utils.get_bias_weight(layer=i, initializer=self.bias_initializer)
+            self.outer_param_dict['conv' + str(i)] = network_utils.get_conv_weight(self,layer=i, initializer=self.conv_initializer)
+            self.outer_param_dict['bias' + str(i)] = network_utils.get_bias_weight(self,layer=i, initializer=self.bias_initializer)
 
         # hyper parameters of transformation layer
         if self.use_T:
