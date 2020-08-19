@@ -16,21 +16,19 @@ map_dict = {'omniglot': {'data_loader': pybml.meta_omniglot, 'model': pybml.BOML
             'miniimagenet': {'data_loader': pybml.meta_mini_imagenet, 'model': pybml.BOMLNetMiniMetaInitV1}}
 
 
-def build(metasets, learn_lr, learn_alpha, learn_alpha_itr, learn_st, lr0, MBS, T, mlr0, mlr_decay,
-          alpha_decay,batch_norm_before_classifier, weights_initializer,
-          process_fn=None, scalor=0.0, regularization=None, alpha_itr=0.0, method='MetaInit',inner_method='Simple', outer_method='Simple',
+def build(metasets, learn_lr, lr0, MBS, T, mlr0, process_fn=None, method='MetaInit',inner_method='Simple', outer_method='Simple',
           use_T=False, use_Warp=False, first_order=False):
 
     exs = [dl.BMLExperiment(metasets) for _ in range(MBS)]
 
-    pybml_ho = pybml.BOMLOptimizer(method='MetaInit', inner_method=inner_method, outer_method=outer_method,experiments=exs)
+    pybml_ho = pybml.BOMLOptimizer(method=method, inner_method=inner_method, outer_method=outer_method,experiments=exs)
     meta_model = pybml_ho.meta_learner(_input=exs[0].x, dataset=metasets, meta_model='V1',
                                         name='HyperRepr', use_T=use_T,use_Warp=use_Warp)
 
     for k, ex in enumerate(exs):
         ex.model = pybml_ho.base_learner(_input=ex.x, meta_learner=meta_model,
                                          name='Task_Net_%s' % k)
-        ex.errors['training'] = boml.utils.cross_entropy(pred=ex.model.out, label=ex.y, method='MetaInit')
+        ex.errors['training'] = boml.utils.cross_entropy(pred=ex.model.out, label=ex.y, method=method)
         ex.scores['accuracy'] = tf.contrib.metrics.accuracy(tf.argmax(tf.nn.softmax(ex.model.out), 1),
                                                             tf.argmax(ex.y, 1))
         ex.optimizers['apply_updates'], _ = pybml.BOMLOptSGD(learning_rate=lr0).minimize(ex.errors['training'],
@@ -39,7 +37,7 @@ def build(metasets, learn_lr, learn_alpha, learn_alpha_itr, learn_st, lr0, MBS, 
                                          inner_objective_optimizer='SGD',
                                          T=T, experiment=ex, var_list=ex.model.var_list, learn_lr=learn_lr,
                                          first_order=first_order)
-        ex.errors['validation'] = boml.utils.cross_entropy(pred=ex.model.re_forward(ex.x_).out, label=ex.y_, method='MetaInit')
+        ex.errors['validation'] = boml.utils.cross_entropy(pred=ex.model.re_forward(ex.x_).out, label=ex.y_, method=method)
         pybml_ho.ul_problem(outer_objective=ex.errors['validation'], meta_learning_rate=mlr0, inner_grad=optim_dict,
                             outer_objective_optimizer='Adam',
                             meta_param=tf.get_collection(boml.extension.GraphKeys.METAPARAMETERS))
@@ -72,11 +70,7 @@ def train_and_test(metasets, name_of_exp,method, inner_method, outer_method, use
     print('copying {} into {}'.format(executing_file_path, exp_dir))
     copyfile(executing_file_path, os.path.join(exp_dir, executing_file_path.split('/')[-1]))
 
-    exs, pybml_ho, saver = build(metasets, learn_lr, learn_alpha, learn_alpha_itr, learn_st, lr0,
-                                 MBS, T, mlr0,
-                                 mlr_decay, alpha_decay,
-                                 batch_norm_before_classifier, weights_initializer, process_fn, scalor, regularization,
-                                 alpha,method, inner_method, outer_method, use_T, use_Warp, first_order)
+    exs, pybml_ho, saver = build(metasets, learn_lr, lr0,MBS, T, mlr0, process_fn, method, inner_method, outer_method, use_T, use_Warp, first_order)
 
     sess = tf.Session(config=boml.utils.GPU_CONFIG())
 
@@ -90,7 +84,7 @@ def train_and_test(metasets, name_of_exp,method, inner_method, outer_method, use
 # training and testing function
 def build_and_test(metasets, exp_dir,method, inner_method, outer_method, use_T=False,use_Warp=False, first_order=False,
                    seed=None, lr0=0.04, T=5, MBS=4,
-                   process_fn=None, n_test_episodes=600, iterations_to_test=list(range(100000)), alpha=0.0):
+                   process_fn=None, n_test_episodes=600, iterations_to_test=list(range(100000))):
     params = locals()
     print('params: {}'.format(params))
 
