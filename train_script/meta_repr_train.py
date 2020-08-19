@@ -71,7 +71,7 @@ def train_and_test(metasets, name_of_exp, method, inner_method, outer_method, us
                    learn_alpha=False, learn_alpha_itr=False, learn_st=False,
                    mlr0=0.001, mlr_decay=1.e-5, T=5, resume=True, MBS=4, n_meta_iterations=5000,
                    weights_initializer=tf.zeros_initializer,process_fn=None, save_interval=5000, print_interval=5000,
-                   n_test_episodes=1000, alpha=0.0, threshold=0.0):
+                   n_test_episodes=1000, alpha=0.0):
     params = locals()
     print('params: {}'.format(params))
 
@@ -105,8 +105,7 @@ def train_and_test(metasets, name_of_exp, method, inner_method, outer_method, us
 def build_and_test(metasets, exp_dir, method, inner_method, outer_method, use_T=False, truncate_iter=-1,
                    seed=None, lr0=0.04, T=5, MBS=4, learn_alpha=False, learn_alpha_itr=False,
                    weights_initializer=tf.zeros_initializer,
-                   process_fn=None, n_test_episodes=600, iterations_to_test=list(range(100000)), scalor=0.0,
-                   regularization=None, alpha=0.0, threshold=0.0,darts=False):
+                   process_fn=None, n_test_episodes=600, iterations_to_test=list(range(100000)), alpha=0.0, darts=False):
     params = locals()
     print('params: {}'.format(params))
     mlr_decay = 1.e-5
@@ -122,7 +121,7 @@ def build_and_test(metasets, exp_dir, method, inner_method, outer_method, use_T=
                                  MBS, T, mlr0, mlr_decay, weights_initializer, process_fn,
                                  alpha, method, inner_method, outer_method, use_T, truncate_iter)
 
-    sess = tf.Session(config=boml.utils.GPU_CONFIG())
+    sess = tf.Session(config=boml.utils.set_gpu())
 
     meta_test_up_to_T(exp_dir, metasets, exs, boml_ho, saver, sess, args.classes, args.examples_train, lr0,
                       n_test_episodes, MBS, seed, T, iterations_to_test)
@@ -159,12 +158,11 @@ def main():
                        alpha=args.alpha)
 
     elif args.mode == 'test':
-        build_and_test(metasets, args.exp_dir, method=args.method, inner_method=args.inner_method,
+        build_and_test(metasets, exp_dir=args.expdir, method=args.method, inner_method=args.inner_method,
                        outer_method=args.outer_method, use_T=args.use_T, truncate_iter=args.truncate_iter,
-                       seed=args.seed, lr0=args.lr,
-                       T=args.T, MBS=args.meta_batch_size, weights_initializer=weights_initializer,
+                       seed=args.seed, lr0=args.lr, T=args.T, MBS=args.meta_batch_size, weights_initializer=weights_initializer,
                        learn_alpha=args.learn_alpha, learn_alpha_itr=args.learn_alpha_itr,process_fn=process_fn,
-                       n_test_episodes=args.test_episodes, iterations_to_test=args.iterations_to_test, alpha=args.alpha)
+                       n_test_episodes=args.test_episodes, iterations_to_test=args.iterations_to_test, alpha=args.alpha,darts=args.darts)
 
 
 if __name__ == "__main__":

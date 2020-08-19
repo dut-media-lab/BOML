@@ -132,7 +132,9 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
     def apply_gradients(self, inner_objective_feed_dicts=None, outer_objective_feed_dicts=None,
                         initializer_feed_dict=None, param_dict=OrderedDict(), train_batches=None, experiments=[], global_step=None, session=None,
                         online=False, callback=None):
-
+        if self._inner_method == 'Aggr':
+            alpha = param_dict['alpha']
+            t_tensor = param_dict['t_tensor']
         callback = utils.as_tuple_or_list(callback)
         # same thing for T
         T_or_generator = utils.as_tuple_or_list(param_dict['T'])
@@ -161,6 +163,14 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
             # nonlocal t  # with nonlocal would not be necessary the variable T... not compatible with 2.7
 
             _fd = utils.maybe_call(inner_objective_feed_dicts, _adjust_step(t))
+            if self._inner_method == 'Aggr':
+                _fd.update(utils.maybe_call(outer_objective_feed_dicts, _adjust_step(t)))
+                if not alpha.get_shape().as_list():
+                    _fd[t_tensor] = float(t + 1.0)
+                else:
+                    tmp = np.zeros((alpha.get_shape().as_list()[1], 1))
+                    tmp[t][0] = 1.0
+                    _fd[t_tensor] = tmp
             self._save_history(ss.run(self.iteration, feed_dict=_fd))
             T = t
 
@@ -186,7 +196,16 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
 
             new_fd = utils.merge_dicts(state_feed_dict, utils.maybe_call(inner_objective_feed_dicts,
                                                                          _adjust_step(t)))
-
+            if self._inner_method == 'Aggr':
+                new_fd = utils.merge_dicts(new_fd, utils.maybe_call(outer_objective_feed_dicts,
+                                                                    _adjust_step(t)))
+                # modified - mark
+                if not alpha.shape.as_list():
+                    new_fd[t_tensor] = float(t + 2.0)
+                else:
+                    tmp = np.zeros((alpha.get_shape().as_list()[1], 1))
+                    tmp[t][0] = 1
+                    new_fd[t_tensor] = tmp
             new_fd = utils.merge_dicts(new_fd, utils.maybe_call(outer_objective_feed_dicts,
                                                                 _adjust_step(t)))
             ss.run(self._darts_initializer, new_fd)

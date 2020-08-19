@@ -54,7 +54,7 @@ class BOMLOptimizer(object):
             outer_method = 'Simple'
         elif self.inner_method == 'Trad' and outer_method == 'Implicit':
             outer_method = 'Implicit'
-        elif self.inner_method == 'Trad' and outer_method == 'Darts':
+        elif self.inner_method in ('Aggr', 'Trad') and outer_method == 'Darts':
             outer_method = 'Darts'
         else:
             print('Invalid combination of inner and outer methods, \
@@ -194,8 +194,7 @@ class BOMLOptimizer(object):
         :param beta2: specific parameter for Optimizer.BMLOptMomentum to set initial value of Adam
         :param regularization: whether to add regularization terms in the inner objective
         :param experiment: instance of Experiment to use in the Lower Level Problem, especifially needed in the
-         `MetaInit` type of method.
-        :param scalor: coefficient of regularization term in the objective function.
+         `MetaInit` type of methods.
         :param var_list: optional list of variables (of the inner optimization problem)from
         :param init_dynamics_dict: optional dictrionary that defines Phi_0 (see `OptimizerDict.set_init_dynamics`)
         :param inner_kargs: optional arguments to pass to `py_bml.core.optimizer.minimize`

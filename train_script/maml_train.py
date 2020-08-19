@@ -9,48 +9,53 @@ import boml.extension
 import boml as pybml
 from train_script.script_helper import *
 import numpy as np
-import inspect
+import inspect, time
 from shutil import copyfile
 
 map_dict = {'omniglot': {'data_loader': pybml.meta_omniglot, 'model': pybml.BOMLNetOmniglotMetaInitV1},
             'miniimagenet': {'data_loader': pybml.meta_mini_imagenet, 'model': pybml.BOMLNetMiniMetaInitV1}}
 
 
-def build(metasets, learn_lr, lr0, MBS, T, mlr0, process_fn=None, method='MetaInit', inner_method='Simple', outer_method='Simple',
+def build(metasets, learn_lr, learn_alpha, learn_alpha_itr, learn_st, lr0, MBS, T, mlr0, mlr_decay,
+          alpha_decay,batch_norm_before_classifier, weights_initializer,
+          process_fn=None, scalor=0.0, regularization=None, alpha_itr=0.0, method='MetaInit',inner_method='Simple', outer_method='Simple',
           use_T=False, use_Warp=False, first_order=False):
+
     exs = [dl.BMLExperiment(metasets) for _ in range(MBS)]
 
-    pybml_ho = pybml.BOMLOptimizer(method=method, inner_method=inner_method, outer_method=outer_method, experiments=exs)
+    pybml_ho = pybml.BOMLOptimizer(method='MetaInit', inner_method=inner_method, outer_method=outer_method,experiments=exs)
     meta_model = pybml_ho.meta_learner(_input=exs[0].x, dataset=metasets, meta_model='V1',
                                         name='HyperRepr', use_T=use_T,use_Warp=use_Warp)
 
     for k, ex in enumerate(exs):
         ex.model = pybml_ho.base_learner(_input=ex.x, meta_learner=meta_model,
                                          name='Task_Net_%s' % k)
-        ex.errors['training'] = boml.utils.cross_entropy(pred=ex.model.out, label=ex.y, method=method)
+        ex.errors['training'] = boml.utils.cross_entropy(pred=ex.model.out, label=ex.y, method='MetaInit')
         ex.scores['accuracy'] = tf.contrib.metrics.accuracy(tf.argmax(tf.nn.softmax(ex.model.out), 1),
                                                             tf.argmax(ex.y, 1))
         ex.optimizers['apply_updates'], _ = pybml.BOMLOptSGD(learning_rate=lr0).minimize(ex.errors['training'],
-                                                                                         var_list=ex.model.var_list)
+                                                                                        var_list=ex.model.var_list)
         optim_dict = pybml_ho.ll_problem(inner_objective=ex.errors['training'], learning_rate=lr0,
-                                         inner_objective_optimizer=args.inner_opt,
+                                         inner_objective_optimizer='SGD',
                                          T=T, experiment=ex, var_list=ex.model.var_list, learn_lr=learn_lr,
                                          first_order=first_order)
-        ex.errors['validation'] = boml.utils.cross_entropy(pred=ex.model.re_forward(ex.x_).out, label=ex.y_, method=method)
+        ex.errors['validation'] = boml.utils.cross_entropy(pred=ex.model.re_forward(ex.x_).out, label=ex.y_, method='MetaInit')
         pybml_ho.ul_problem(outer_objective=ex.errors['validation'], meta_learning_rate=mlr0, inner_grad=optim_dict,
-                            outer_objective_optimizer=args.outer_opt,
+                            outer_objective_optimizer='Adam',
                             meta_param=tf.get_collection(boml.extension.GraphKeys.METAPARAMETERS))
 
     pybml_ho.aggregate_all(gradient_clip=process_fn)
     saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES), max_to_keep=10)
     return exs, pybml_ho, saver
 
-
 # training and testing function
 def train_and_test(metasets, name_of_exp,method, inner_method, outer_method, use_T=False, use_Warp=False,
-                   first_order=False, logdir='logs/', seed=None, lr0=0.04, learn_lr=False,
-                   mlr0=0.001, mlr_decay=1.e-5,T=5, resume=True, MBS=4, n_meta_iterations=5000, process_fn=None, save_interval=5000, print_interval=5000,
-                   n_test_episodes=1000, alpha=0.0):
+                   first_order=False, reptile=False, logdir='logs/', seed=None, lr0=0.04, learn_lr=False,
+                   learn_alpha=False, learn_alpha_itr=False, learn_st=False,
+                   mlr0=0.001, mlr_decay=1.e-5, alpha_decay=1.e-5, T=5, resume=True, MBS=4, n_meta_iterations=5000,
+                   weights_initializer=tf.zeros_initializer,
+                   batch_norm_before_classifier=False, process_fn=None, save_interval=5000, print_interval=5000,
+                   n_test_episodes=1000, scalor=0.0, regularization=None, alpha=0.0, threshold=0.0):
     params = locals()
     print('params: {}'.format(params))
 
@@ -67,10 +72,13 @@ def train_and_test(metasets, name_of_exp,method, inner_method, outer_method, use
     print('copying {} into {}'.format(executing_file_path, exp_dir))
     copyfile(executing_file_path, os.path.join(exp_dir, executing_file_path.split('/')[-1]))
 
-    exs, pybml_ho, saver = build(metasets, learn_lr, lr0,
-                                 MBS, T, mlr0, process_fn,method, inner_method, outer_method, use_T, use_Warp, first_order)
+    exs, pybml_ho, saver = build(metasets, learn_lr, learn_alpha, learn_alpha_itr, learn_st, lr0,
+                                 MBS, T, mlr0,
+                                 mlr_decay, alpha_decay,
+                                 batch_norm_before_classifier, weights_initializer, process_fn, scalor, regularization,
+                                 alpha,method, inner_method, outer_method, use_T, use_Warp, first_order)
 
-    sess = tf.Session(config=boml.utils.set_gpu())
+    sess = tf.Session(config=boml.utils.GPU_CONFIG())
 
     meta_train(exp_dir, metasets, exs, pybml_ho, saver, sess, n_test_episodes, MBS, seed, resume, T,
                n_meta_iterations, print_interval, save_interval)
@@ -133,7 +141,6 @@ def main():
                        first_order=args.first_order, seed=args.seed, lr0=args.lr,
                        T=args.T, MBS=args.meta_batch_size, process_fn=process_fn,
                        n_test_episodes=args.test_episodes, iterations_to_test=args.iterations_to_test)
-
 
 if __name__ == "__main__":
     main()

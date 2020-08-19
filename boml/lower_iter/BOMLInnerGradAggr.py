@@ -18,7 +18,7 @@ class BOMLInnerGradAggr(BOMLInnerGradTrad):
                           set(inner_kargs.keys()) - set(param_dict.keys())}
 
         assert loss_inner is not None, 'argument:inner_objective must be initialized'
-        assert {'alpha', 's', 'scalor', 't', 't_tensor'} <= param_dict.keys(), \
+        assert {'alpha', 's', 't', 't_tensor'} <= param_dict.keys(), \
             'Necessary hyper_parameters must be initialized before calling minimize()'
         # alpha, loss_outer, s, scalor, t, t_tensor = sorted(param_dict.items(), key=lambda x: x[0])
         update_op, dynamics = BOMLInnerGradAggr.bml_inner_grad_aggr(inner_optimizer=bml_opt, loss_inner=loss_inner,
@@ -62,7 +62,7 @@ class BOMLInnerGradAggr(BOMLInnerGradTrad):
     def combine_grads(inner_grads, outer_grads, alpha, s, t, t_tensor):
 
         combine_grads = []
-        if len(alpha.get_shape().as_list()) == 0:
+        if not alpha.get_shape().as_list():
             for _ in range(len(inner_grads)):
                 ll_part = (1 - alpha / t_tensor) * t * inner_grads[_][0]
                 ul_part = alpha / t_tensor * s * outer_grads[_][0]

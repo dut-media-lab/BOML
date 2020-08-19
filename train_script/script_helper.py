@@ -1,13 +1,14 @@
 import argparse
+import pickle
+from threading import Thread
 import os
-import time
 
-import numpy as np
 import tensorflow as tf
-
+import numpy as np
+import time
 import boml
 import boml.load_data as dl
-from boml.utils import feed_dicts, BatchQueueMock, save_obj, load_obj
+from boml.utils import feed_dicts
 
 DATASETS_FOLDER = '../omniglot_resized'
 
@@ -17,7 +18,7 @@ parser.add_argument('-m', '--mode', type=str, default="train", metavar='STRING',
                     help='mode, can be train or test')
 
 # Dataset/method options
-parser.add_argument('-d', '--dataset', type=str, default='omniglot', metavar='STRING',
+parser.add_argument('-d', '--dataset', type=str, default='miniimagenet', metavar='STRING',
                     help='omniglot or miniimagenet.')
 parser.add_argument('-nc', '--classes', type=int, default=5, metavar='NUMBER',
                     help='number of classes used in classification (c for  c-way classification).')
@@ -31,22 +32,22 @@ parser.add_argument('-s', '--seed', type=int, default=0, metavar='NUMBER',
                     help='seed for random number generators')
 parser.add_argument('-mbs', '--meta_batch_size', type=int, default=2, metavar='NUMBER',
                     help='number of tasks sampled per meta-update')
-parser.add_argument('-nmi', '--n_meta_iterations', type=int, default=500, metavar='NUMBER',
+parser.add_argument('-nmi', '--n_meta_iterations', type=int, default=50000, metavar='NUMBER',
                     help='number of metatraining iterations.')
 parser.add_argument('-T', '--T', type=int, default=5, metavar='NUMBER',
                     help='number of inner updates during training.')
 parser.add_argument('-xi', '--xavier', type=bool, default=False, metavar='BOOLEAN',
                     help='FFNN weights initializer')
-parser.add_argument('-bn', '--batch-norm', type=bool, default=True, metavar='BOOLEAN',
+parser.add_argument('-bn', '--batch-norm', type=bool, default=False, metavar='BOOLEAN',
                     help='Use batch normalization before classifier')
-parser.add_argument('-mlr', '--meta-lr', type=float, default=1.e-3, metavar='NUMBER',
+parser.add_argument('-mlr', '--meta-lr', type=float, default=0.3, metavar='NUMBER',
                     help='starting meta learning rate')
 parser.add_argument('-mlrdr', '--meta-lr-decay-rate', type=float, default=1.e-5, metavar='NUMBER',
                     help='meta lr  inverse time decay rate')
 
 parser.add_argument('-cv', '--clip-value', type=float, default=0., metavar='NUMBER',
                     help='meta gradient clip value (0. for no clipping)')
-parser.add_argument('-lr', '--lr', type=float, default=0.1, metavar='NUMBER',
+parser.add_argument('-lr', '--lr', type=float, default=0.4, metavar='NUMBER',
                     help='starting learning rate')
 
 parser.add_argument('-tr_ir', '--truncate_iter', type=int, default=-1, metavar='NUMBER',
@@ -61,14 +62,17 @@ parser.add_argument('-lralpha', '--learn_alpha', type=bool, default=False, metav
                     help='True if alpha is an hyperparameter')
 parser.add_argument('-learn_alpha_itr', '--learn_alpha_itr', type=bool, default=False, metavar='BOOLEAN',
                     help='learn alpha iteration wise')
-
+parser.add_argument('-scalor', '--scalor', type=float, default=0.0, metavar='NUMBER',
+                    help='scalor for controlling the regularization coefficient')
+parser.add_argument('-regularization', '--regularization', type=str, default=None, metavar='STRING',
+                    help='L1 or L2 or no regularization measure to apply')
 parser.add_argument('-alpha', '--alpha', type=float, default=0.0, metavar='NUMBER',
                     help='factor for controlling the ratio of gradients')
-parser.add_argument('-md', '--method', type=str, default='MetaInit', metavar='STRING',
+parser.add_argument('-md', '--method', type=str, default='Simple', metavar='STRING',
                     help='choose which method to use,[Trad, Aggr,Simple]')
-parser.add_argument('-i_d', '--inner_method', type=str, default='Simple', metavar='STRING',
+parser.add_argument('-i_d', '--inner_method', type=str, default='Trad', metavar='STRING',
                     help='choose which method to use,[Trad, Aggr,Simple]')
-parser.add_argument('-o_d', '--outer_method', type=str, default='Simple', metavar='STRING',
+parser.add_argument('-o_d', '--outer_method', type=str, default='Reverse', metavar='STRING',
                     help='choose which method to use,[Reverse,Implicit,Forward,Simple]')
 parser.add_argument('-u_T', '--use_T', type=bool, default=False, metavar='BOOLEAN',
                     help='whether use T-Net')
@@ -76,6 +80,8 @@ parser.add_argument('-u_W', '--use_Warp', type=bool, default=False, metavar='BOO
                     help='whether use Warp layer to implement Warp-MAML')
 parser.add_argument('-fo', '--first_order', type=bool, default=False, metavar='BOOLEAN',
                     help='whether to implement FOMAML, short for First Order MAML')
+parser.add_argument('-re', '--reptile', type=bool, default=False, metavar='BOOLEAN',
+                    help='whether to implement Reptile method')
 parser.add_argument('-ds', '--darts', type=bool, default=False, metavar='BOOLEAN',
                     help='whether to implement Darts Method')
 parser.add_argument('-io', '--inner_opt', type=str, default='SGD', metavar='STRING',
@@ -92,17 +98,18 @@ parser.add_argument('-ld', '--logdir', type=str, default='logs/', metavar='STRIN
                     help='directory for summaries and checkpoints.')
 parser.add_argument('-res', '--resume', type=bool, default=True, metavar='BOOLEAN',
                     help='resume training if there is a model available')
-parser.add_argument('-pi', '--print-interval', type=int, default=100, metavar='NUMBER',
+parser.add_argument('-pi', '--print-interval', type=int, default=1, metavar='NUMBER',
                     help='number of meta-train iterations before print')
-parser.add_argument('-si', '--save_interval', type=int, default=100, metavar='NUMBER',
+parser.add_argument('-si', '--save_interval', type=int, default=1, metavar='NUMBER',
                     help='number of meta-train iterations before save')
 parser.add_argument('-te', '--test_episodes', type=int, default=600, metavar='NUMBER',
                     help='number of episodes for testing')
 
+
 # Testing options (put parser.mode = 'test')
-parser.add_argument('-exd', '--expdir', type=str, default='../logs', metavar='STRING',
+parser.add_argument('-exd', '--exp-dir', type=str, default=None, metavar='STRING',
                     help='directory of the experiment model files')
-parser.add_argument('-itt', '--iterations_to_test', type=str, default=[100], metavar='STRING',
+parser.add_argument('-itt', '--iterations_to_test', type=str, default=[40000], metavar='STRING',
                     help='meta_iteration to test (model file must be in "exp_dir")')
 parser.add_argument('-Notes', '--Notes', type=str, default='Notes',
                     help='Something important')
@@ -111,7 +118,6 @@ args = parser.parse_args()
 exp_string = str(args.classes) + 'way_' + str(args.examples_train) + 'shot_' + str(args.meta_batch_size) + \
              'mbs' + str(args.T) + 'T' + str(args.clip_value) + 'clip' + str(args.alpha) + 'alpha' + str(args.inner_method) +\
              'inner_method' + str(args.outer_method) + 'outer_method'+str(args.meta_lr) + 'meta_lr' + str(args.lr) + 'lr' + str(args.Notes) + 'Notes'
-
 
 def meta_train(exp_dir, metasets, exs, pybml_ho, saver, sess, n_test_episodes, MBS, seed, resume, T,
                n_meta_iterations, print_interval, save_interval):
@@ -140,9 +146,9 @@ def meta_train(exp_dir, metasets, exs, pybml_ho, saver, sess, n_test_episodes, M
             saver.restore(sess, model_file)
 
     ''' Meta-Train '''
-    train_batches = BatchQueueMock(metasets.train, 1, MBS)
-    valid_batches = BatchQueueMock(metasets.validation, n_test_batches, MBS)
-    test_batches = BatchQueueMock(metasets.test, n_test_batches, MBS)
+    train_batches = BatchQueueMock(metasets.train, 1, MBS, rand)
+    valid_batches = BatchQueueMock(metasets.validation, n_test_batches, MBS, rand)
+    test_batches = BatchQueueMock(metasets.test, n_test_batches, MBS, rand)
 
     start_time = time.time()
     print('\nIteration quantities: train_train acc, train_test acc, valid_test, acc'
@@ -152,14 +158,16 @@ def meta_train(exp_dir, metasets, exs, pybml_ho, saver, sess, n_test_episodes, M
         for meta_it in range(resume_itr, n_meta_iterations):
             tr_fd, v_fd = feed_dicts(train_batches.get_all_batches()[0], exs)
             pybml_ho.run(tr_fd, v_fd)
+
+            duration = time.time() - start_time
+
+            results['time'].append(duration)
             outer_losses = []
             for _, ex in enumerate(exs):
                 outer_losses.append(sess.run(ex.errors['validation'], boml.utils.merge_dicts(tr_fd, v_fd)))
             outer_losses_moments = (np.mean(outer_losses), np.std(outer_losses))
             results['outer_losses']['mean'].append(outer_losses_moments[0])
             results['outer_losses']['std'].append(outer_losses_moments[1])
-            duration = time.time() - start_time
-            results['time'].append(duration)
 
             if meta_it % print_interval == 0 or meta_it == n_meta_iterations - 1:
                 results['iterations'].append(meta_it)
@@ -197,11 +205,16 @@ def meta_train(exp_dir, metasets, exs, pybml_ho, saver, sess, n_test_episodes, M
 
                 print('mean outer losses: {}'.format(outer_losses_moments[0]))
 
+
+
                 print(
                     'it %d, ep %d (%.5fs): %.5f, %.5f, %.5f, %.5f' % (meta_it, meta_it * MBS, duration, train_train[0],
                                                                       train_test[0], valid_test[0], test_test[0]))
+
                 lr = sess.run(["lr:0"])[0]
                 print('lr: {}'.format(lr))
+
+                # do_plot(logdir, results)
 
             if meta_it % save_interval == 0 or meta_it == n_meta_iterations - 1:
                 saver.save(sess, exp_dir + '/model' + str(meta_it))
@@ -218,9 +231,10 @@ def meta_test(exp_dir, metasets, exs, pybml_ho, saver, sess, c_way, k_shot, lr, 
                     + str(T) + 'T' + str(lr) + 'lr' + str(n_test_episodes) + 'ep'
 
     n_test_batches = n_test_episodes // MBS
+    rand = dl.get_rand_state(seed)
 
-    valid_batches = BatchQueueMock(metasets.validation, n_test_batches, MBS)
-    test_batches = BatchQueueMock(metasets.test, n_test_batches, MBS)
+    valid_batches = BatchQueueMock(metasets.validation, n_test_batches, MBS, rand)
+    test_batches = BatchQueueMock(metasets.test, n_test_batches, MBS, rand)
 
     print('\nMeta-testing {} (over {} eps)...'.format(meta_test_str, n_test_episodes))
 
@@ -270,10 +284,11 @@ def meta_test_up_to_T(exp_dir, metasets, exs, pybml_ho, saver, sess, c_way, k_sh
     meta_test_str = str(c_way) + 'way_' + str(k_shot) + 'shot_' + str(lr) + 'lr' + str(n_test_episodes) + 'ep'
 
     n_test_batches = n_test_episodes // MBS
+    rand = dl.get_rand_state(seed)
 
-    valid_batches = BatchQueueMock(metasets.validation, n_test_batches, MBS)
-    test_batches = BatchQueueMock(metasets.test, n_test_batches, MBS)
-    train_batches = BatchQueueMock(metasets.train, n_test_batches, MBS)
+    valid_batches = BatchQueueMock(metasets.validation, n_test_batches, MBS, rand)
+    test_batches = BatchQueueMock(metasets.test, n_test_batches, MBS, rand)
+    train_batches = BatchQueueMock(metasets.train, n_test_batches, MBS, rand)
 
     print('\nMeta-testing {} (over {} eps)...'.format(meta_test_str, n_test_episodes))
 
@@ -332,6 +347,41 @@ def meta_test_up_to_T(exp_dir, metasets, exs, pybml_ho, saver, sess, c_way, k_sh
     return test_results
 
 
+def batch_producer(metadataset, batch_queue, n_batches, batch_size, rand=0):
+    while True:
+        batch_queue.put([d for d in metadataset.generate(n_batches, batch_size, rand)])
+
+
+def start_batch_makers(number_of_workers, metadataset, batch_queue, n_batches, batch_size, rand=0):
+    for w in range(number_of_workers):
+        worker = Thread(target=batch_producer, args=(metadataset, batch_queue, n_batches, batch_size, rand))
+        worker.setDaemon(True)
+        worker.start()
+
+
+# Class for debugging purposes for multi-thread issues (used now because it resolves rand issues)
+class BatchQueueMock:
+    def __init__(self, metadataset, n_batches, batch_size, rand):
+        self.metadataset = metadataset
+        self.n_batches = n_batches
+        self.batch_size = batch_size
+        self.rand = rand
+
+    def get_all_batches(self):
+        return [d for d in self.metadataset.generate(self.n_batches, self.batch_size, self.rand)]
+
+
+def save_obj(file_path, obj):
+    with open(file_path, 'wb') as handle:
+        pickle.dump(obj, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def load_obj(file_path):
+    with open(file_path, 'rb') as handle:
+        b = pickle.load(handle)
+    return b
+
+
 ''' Useful Functions '''
 
 
@@ -380,18 +430,8 @@ def accuracy_on_up_to_T(batch_queue, exs, pybml_ho, sess, T):
 
     return tr_acc, v_acc
 
-class BatchQueueMock:
-    def __init__(self, metadataset, n_batches, batch_size):
-        self.metadataset = metadataset
-        self.n_batches = n_batches
-        self.batch_size = batch_size
-        self.rand = get_rand_state()
 
-    def get_all_batches(self):
-        return [d for d in self.metadataset.generate(self.n_batches, self.batch_size, self.rand)]
-
-
-def get_rand_state(rand=None):
+def get_rand_state(rand):
     """
     Utility methods for getting a `RandomState` object.
 
@@ -408,9 +448,3 @@ def get_rand_state(rand=None):
         raise ValueError('parameter rand {} has wrong type'.format(rand))
 
 
-def get_train_batch(dataset):
-    return BatchQueueMock(dataset.train, 1, 1, get_rand_state())
-
-
-def get_single_train_batch(train_batch, ex):
-    return feed_dicts(train_batch.get()[0], ex)

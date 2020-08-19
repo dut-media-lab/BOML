@@ -158,7 +158,7 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
             _fd = utils.maybe_call(inner_objective_feed_dicts, _adjust_step(t))
             if self._inner_method == 'Aggr':
                 _fd.update(utils.maybe_call(outer_objective_feed_dicts, _adjust_step(t)))
-                if alpha.get_shape().as_list() :
+                if not alpha.get_shape().as_list():
                     _fd[t_tensor] = float(t + 1.0)
                 else:
                     tmp = np.zeros((alpha.get_shape().as_list()[1], 1))
