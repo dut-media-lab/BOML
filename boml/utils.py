@@ -1,13 +1,11 @@
 from __future__ import absolute_import, print_function, division
 
-import pickle
-import random
 import sys
 
 import numpy as np
 import tensorflow as tf
 import tensorflow.contrib.layers as tcl
-
+import random
 # noinspection PyClassHasNoInit
 import boml
 
@@ -16,23 +14,22 @@ Bilevel_Optim_Method = ['Reverse', 'Truncated', 'Forward', 'Reverse', 'Implicit'
 METHOD_COLLECTIONS = [Hyper_Optim_Method, Bilevel_Optim_Method]
 
 
-def remove_from_collection(key, *var_list):
+def remove_from_collection(key, *lst):
     """
     Remove tensors in lst from collection given by key
     """
     try:
         # noinspection PyProtectedMember
-        [tf.get_default_graph()._collections[key].remove(_e) for _e in var_list]
+        [tf.get_default_graph()._collections[key].remove(_e) for _e in lst]
     except ValueError:
-        print('WARNING: Collection -> {} <- does not contain some tensor in {}'.format(key, var_list),
+        print('WARNING: Collection -> {} <- does not contain some tensor in {}'.format(key, lst),
               file=sys.stderr)
 
 
-def set_gpu():
-
-    gpu_config = tf.ConfigProto(allow_soft_placement=True)
-    gpu_config.gpu_options.allow_growth = True
-    return gpu_config
+def GPU_CONFIG():
+    CONFIG_GPU_GROWTH = tf.ConfigProto(allow_soft_placement=True)
+    CONFIG_GPU_GROWTH.gpu_options.allow_growth = True
+    return CONFIG_GPU_GROWTH
 
 
 def as_tuple_or_list(obj):
@@ -157,6 +154,13 @@ def classification_acc(pred, label):
     tf.contrib.metrics.accuracy(tf.argmax(tf.nn.softmax(pred), 1), tf.argmax(label, 1))
 
 
+def set_gpu():
+    # set general configuration
+    gpu_config = tf.ConfigProto(allow_soft_placement=True)
+    gpu_config.gpu_options.allow_growth = True
+    return gpu_config
+
+
 def get_regularization(parameter=[], regularization=None, scalor=0.0):
     if regularization == 'L1':
         regularizer = tcl.l2_regularizer(scalor)
@@ -221,18 +225,6 @@ def feed_dicts(dat_lst, exs):
     return train_fd, valid_fd
 
 
-# Class for debugging purposes for multi-thread issues (used now because it resolves rand issues)
-class BatchQueueMock:
-    def __init__(self, metadataset, n_batches, batch_size, rand):
-        self.metadataset = metadataset
-        self.n_batches = n_batches
-        self.batch_size = batch_size
-        self.rand = rand
-
-    def get_all_batches(self):
-        return [d for d in self.metadataset.generate(self.n_batches, self.batch_size, self.rand)]
-
-
 def to_one_hot_enc(seq, dimension=None):
     da_max = dimension or int(np.max(seq)) + 1
     _tmp = np.zeros((len(seq), da_max))
@@ -252,34 +244,6 @@ def sample_mini_dataset(dataset, num_classes, num_shots):
     for class_idx, class_obj in enumerate(shuffled[:num_classes]):
         for sample in class_obj.sample(num_shots):
             yield (sample, class_idx)
-
-
-def split_train_test(samples, test_shots=1):
-    """
-    Split a few-shot task into a train and a test set.
-
-    Args:
-      samples: an iterable of (input, label) pairs.
-      test_shots: the number of examples per class in the
-        test set.
-
-    Returns:
-      A tuple (train, test), where train and test are
-        sequences of (input, label) pairs.
-    """
-    train_set = list(samples)
-    test_set = []
-    labels = set(item[1] for item in train_set)
-    for _ in range(test_shots):
-        for label in labels:
-            for i, item in enumerate(train_set):
-                if item[1] == label:
-                    del train_set[i]
-                    test_set.append(item)
-                    break
-    if len(test_set) < len(labels) * test_shots:
-        raise IndexError('not enough examples of each class for test set')
-    return train_set, test_set
 
 
 def mini_batches(samples, batch_size, num_batches, replacement):
@@ -324,24 +288,3 @@ def feed_train_dicts(mini_batches, exs,num_classes):
         train_fd = merge_dicts(_fd, train_fd)
 
     return train_fd
-
-
-def feed_test_dicts(mini_batch, exs, num_classes):
-    test_fd = {}
-    input_ph, label_ph = zip(*mini_batch)
-    label_ph = to_one_hot_enc(label_ph, dimension=num_classes)
-    for ex in exs:
-        _fd = {ex.x: input_ph, ex.y: label_ph}
-        test_fd = merge_dicts(_fd, test_fd)
-
-    return test_fd
-
-def save_obj(file_path, obj):
-    with open(file_path, 'wb') as handle:
-        pickle.dump(obj, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-
-def load_obj(file_path):
-    with open(file_path, 'rb') as handle:
-        b = pickle.load(handle)
-    return b

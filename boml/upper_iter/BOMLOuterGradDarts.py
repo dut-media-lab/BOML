@@ -5,7 +5,7 @@ from collections import OrderedDict, deque
 # import py_bml.OuterOpt.outer_opt_utils as utils
 import tensorflow as tf
 from tensorflow.python.training import slot_creator
-
+import numpy as np
 import boml.extension
 from boml import utils
 from boml.upper_iter.BOMLOuterGrad import BOMLOuterGrad
@@ -15,7 +15,7 @@ RAISE_ERROR_ON_DETACHED = False
 
 class BOMLOuterGradDarts(BOMLOuterGrad):
 
-    def __init__(self, inner_method='Darts', truncate_iter=-1, name='BMLOuterGradDarts'):
+    def __init__(self, inner_method='Trad', truncate_iter=-1, name='BMLOuterGradDarts'):
         """
        Utility method to initialize truncated reverse HG (not necessarily online),
        :param truncate_iter: Maximum number of iterations that will be stored
@@ -132,6 +132,7 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
     def apply_gradients(self, inner_objective_feed_dicts=None, outer_objective_feed_dicts=None,
                         initializer_feed_dict=None, param_dict=OrderedDict(), train_batches=None, experiments=[], global_step=None, session=None,
                         online=False, callback=None):
+
         callback = utils.as_tuple_or_list(callback)
         # same thing for T
         T_or_generator = utils.as_tuple_or_list(param_dict['T'])
@@ -160,7 +161,6 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
             # nonlocal t  # with nonlocal would not be necessary the variable T... not compatible with 2.7
 
             _fd = utils.maybe_call(inner_objective_feed_dicts, _adjust_step(t))
-
             self._save_history(ss.run(self.iteration, feed_dict=_fd))
             T = t
 

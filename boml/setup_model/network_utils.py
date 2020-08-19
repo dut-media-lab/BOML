@@ -39,7 +39,7 @@ def conv_block_t(bomlnet, conv_weight, conv_bias, zweight):
 
     if bomlnet.batch_norm is not None:
         batch_out = layers.batch_norm(conv_output, activation_fn=bomlnet.activation,
-                                      variables_collections=bomlnet.var_collections,)
+                                      variables_collections=bomlnet.var_collections)
     else:
         batch_out = bomlnet.activation(conv_output)
     if bomlnet.max_pool:

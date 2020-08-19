@@ -202,7 +202,7 @@ def meta_omniglot(folder=OMNIGLOT_RESIZED, std_num_classes=None, examples_train=
     :return: a Datasets of MetaDataset s
     """
     assert examples_train > 0, 'Wrong initialization for number of examples used for training'
-    if examples_test > 0:
+    if examples_test >0:
         std_num_examples = (examples_train * std_num_classes, examples_test * std_num_classes)
     else:
         std_num_examples = (examples_train * std_num_classes)

@@ -2,7 +2,6 @@ import sys
 
 import numpy as np
 import tensorflow as tf
-
 from boml import utils
 
 Hyper_Optim_Method = ['MAML', 'FOMAML', 'MSGD', 'MTNet']
@@ -120,7 +119,7 @@ def get_outerparameter(name, initializer=None, shape=None, dtype=None, collectio
         return tf.convert_to_tensor(_tmp_lst.tolist(), name=name)
 
 
-def metaparameters(scope=None):
+def hyperparameters(scope=None):
     """
     List of variables in the collection HYPERPARAMETERS.
 
@@ -129,4 +128,4 @@ def metaparameters(scope=None):
     :param scope: (str) an optional scope.
     :return: A list of tensors (usually variables)
     """
-    return tf.get_collection(GraphKeys.METAPARAMETERS, scope=scope)
+    return tf.get_collection(GraphKeys.HYPERPARAMETERS, scope=scope)

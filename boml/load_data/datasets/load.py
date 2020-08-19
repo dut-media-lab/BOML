@@ -187,7 +187,7 @@ def meta_omniglot(folder=OMNIGLOT_RESIZED, std_num_classes=None, examples_train=
     Loading function for Omniglot dataset in learning-to-learn version. Use image data as obtained from
     https://github.com/cbfinn/maml/blob/master/data/omniglot_resized/resize_images.py
 
-    :param folder: root folder name. Use os module to modify the path to the datasets
+    :param folder: root folder name.
     :param std_num_classes: standard number of classes for N-way classification
     :param examples_train:standard number of examples to be picked in each generated per classes for training
     (eg .1 shot, examples_train=1)
@@ -232,7 +232,7 @@ def meta_omniglot_v2(folder=OMNIGLOT_RESIZED, std_num_classes=None, examples_tra
     Loading function for Omniglot dataset in learning-to-learn version. Use image data as obtained from
     https://github.com/cbfinn/maml/blob/master/data/omniglot_resized/resize_images.py
 
-    :param folder: root folder name. Use os module to modify the path to the datasets
+    :param folder: root folder name.
     :param std_num_classes: standard number of classes for N-way classification
     :param examples_train:standard number of examples to be picked in each generated per classes for training
     (eg .1 shot, examples_train=1)
