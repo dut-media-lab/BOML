@@ -1,9 +1,3 @@
-ignore:
-  - "boml/load_data/**/*"
-  - "boml/utils.py"
-  - "boml/upper_iter/BOMLOuterGrad.py"
-  - "boml/setup_model/network_utils.py"
-  
 coverage:
   status:
     project:
@@ -34,3 +28,11 @@ coverage:
         only_pulls: false
         flags: null
         paths: null
+        
+ignore:
+  - "boml/load_data/**/*"
+  - "boml/upper_iter/BOMLOuterGrad.py"
+  - "boml/setup_model/network_utils.py"
+  - "boml/utils.py"
+  - "boml/extension.py"
+  
