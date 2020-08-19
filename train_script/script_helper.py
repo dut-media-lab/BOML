@@ -107,7 +107,7 @@ parser.add_argument('-te', '--test_episodes', type=int, default=600, metavar='NU
 
 
 # Testing options (put parser.mode = 'test')
-parser.add_argument('-exd', '--exp-dir', type=str, default=None, metavar='STRING',
+parser.add_argument('-exd', '--expdir', type=str, default=None, metavar='STRING',
                     help='directory of the experiment model files')
 parser.add_argument('-itt', '--iterations_to_test', type=str, default=[40000], metavar='STRING',
                     help='meta_iteration to test (model file must be in "exp_dir")')
