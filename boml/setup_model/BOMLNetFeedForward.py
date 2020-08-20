@@ -2,7 +2,7 @@ from collections import OrderedDict
 
 import tensorflow as tf
 
-from boml import BOMLNet
+from boml.setup_model.BOMLNet import BOMLNet
 from boml.extension import GraphKeys
 from boml.utils import as_tuple_or_list, remove_from_collection
 

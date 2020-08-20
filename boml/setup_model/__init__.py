@@ -1,5 +1,5 @@
 try:
-    from boml.setup_model.BOMLNet import BOMLNet
+    from boml.setup_model import BOMLNet
     from boml.setup_model.BOMLNetFeedForward import BOMLNetFeedForward
     from boml.setup_model.BOMLNetMetaInitV1 import BOMLNetMetaInitV1, BOMLNetMiniMetaInitV1, BOMLNetOmniglotMetaInitV1
     from boml.setup_model.BOMLNetMetaInitV2 import BOMLNetMiniMetaInitV2, BOMLNetOmniglotMetaInitV2
