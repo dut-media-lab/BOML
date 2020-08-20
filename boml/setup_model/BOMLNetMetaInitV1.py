@@ -129,8 +129,7 @@ class BOMLNetMetaInitV1(BOMLNet):
                                   task_parameter=self.task_parameter if len(task_parameter.keys()) == 0 else task_parameter
                                   , use_T=self.use_T, use_Warp=self.use_Warp,outer_method=self.outer_method,
                                   var_collections=self.var_collections, dim_hidden=self.dim_hidden,
-                                  output_weight_initializer=self.output_weight_initializer, max_pool=self.max_pool,
-                                  deterministic_initialization=self.deterministic_initialization, reuse=True)
+                                  output_weight_initializer=self.output_weight_initializer, max_pool=self.max_pool, reuse=True)
 
 
 def BOMLNetOmniglotMetaInitV1(_input, dim_output, outer_param_dict=OrderedDict(), model_param_dict=OrderedDict(),
