@@ -16,8 +16,7 @@ class BOMLNetMetaInitV1(BOMLNet):
                  task_parameter=None,use_T=False, use_Warp=False,outer_method='Simple',activation=tf.nn.relu, var_collections=tf.GraphKeys.MODEL_VARIABLES,
                  conv_initializer=tf.contrib.layers.xavier_initializer_conv2d(tf.float32),
                  output_weight_initializer=tf.contrib.layers.xavier_initializer(tf.float32), norm=layers.batch_norm,
-                 data_type=tf.float32, channels=1, dim_hidden=[64, 64, 64, 64], kernel=3, max_pool=False,
-                 deterministic_initialization=False, reuse=False):
+                 data_type=tf.float32, channels=1, dim_hidden=[64, 64, 64, 64], kernel=3, max_pool=False, reuse=False):
         self.kernel = kernel
         self.channels = channels
         self.dims = as_tuple_or_list(dim_output)
@@ -36,8 +35,8 @@ class BOMLNetMetaInitV1(BOMLNet):
         self.use_Warp = use_Warp
 
         super().__init__(_input=_input, outer_param_dict=outer_param_dict,
-                         var_collections=var_collections, name=name, model_param_dict=model_param_dict,
-                         deterministic_initialization=deterministic_initialization,task_parameter=task_parameter, reuse=reuse)
+                         var_collections=var_collections, name=name, model_param_dict=model_param_dict
+                         ,task_parameter=task_parameter, reuse=reuse)
 
         # variables from batch normalization
         self.betas = self.filter_vars('beta')

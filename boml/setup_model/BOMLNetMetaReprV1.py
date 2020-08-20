@@ -17,8 +17,7 @@ class BOMLNetMetaReprV1(BOMLNet):
                  activation=tf.nn.relu, var_collections=extension.METAPARAMETERS_COLLECTIONS,
                  conv_initializer=tf.contrib.layers.xavier_initializer_conv2d(tf.float32),
                  output_weight_initializer=tf.contrib.layers.xavier_initializer(tf.float32), norm=layers.batch_norm,
-                 data_type=tf.float32, channels=1, dim_hidden=[64, 64, 64, 64], kernel=3,max_pool=False,
-                 deterministic_initialization=False, reuse=False):
+                 data_type=tf.float32, channels=1, dim_hidden=[64, 64, 64, 64], kernel=3,max_pool=False, reuse=False):
 
         self.kernel = kernel
         self.channels = channels
@@ -38,8 +37,8 @@ class BOMLNetMetaReprV1(BOMLNet):
         self.flatten = False if self.outer_method == 'Implicit' else True
 
         super(BOMLNetMetaReprV1, self).__init__(_input=_input, outer_param_dict=outer_param_dict,
-                                                 var_collections=var_collections, name=name, model_param_dict=model_param_dict, task_parameter=task_parameter,
-                                                 deterministic_initialization=deterministic_initialization, reuse=reuse)
+                                                 var_collections=var_collections, name=name, model_param_dict=model_param_dict,
+                                                task_parameter=task_parameter, reuse=reuse)
 
         self.betas = self.filter_vars('beta')
 
@@ -62,11 +61,14 @@ class BOMLNetMetaReprV1(BOMLNet):
         # hyper parameters of transformation layer
         if self.use_T:
             for i in range(len(self.dim_hidden)):
-                self.outer_param_dict['conv' + str(i) + '_z'] = self.get_identity(self.dim_hidden[0],
+                self.outer_param_dict['conv' + str(i) + '_z'] = network_utils.get_identity(self.dim_hidden[0],
                                                                                   name='conv' + str(i) + '_z',
                                                                                   conv=True)
 
         [tf.add_to_collections(extension.GraphKeys.METAPARAMETERS, hyper) for hyper in self.outer_param_dict.values()]
+
+        if len(self.model_param_dict) == 0 and callable(getattr(self, 'create_model_parameters', None)):
+            self.create_model_parameters()
 
         return self.outer_param_dict
 
@@ -77,15 +79,12 @@ class BOMLNetMetaReprV1(BOMLNet):
                 self.model_param_dict['conv' + str(i) + '_z'] = network_utils.get_identity(self.dim_hidden[0],
                                                                                   name='conv' + str(i) + '_z',
                                                                                   conv=True)
-            self.model_param_dict['w' + str(len(self.dim_hidden)) + '_z'] = network_utils.get_identity(self.dims[-1],
-                                                                                              name='w' + str(len(
-                                                                                                  self.dim_hidden)) + '_z',
-                                                                                              conv=False)
+
         elif self.use_Warp:
             for i in range(len(self.dim_hidden)):
-                self.model_param_dict['conv' + str(i) + '_z'] = network_utils.get_warp_weight(self,layer=i,
+                self.model_param_dict['conv' + str(i) + '_z'] = network_utils.get_warp_weight(self, layer=i,
                                                                                      initializer=self.conv_initializer)
-                self.model_param_dict['bias' + str(i) + '_z'] = network_utils.get_warp_bias(self,layer=i,
+                self.model_param_dict['bias' + str(i) + '_z'] = network_utils.get_warp_bias(self, layer=i,
                                                                                    initializer=self.bias_initializer)
         [tf.add_to_collections(var_collections, model_param) for model_param in self.model_param_dict.values()]
 
@@ -126,8 +125,7 @@ class BOMLNetMetaReprV1(BOMLNet):
                                  task_parameter=self.task_parameter, use_Warp=self.use_Warp, use_T=self.use_T,
                                  var_collections=self.var_collections, dim_hidden=self.dim_hidden,
                                  output_weight_initializer=self.output_weight_initializer, max_pool=self.max_pool,
-                                 deterministic_initialization=self.deterministic_initialization, reuse=True,
-                                 outer_method=self.outer_method)
+                                 reuse=True, outer_method=self.outer_method)
 
 
 def BOMLNetOmniglotMetaReprV1(_input, outer_param_dict=OrderedDict(),model_param_dict=OrderedDict(),

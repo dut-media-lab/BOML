@@ -135,82 +135,49 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
         if self._inner_method == 'Aggr':
             alpha = param_dict['alpha']
             t_tensor = param_dict['t_tensor']
-        callback = utils.as_tuple_or_list(callback)
-        # same thing for T
-        T_or_generator = utils.as_tuple_or_list(param_dict['T'])
 
         ss = session or tf.get_default_session()
 
         self._history.clear()
 
-        def _adjust_step(_t):
-            if online:
-                _T = utils.maybe_eval(global_step, ss)
-                if _T is None:
-                    _T = 0
-                tot_t = T_or_generator[0]
-                if not isinstance(tot_t, int): return _t  # when using a generator there is little to do...
-                return int(_t + tot_t * _T)
-            else:
-                return _t
-
         if not online:
             _fd = utils.maybe_call(initializer_feed_dict, utils.maybe_eval(global_step, ss))
             self._save_history(ss.run(self.initialization, feed_dict=_fd))
 
-        T = 0  # this is useful if T_or_generator is indeed a generator...
-        for t in utils.solve_int_or_generator(T_or_generator[0]):
-            # nonlocal t  # with nonlocal would not be necessary the variable T... not compatible with 2.7
-
-            _fd = utils.maybe_call(inner_objective_feed_dicts, _adjust_step(t))
-            if self._inner_method == 'Aggr':
-                _fd.update(utils.maybe_call(outer_objective_feed_dicts, _adjust_step(t)))
-                if not alpha.get_shape().as_list():
-                    _fd[t_tensor] = float(t + 1.0)
-                else:
-                    tmp = np.zeros((alpha.get_shape().as_list()[1], 1))
-                    tmp[t][0] = 1.0
-                    _fd[t_tensor] = tmp
-            self._save_history(ss.run(self.iteration, feed_dict=_fd))
-            T = t
-
-            utils.maybe_call(callback[0], _adjust_step(t), _fd, ss)  # callback
+        _fd = inner_objective_feed_dicts
+        if self._inner_method == 'Aggr':
+            _fd.update(outer_objective_feed_dicts)
+            if not alpha.get_shape().as_list():
+                _fd[t_tensor] = float(1.0)
+            else:
+                tmp = np.zeros((alpha.get_shape().as_list()[1], 1))
+                tmp[0][0] = 1.0
+                _fd[t_tensor] = tmp
+        self._save_history(ss.run(self.iteration, feed_dict=_fd))
 
         # initialization of support variables (supports stochastic evaluation of outer objective via global_step ->
         # variable)
 
         _fd = utils.maybe_call(outer_objective_feed_dicts, utils.maybe_eval(global_step, ss))
         # now adding also the initializer_feed_dict because of tf quirk...
-        darts_init_fd = utils.merge_dicts(_fd, utils.maybe_call(inner_objective_feed_dicts,
-                                                                     _adjust_step(t)))
-        maybe_init_fd = utils.maybe_call(initializer_feed_dict, utils.maybe_eval(global_step, ss))
-        darts_init_fd = utils.merge_dicts(darts_init_fd, maybe_init_fd)
+        darts_init_fd = utils.merge_dicts(_fd, inner_objective_feed_dicts)
         ss.run(self._diff_initializer, feed_dict=darts_init_fd)
 
         del self._history[-1]  # do not consider last point
 
-        for pt, state_feed_dict in self._state_feed_dict_generator(reversed(self._history), T_or_generator[-1]):
-            # this should be fine also for truncated reverse... but check again the index t
-            t = T - pt - 1  # if T is int then len(self.history) is T + 1 and this numerator
-            # shall start at T-1
-
-            new_fd = utils.merge_dicts(state_feed_dict, utils.maybe_call(inner_objective_feed_dicts,
-                                                                         _adjust_step(t)))
-            if self._inner_method == 'Aggr':
-                new_fd = utils.merge_dicts(new_fd, utils.maybe_call(outer_objective_feed_dicts,
-                                                                    _adjust_step(t)))
-                # modified - mark
-                if not alpha.shape.as_list():
-                    new_fd[t_tensor] = float(t + 2.0)
-                else:
-                    tmp = np.zeros((alpha.get_shape().as_list()[1], 1))
-                    tmp[t][0] = 1
-                    new_fd[t_tensor] = tmp
-            new_fd = utils.merge_dicts(new_fd, utils.maybe_call(outer_objective_feed_dicts,
-                                                                _adjust_step(t)))
-            ss.run(self._darts_initializer, new_fd)
-            if len(callback) == 2:
-                utils.maybe_call(callback[1], _adjust_step(t), new_fd, ss)
+        state_feed_dict = utils.merge_dicts( *[od.state_feed_dict(h) for od, h in zip(sorted(self._optimizer_dicts), self._history[-1])])
+        new_fd = utils.merge_dicts(state_feed_dict, inner_objective_feed_dicts)
+        if self._inner_method == 'Aggr':
+            new_fd = utils.merge_dicts(new_fd, outer_objective_feed_dicts)
+            # modified - mark
+            if not alpha.shape.as_list():
+                new_fd[t_tensor] = float(1.0)
+            else:
+                tmp = np.zeros((alpha.get_shape().as_list()[1], 1))
+                tmp[0][0] = 1
+                new_fd[t_tensor] = tmp
+        new_fd = utils.merge_dicts(new_fd, outer_objective_feed_dicts)
+        ss.run(self._darts_initializer, new_fd)
 
     def _save_history(self, weights):
         self._history.append(weights)
