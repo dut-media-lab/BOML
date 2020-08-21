@@ -156,10 +156,3 @@ class BOMLInnerGradSimple(BOMLInnerGradTrad):
 
         return self._initialization
 
-    def __lt__(self, other):  # make OptimizerDict sortable
-        # TODO be sure that this is consistent
-        assert isinstance(other, BOMLInnerGradSimple)
-        return hash(self) < hash(other)
-
-    def __len__(self):
-        return len(self._dynamics)

@@ -36,4 +36,5 @@ ignore:
   - "boml/setup_model/network_utils.py"
   - "boml/setup_model/BOMLNet.py"
   - "boml/extension.py"
+  - "train_script/script_helper.py"
   
