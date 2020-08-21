@@ -48,5 +48,4 @@ class BOMLNetFeedForward(BOMLNet):
                                   task_parameter=self.task_parameter if self.task_parameter is not None
                                   else task_parameter, name=self.name, activation=self.activation,
                                   data_type=self.data_type, var_collections=self.var_collections,
-                                  output_weight_initializer=self.output_weight_initializer,
-                                  deterministic_initialization=self.deterministic_initialization, reuse=True, use_T=self.use_T)
+                                  output_weight_initializer=self.output_weight_initializer, reuse=True, use_T=self.use_T)
