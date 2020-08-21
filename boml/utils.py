@@ -9,9 +9,9 @@ import random
 # noinspection PyClassHasNoInit
 import boml
 
-Hyper_Optim_Method = ['MAML', 'FOMAML', 'MSGD', 'MTNet']
-Bilevel_Optim_Method = ['Reverse', 'Truncated', 'Forward', 'Reverse', 'Implicit']
-METHOD_COLLECTIONS = [Hyper_Optim_Method, Bilevel_Optim_Method]
+Meta_Init_Method = ['MAML', 'FOMAML', 'MSGD', 'MTNet']
+Meta_Init_Method = ['Reverse', 'Truncated', 'OS-RAD', 'Reverse', 'Implicit']
+METHOD_COLLECTIONS = [Meta_Init_Method, Meta_Init_Method]
 
 
 def remove_from_collection(key, *lst):
@@ -24,13 +24,6 @@ def remove_from_collection(key, *lst):
     except ValueError:
         print('WARNING: Collection -> {} <- does not contain some tensor in {}'.format(key, lst),
               file=sys.stderr)
-
-
-def GPU_CONFIG():
-    CONFIG_GPU_GROWTH = tf.ConfigProto(allow_soft_placement=True)
-    CONFIG_GPU_GROWTH.gpu_options.allow_growth = True
-    return CONFIG_GPU_GROWTH
-
 
 def as_tuple_or_list(obj):
     """
@@ -160,20 +153,6 @@ def set_gpu():
     gpu_config.gpu_options.allow_growth = True
     return gpu_config
 
-
-def get_regularization(parameter=[], regularization=None, scalor=0.0):
-    if regularization == 'L1':
-        regularizer = tcl.l2_regularizer(scalor)
-        reg_l1 = tcl.apply_regularization(regularizer, weights_list=parameter)
-        return reg_l1
-    elif regularization == 'L2':
-        regularizer = tcl.l2_regularizer(scalor)
-        reg_l2 = tcl.apply_regularization(regularizer, weights_list=parameter)
-        return reg_l2
-    else:
-        return
-
-
 def get_default_session():
     return tf.get_default_session()
 
@@ -223,68 +202,3 @@ def feed_dicts(dat_lst, exs):
           for _ex, dat in zip(exs, dat_lst)])
 
     return train_fd, valid_fd
-
-
-def to_one_hot_enc(seq, dimension=None):
-    da_max = dimension or int(np.max(seq)) + 1
-    _tmp = np.zeros((len(seq), da_max))
-    _tmp[range(len(_tmp)), np.array(seq, dtype=int)] = 1
-    return _tmp
-
-
-def sample_mini_dataset(dataset, num_classes, num_shots):
-    """
-    Sample a few shot task from a dataset.
-
-    Returns:
-      An iterable of (input, label) pairs.
-    """
-    shuffled = list(dataset)
-    random.shuffle(shuffled)
-    for class_idx, class_obj in enumerate(shuffled[:num_classes]):
-        for sample in class_obj.sample(num_shots):
-            yield (sample, class_idx)
-
-
-def mini_batches(samples, batch_size, num_batches, replacement):
-    """
-    Generate mini-batches from some data.
-
-    Returns:
-      An iterable of sequences of (input, label) pairs,
-        where each sequence is a mini-batch.
-    """
-    samples = list(samples)
-    if replacement:
-        for _ in range(num_batches):
-            yield random.sample(samples, batch_size)
-        return
-    cur_batch = []
-    batch_count = 0
-    while True:
-        random.shuffle(samples)
-        for sample in samples:
-            cur_batch.append(sample)
-            if len(cur_batch) < batch_size:
-                continue
-            yield cur_batch
-            cur_batch = []
-            batch_count += 1
-            if batch_count == num_batches:
-                return
-
-
-def get_mini_dataset(dataset, exs, num_classes, num_shots, inner_batch_size, inner_iters):
-    mini_datasets = [boml.utils.sample_mini_dataset(dataset=dataset, num_classes=num_classes, num_shots=num_shots) for _ in exs]
-    return [boml.utils.mini_batches(mini_dataset, inner_batch_size, inner_iters, False) for mini_dataset in mini_datasets]
-
-
-def feed_train_dicts(mini_batches, exs,num_classes):
-    train_fd = {}
-    for mini_batch, ex in zip(mini_batches, exs):
-        input_ph, label_ph = zip(*(mini_batch.__next__()))
-        label_ph = to_one_hot_enc(label_ph,dimension=num_classes)
-        _fd = {ex.x: input_ph, ex.y: label_ph}
-        train_fd = merge_dicts(_fd, train_fd)
-
-    return train_fd
