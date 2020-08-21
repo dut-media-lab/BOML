@@ -285,8 +285,8 @@ class BOMLOptimizer(object):
             inner_grad.set_init_dynamics(init_dynamics_dict)
         return inner_grad
 
-    def ul_problem(self, outer_objective, meta_learning_rate, inner_grad,
-                   meta_param=None, outer_objective_optimizer='Adam', epsilon=1.0,beta1=0.9,beta2=0.999,
+    def ul_problem(self, outer_objective, meta_learning_rate,inner_grad, mlr_decay=1.e-5,
+                   meta_param=None, outer_objective_optimizer='Adam', epsilon=1.0,
                    momentum=0.5, tolerance=lambda _k: 0.1 * (0.9 ** _k), global_step=None):
         """
         Set the outer optimization problem and the descent procedure for the optimization of the
@@ -311,7 +311,7 @@ class BOMLOptimizer(object):
         """
         if self._meta_learning_rate is None:
             self._meta_learning_rate = tf.train.inverse_time_decay(meta_learning_rate, self.global_step, decay_steps=1.,
-                                                                   decay_rate=1.e-5)
+                                                                   decay_rate=mlr_decay)
         if self.oo_opt is None:
             if outer_objective_optimizer == 'Momentum':
                 self.oo_opt = tf.train.MomentumOptimizer(learning_rate=self._meta_learning_rate,
@@ -340,24 +340,30 @@ class BOMLOptimizer(object):
             self._global_step = global_step
         return self
 
-    def minimize(self, inner_objective, inner_objective_optimizer, outer_objective, outer_objective_optimizer,
-                 inner_method='Trad', outer_method='Reverse', T=-1, learn_alpha=False, learn_st=False,
-                 learn_alpha_itr=False, var_list=None, hyper_list=None, init_dynamics_dict=None,
-                 loss_func='cross_entropy', aggregation_fn=None, process_fn=None, **inner_kargs):
+    def minimize(self, inner_objective, learning_rate,meta_learning_rate, T, inner_objective_optimizer='SGD', outer_objective=None,
+                   learn_lr=False, alpha_init=0.0, s=1.0, t=1.0, learn_alpha=False, learn_st=False,
+                   learn_alpha_itr=False, var_list=None,
+                   init_dynamics_dict=None, first_order=False, loss_func=utils.cross_entropy,
+                   momentum=0.5,beta1=0.0, beta2=0.999,experiment=None,
+                   meta_param=None, outer_objective_optimizer='Adam', epsilon=1.0,
+                 tolerance=lambda _k: 0.1 * (0.9 ** _k), global_step=None, **inner_kargs):
         """
         calling once 'inner_problem', 'outer_problem' and 'aggregate_all', and optionally set an initial dynamics.
         For more complex uses (like inner problems batching) use the methods separately. This can be used only when
         a single problem setting are expected for your problem definition.
         Returns method `BOMLOptimizer.run`, that runs one hyperiteration.
         """
-        optim_dict = self.ll_problem(inner_objective=inner_objective,
-                                     inner_objective_optimizer=inner_objective_optimizer,
-                                     outer_objective=outer_objective, inner_method=inner_method, T=T,
+        inner_grad = self.ll_problem(inner_objective=inner_objective,learning_rate=learning_rate,
+                                     inner_objective_optimizer=inner_objective_optimizer,experiment=experiment,
+                                     outer_objective=outer_objective, T=T, first_order=first_order,learn_lr=learn_lr,
                                      learn_alpha=learn_alpha, learn_st=learn_st, learn_alpha_itr=learn_alpha_itr,
-                                     var_list=var_list,
+                                     var_list=var_list,alpha_init=alpha_init,s=s,t=t,momentum=momentum,beta2=beta2,beta1=beta1,
                                      loss_func=loss_func, init_dynamics_dict=init_dynamics_dict, **inner_kargs)
-        self.ul_problem(outer_objective, outer_method, optim_dict, outer_objective_optimizer, hyper_list)
-        return self.aggregate_all(aggregation_fn=aggregation_fn, process_fn=process_fn)
+        self.ul_problem(outer_objective=outer_objective,meta_learning_rate=meta_learning_rate,inner_grad=inner_grad,
+                        outer_objective_optimizer=outer_objective_optimizer, meta_param=meta_param,
+                        global_step=global_step,tolerance=tolerance, momentum=momentum,epsilon=epsilon)
+
+        return
 
     def aggregate_all(self, aggregation_fn=None, gradient_clip=None):
         """
