@@ -11,24 +11,19 @@ class BOMLNetFeedForward(BOMLNet):
     def __init__(self, _input, dims, task_parameter=None,name='BMLNetFeedForward', activation=tf.nn.relu,
                  var_collections=tf.GraphKeys.MODEL_VARIABLES,
                  output_weight_initializer=tf.contrib.layers.xavier_initializer(tf.float32), data_type=tf.float32,
-                 deterministic_initialization=False, reuse=False,use_T=False):
+                 reuse=False, use_T=False):
         self.dims = as_tuple_or_list(dims)
         self.activation = activation
         self.data_type = data_type
         self.var_collections = var_collections
         self.output_weight_initializer = output_weight_initializer
         self.use_T = use_T
-        super().__init__(_input=_input, name=name, var_collections=var_collections,task_parameter=task_parameter,
-                         deterministic_initialization=deterministic_initialization, reuse=reuse)
+        super().__init__(_input=_input, name=name, var_collections=var_collections,task_parameter=task_parameter, reuse=reuse)
         if not reuse:
             print(name, 'MODEL CREATED')
 
     def _forward(self):
-        '''
-        self + tcl.fully_connected(self.out, self.dims[-1], activation_fn=None,
-                                   weights_initializer=self.output_weight_initializer,
-                                   variables_collections=self.var_collections, trainable=False)
-        '''
+
         if not isinstance(self.task_parameter, dict):
             self.create_initial_parameter()
         self + tf.add(tf.matmul(self.out, self.task_parameter['fc_weight']), self.task_parameter['fc_bias'])
