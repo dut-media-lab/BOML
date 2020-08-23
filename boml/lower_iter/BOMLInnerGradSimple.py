@@ -25,10 +25,11 @@ class BOMLInnerGradSimple(BOMLInnerGradTrad):
         update_op, dynamics = bml_opt.minimize(loss_inner, var_list, *minimize_kargs)
         if len(param_dict) > 0 and len(var_list) > 0:
             fast_param, outer_grad, model_grad = BOMLInnerGradSimple.bml_inner_grad_trad(
-                                                                                                           loss_inner=loss_inner,param_dict=param_dict, var_list=var_list)
+                loss_inner=loss_inner, param_dict=param_dict, var_list=var_list)
 
-            return BOMLInnerGradSimple(update_op=update_op, dynamics=dynamics, objective=loss_inner,
-                                       inner_param_tensor=fast_param, outer_param_tensor=outer_grad, model_param_tensor=model_grad)
+            return BOMLInnerGradSimple(update_op=update_op, dynamics=dynamics,
+                                       objective=loss_inner,inner_param_tensor=fast_param,
+                                       outer_param_tensor=outer_grad, model_param_tensor=model_grad)
         else:
             return BOMLInnerGradSimple(update_op=update_op, dynamics=dynamics, objective=loss_inner)
 
@@ -65,12 +66,14 @@ class BOMLInnerGradSimple(BOMLInnerGradTrad):
             iter_loss = param_dict['loss_func'](pred=task_model.out, label=param_dict['experiment'].y,method='MetaInit')
 
             if param_dict['use_Warp']:
-                outer_param_loss = param_dict['outer_loss_func'](pred=task_model.re_forward(param_dict['experiment'].x_).out,
-                                                           label=param_dict['experiment'].y_, method='MetaInit')
-                model_param_loss = param_dict['model_loss_func'](pred=task_model.re_forward(param_dict['experiment'].x_).out,
-                                                           label=param_dict['experiment'].y_, method='MetaInit')
-                outer_param_grad = add_list(outer_param_grad,tf.gradients(outer_param_loss, list(var_list)))
-                model_param_grad = add_list(model_param_grad,tf.gradients(model_param_loss, list(task_model.model_param_dict.values())))
+                outer_param_loss = param_dict['outer_loss_func'](
+                    pred=task_model.re_forward(param_dict['experiment'].x_).out,
+                    label=param_dict['experiment'].y_, method='MetaInit')
+                model_param_loss = param_dict['model_loss_func'](
+                    pred=task_model.re_forward(param_dict['experiment'].x_).out,
+                    label=param_dict['experiment'].y_, method='MetaInit')
+                outer_param_grad = add_list(outer_param_grad, tf.gradients(outer_param_loss, list(var_list)))
+                model_param_grad = add_list(model_param_grad, tf.gradients(model_param_loss, list(task_model.model_param_dict.values())))
 
             grads = tf.gradients(iter_loss, list(task_param.values()))
 

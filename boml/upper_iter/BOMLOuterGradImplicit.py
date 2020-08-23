@@ -66,19 +66,17 @@ class BOMLOuterGradImplicit(BOMLOuterGrad):
         return self._qs[-1]
 
     def apply_gradients(self, inner_objective_feed_dicts=None, outer_objective_feed_dicts=None,
-                        initializer_feed_dict=None, param_dict=OrderedDict(), train_batches=None, experiments=[], global_step=None, session=None,
-                        online=False, callback=None):
+                        initializer_feed_dict=None, param_dict=OrderedDict(), global_step=None, session=None):
         ss = session or tf.get_default_session()
 
         inner_objective_feed_dicts = utils.as_tuple_or_list(inner_objective_feed_dicts)
-        if not online:
-            self._run_batch_initialization(ss, utils.maybe_call(
-                initializer_feed_dict, utils.maybe_eval(global_step, ss)))
+
+        self._run_batch_initialization(ss, utils.maybe_call(
+            initializer_feed_dict, utils.maybe_eval(global_step, ss)))
 
         for t in utils.solve_int_or_generator(param_dict['T']):
             _fd = utils.maybe_call(inner_objective_feed_dicts[0], t)
             self._forward_step(ss, _fd)
-            utils.maybe_call(callback, t, _fd, ss)
 
         # end of optimization. Solve linear systems.
         tol_val = utils.maybe_call(self.tolerance, utils.maybe_eval(global_step, ss))  # decreasing tolerance (seq.)

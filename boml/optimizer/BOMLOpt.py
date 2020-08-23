@@ -31,3 +31,4 @@ class BOMLOpt(tf.train.Optimizer):
     @property
     def optimizer_params_tensor(self):
         return [self.learning_rate_tensor]
+

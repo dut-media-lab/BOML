@@ -3,8 +3,9 @@ from functools import reduce
 
 import numpy as np
 import tensorflow as tf
-from boml import extension
 from tensorflow.contrib.layers.python import layers
+
+from boml import extension
 from boml.setup_model import network_utils
 from boml.setup_model.BOMLNet import BOMLNet
 

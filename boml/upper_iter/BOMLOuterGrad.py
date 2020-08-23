@@ -81,8 +81,7 @@ class BOMLOuterGrad(object):
         return self._apply_updates
 
     def apply_gradients(self, inner_objective_feed_dicts=None, outer_objective_feed_dicts=None,
-                        initializer_feed_dict=None, param_dict=OrderedDict(), train_batches=None, experiments= [],
-                        global_step=None, session=None, online=False, callback=None):
+                        initializer_feed_dict=None, param_dict=OrderedDict(), global_step=None, session=None):
         """
         Runs the inner optimization dynamics for T iterations
         in the meanwhile.
@@ -93,14 +92,8 @@ class BOMLOuterGrad(object):
                                             variables)
         :param initializer_feed_dict: Optional feed dictionary for the inner objective
         :param global_step: Optional global step for the optimization process
-        :param param_dict: dictionary of parameters passed by `pybml.Core.BMLHOptimizer`
-        :param train_batches: mini batches of data, needed when Reptile Algorithm are implemented
+        :param param_dict: dictionary of parameters passed by `boml.boml_optimizer.BOMLOptimizer`
         :param session: Optional session (otherwise will take the default session)
-        :param experiments: list of instances of `Experiment`, needed when Reptile Algorithm are implemented
-        :param online: Performs the computation of the outer gradient in the online (or "real time") mode. Note that
-                        `ReverseHG` and `ForwardHG` behave differently.
-        :param callback: callback funciton for the forward optimization
-
         """
         raise NotImplementedError()
 

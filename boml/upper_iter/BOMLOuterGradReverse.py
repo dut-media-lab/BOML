@@ -56,7 +56,6 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
             alpha_vec = utils.vectorize_all(alphas)
             dyn_vec = utils.vectorize_all(list(optimizer_dict.dynamics))
             lag_phi_t = utils.dot(alpha_vec, dyn_vec, name='iter_wise_lagrangian_part1')
-            # TODO outer_objective might be a list... handle this case
 
             alpha_dot_B = tf.gradients(lag_phi_t, meta_param)
             if optimizer_dict.init_dynamics is not None:
@@ -65,8 +64,6 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
             else:
                 alpha_dot_B0 = [None] * len(meta_param)
 
-            # here, if some of this is None it may mean that the hyperparameter compares inside phi_0: check that and
-            # if it is not the case raise error...
             hyper_grad_vars, hyper_grad_step = [], tf.no_op()
             for dl_dh, a_d_b0, hyper in zip(alpha_dot_B, alpha_dot_B0, meta_param):
                 assert dl_dh is not None or a_d_b0 is not None, BOMLOuterGrad._ERROR_HYPER_DETACHED.format(hyper)
@@ -122,13 +119,12 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
             )
 
     def apply_gradients(self, inner_objective_feed_dicts=None, outer_objective_feed_dicts=None,
-                        initializer_feed_dict=None, param_dict=OrderedDict(), train_batches=None, experiments=[], global_step=None, session=None,
-                        online=False, callback=None):
-        # callback may be a pair, first for froward pass, second for reverse pass
+                        initializer_feed_dict=None, param_dict=OrderedDict(), train_batches=None, experiments=[], global_step=None, session=None):
+
         if self._inner_method == 'Aggr':
             alpha = param_dict['alpha']
             t_tensor = param_dict['t_tensor']
-        callback = utils.as_tuple_or_list(callback)
+
         # same thing for T
         T_or_generator = utils.as_tuple_or_list(param_dict['T'])
 
@@ -136,28 +132,16 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
 
         self._history.clear()
 
-        def _adjust_step(_t):
-            if online:
-                _T = utils.maybe_eval(global_step, ss)
-                if _T is None:
-                    _T = 0
-                tot_t = T_or_generator[0]
-                if not isinstance(tot_t, int): return _t  # when using a generator there is little to do...
-                return int(_t + tot_t * _T)
-            else:
-                return _t
-
-        if not online:
-            _fd = utils.maybe_call(initializer_feed_dict, utils.maybe_eval(global_step, ss))
-            self._save_history(ss.run(self.initialization, feed_dict=_fd))
+        _fd = utils.maybe_call(initializer_feed_dict, utils.maybe_eval(global_step, ss))
+        self._save_history(ss.run(self.initialization, feed_dict=_fd))
 
         T = 0  # this is useful if T_or_generator is indeed a generator...
         for t in utils.solve_int_or_generator(T_or_generator[0]):
             # nonlocal t  # with nonlocal would not be necessary the variable T... not compatible with 2.7
 
-            _fd = utils.maybe_call(inner_objective_feed_dicts, _adjust_step(t))
+            _fd = inner_objective_feed_dicts
             if self._inner_method == 'Aggr':
-                _fd.update(utils.maybe_call(outer_objective_feed_dicts, _adjust_step(t)))
+                _fd.update(outer_objective_feed_dicts)
                 if not alpha.get_shape().as_list():
                     _fd[t_tensor] = float(t + 1.0)
                 else:
@@ -167,8 +151,6 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
 
             self._save_history(ss.run(self.iteration, feed_dict=_fd))
             T = t
-
-            utils.maybe_call(callback[0], _adjust_step(t), _fd, ss)  # callback
 
         # initialization of support variables (supports stochastic evaluation of outer objective via global_step ->
         # variable)
@@ -183,14 +165,11 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
         for pt, state_feed_dict in self._state_feed_dict_generator(reversed(self._history), T_or_generator[-1]):
             # this should be fine also for truncated reverse... but check again the index t
             t = T - pt - 1  # if T is int then len(self.history) is T + 1 and this numerator
-            # shall start at T-1
 
-            new_fd = utils.merge_dicts(state_feed_dict, utils.maybe_call(inner_objective_feed_dicts,
-                                                                         _adjust_step(t)))
+            new_fd = utils.merge_dicts(state_feed_dict, inner_objective_feed_dicts)
 
             if self._inner_method == 'Aggr':
-                new_fd = utils.merge_dicts(new_fd, utils.maybe_call(outer_objective_feed_dicts,
-                                                                    _adjust_step(t)))
+                new_fd = utils.merge_dicts(new_fd, outer_objective_feed_dicts)
                 # modified - mark
                 if not alpha.shape.as_list():
                     new_fd[t_tensor] = float(t + 2.0)
@@ -199,8 +178,6 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
                     tmp[t][0] = 1
                     new_fd[t_tensor] = tmp
             ss.run(self._alpha_iter, new_fd)
-            if len(callback) == 2:
-                utils.maybe_call(callback[1], _adjust_step(t), new_fd, ss)
 
     def _save_history(self, weights):
         self._history.append(weights)

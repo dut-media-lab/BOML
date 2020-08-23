@@ -243,6 +243,13 @@ class BOMLOptimizer(object):
                         alpha = extension.get_outerparameter(name='alpha', initializer=alpha_vec)
                         t_tensor = tf.placeholder(shape=(T, 1), dtype=tf.float32, name='t_tensor')
                     else:
+                        '''
+                        if self.outer_method == 'Darts' and learn_alpha:
+                            print('In One-Stage RAD, alpha escapes the back propagation process, '
+                                  'so it can not be optimized with OS-RAD method  ')
+                            raise AssertionError
+                        else:
+                        '''
                         alpha = extension.get_outerparameter(initializer=alpha_init,
                                                    name='alpha') if learn_alpha else tf.constant(
                             alpha_init, name='alpha')
@@ -381,7 +388,10 @@ class BOMLOptimizer(object):
             # in this way also far.optimizer can be used
             _maybe_first_arg = lambda _v: _v[0] if isinstance(_v, tuple) else _v
 
-            self._fin_hts = tf.group(*[_maybe_first_arg(opt.apply_gradients(
+            def maybe_first_arg(_v):
+                return _v[0] if isinstance(_v, tuple) else _v
+
+            self._fin_hts = tf.group(*[maybe_first_arg(opt.apply_gradients(
                 self.outergradient.hgrads_hvars(meta_param=hll, aggregation_fn=aggregation_fn,
                                                 process_fn=gradient_clip)))
                 for opt, hll in self._o_optim_dict.items()])
@@ -393,13 +403,11 @@ class BOMLOptimizer(object):
                              'this object, further calls have no effect')
         return self.run
 
-    def run(self, inner_objective_feed_dicts=None, outer_objective_feed_dicts=None, train_batches=None,
-            initializer_feed_dict=None, session=None, online=False, callback=None):
+    def run(self, inner_objective_feed_dicts=None, outer_objective_feed_dicts=None,
+            initializer_feed_dict=None, session=None):
         """
         Run an hyper-iteration (i.e. train the model(s) and compute hypergradients) and updates the outer parameters.
 
-        :param train_batches: used for Reptile Algorithm, which needs to generates mini batches of
-        images and labels during one training step
         :param inner_objective_feed_dicts: an optional feed dictionary for the inner problem. Can be a function of
                                             step, which accounts for, e.g. stochastic gradient descent.
         :param outer_objective_feed_dicts: an optional feed dictionary for the outer optimization problem
@@ -411,18 +419,11 @@ class BOMLOptimizer(object):
                                             hyper-iterations steps (i.e. global variable), which may account for, e.g.
                                             stochastic initialization.
         :param session: optional session
-        :param online: default `False` if `True` performs the online version of the algorithms (i.e. does not
-                            reinitialize the state after at each run).
-        :param callback: optional callback function of signature
-                                (step (int), feed_dictionary, tf.Session) -> None
-                                    that are called after every forward iteration.
         """
         self._outer_gradient.apply_gradients(inner_objective_feed_dicts,
                                              outer_objective_feed_dicts,
                                              initializer_feed_dict, param_dict=self._param_dict,
-                                             session=session, train_batches=train_batches, experiments=self.experiments,
-                                             online=online, global_step=self._global_step,
-                                             callback=callback)
+                                             session=session, global_step=self._global_step)
         ss = session or tf.get_default_session()
 
         def _opt_fd():

@@ -4,8 +4,7 @@ import sys
 
 import numpy as np
 import tensorflow as tf
-import tensorflow.contrib.layers as tcl
-import random
+
 # noinspection PyClassHasNoInit
 import boml
 

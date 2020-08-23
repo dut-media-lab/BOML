@@ -1,8 +1,7 @@
 """
 Contains some misc utility functions
 """
-import collections
-from collections import OrderedDict, Callable
+
 from functools import reduce
 
 import numpy as np
@@ -19,7 +18,7 @@ def conv_block(bomlnet, cweight, bweight):
         conv_out = tf.add(tf.nn.conv2d(bomlnet.out, cweight, bomlnet.stride, 'SAME'), bweight)
     if bomlnet.batch_norm is not None:
         batch_out = bomlnet.batch_norm(conv_out, activation_fn=bomlnet.activation,
-                                    variables_collections=bomlnet.var_collections)
+                                       variables_collections=bomlnet.var_collections)
     else:
         batch_out = bomlnet.activation(conv_out)
     if bomlnet.max_pool:
@@ -197,17 +196,6 @@ def _tf_string_replace(_str):
         ' ', '')
 
 
-def namedtuple_with_defaults(typename, field_names, default_values=()):
-    T = collections.namedtuple(typename, field_names)
-    T.__new__.__defaults__ = (None,) * len(T._fields)
-    if isinstance(default_values, collections.Mapping):
-        prototype = T(**default_values)
-    else:
-        prototype = T(*default_values)
-    T.__new__.__defaults__ = tuple(prototype)
-    return T
-
-
 def get_rand_state(rand):
     """
     Utility methods for getting a `RandomState` object.
@@ -257,47 +245,3 @@ def get_global_step(name='GlobalStep', init=0):
     import tensorflow as tf
     return tf.get_variable(name, initializer=init, trainable=False,
                            collections=[tf.GraphKeys.GLOBAL_STEP, tf.GraphKeys.GLOBAL_VARIABLES])
-
-
-class DefaultOrderedDict(OrderedDict):
-    # Source: http://stackoverflow.com/a/6190500/562769
-    def __init__(self, default_factory=None, *a, **kw):
-        if (default_factory is not None and
-                not isinstance(default_factory, Callable)):
-            raise TypeError('first argument must be callable')
-        OrderedDict.__init__(self, *a, **kw)
-        self.default_factory = default_factory
-
-    def __getitem__(self, key):
-        try:
-            return OrderedDict.__getitem__(self, key)
-        except KeyError:
-            return self.__missing__(key)
-
-    def __missing__(self, key):
-        if self.default_factory is None:
-            raise KeyError(key)
-        self[key] = value = self.default_factory()
-        return value
-
-    def __reduce__(self):
-        if self.default_factory is None:
-            args = tuple()
-        else:
-            args = self.default_factory,
-        return type(self), args, None, None, self.items()
-
-    def copy(self):
-        return self.__copy__()
-
-    def __copy__(self):
-        return type(self)(self.default_factory, self)
-
-    def __deepcopy__(self, memo):
-        import copy
-        return type(self)(self.default_factory,
-                          copy.deepcopy(self.items()))
-
-    def __repr__(self):
-        return 'OrderedDefaultDict(%s, %s)' % (self.default_factory,
-                                               OrderedDict.__repr__(self))

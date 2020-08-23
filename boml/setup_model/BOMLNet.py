@@ -87,14 +87,6 @@ class BOMLNet(object):
             return tf.get_collection(tf.GraphKeys.MODEL_VARIABLES, self.name)
 
     @property
-    def Ws(self):
-        return self.filter_vars('weights')
-
-    @property
-    def bs(self):
-        return self.filter_vars('biases')
-
-    @property
     def out(self):
         return self[-1]
 

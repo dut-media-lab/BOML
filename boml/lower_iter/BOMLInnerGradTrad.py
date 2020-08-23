@@ -128,7 +128,6 @@ class BOMLInnerGradTrad(object):
         """
         return None if self._init_dyn is None else list(self._init_dyn.items())
 
-
     def __lt__(self, other):  # make OptimizerDict sortable
         # TODO be sure that this is consistent
         assert isinstance(other, BOMLInnerGradTrad)

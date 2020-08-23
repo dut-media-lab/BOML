@@ -13,7 +13,6 @@ GRADIENT_NONE_MESSAGE = 'WARNING: the gradient w.r.t.the tf.Variable\n {}\n is N
 
 
 class BOMLOptAdam(BOMLOpt, tf.train.AdamOptimizer):
-    # changed the default value of epsilon  due to numerical stability of outergradient computation
     def __init__(self, learning_rate=0.001, beta1=0.9, beta2=0.999, epsilon=1e-5, use_locking=False, name="Adam"):
         super(BOMLOptAdam, self).__init__(learning_rate, beta1, beta2, epsilon, use_locking, name)
 
@@ -26,7 +25,7 @@ class BOMLOptAdam(BOMLOpt, tf.train.AdamOptimizer):
         with tf.name_scope(name, 'Adam_Dynamics'):
             try:
                 b1_pow, b2_pow = self._beta1_power, self._beta2_power
-            except AttributeError:  # for newer versions of tensorflow..
+            except AttributeError:
                 b1_pow, b2_pow = self._get_beta_accumulators()
             lr_k = self._lr_t * tf.sqrt(1. - b2_pow) / (1. - b1_pow)
 

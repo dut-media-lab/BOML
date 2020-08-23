@@ -25,8 +25,8 @@ print(boml_meta_repr_v2.out)
 print(boml_meta_repr_v2_omniglot.out)
 print(boml_meta_repr_v2_omniglot.re_forward().out)
 print(boml_meta_repr_v2.re_forward().out)
-
-
+print(boml.utils.get_rand_state(6))
+print(boml_meta_repr_v2.filter_vars('weights'))
 '''
 def test_meta_repr_v2():
     _input_1 = tf.ones(dtype=tf.float32, shape=(5, 28, 28, 1), name='input_28_28')

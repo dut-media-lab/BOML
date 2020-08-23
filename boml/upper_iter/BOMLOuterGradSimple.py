@@ -1,9 +1,7 @@
 from collections import OrderedDict
 
 import tensorflow as tf
-from tensorflow.python.training import slot_creator
 
-import boml.extension
 from boml import utils
 from boml.upper_iter.BOMLOuterGrad import BOMLOuterGrad
 
@@ -29,7 +27,7 @@ class BOMLOuterGradSimple(BOMLOuterGrad):
         :param outer_objective: A loss function for the outer parameters (scalar tensor)
         :param meta_param: Optional list of outer parameters to consider. If not provided will get all variables in the
                             hyperparameter collection in the current scope.
-
+        :param param_dict: dictionary of parameters to specify different methods
         :return: list of outer parameters involved in the computation
         """
         meta_param = super(BOMLOuterGradSimple, self).compute_gradients(outer_objective, optimizer_dict, meta_param)
@@ -55,16 +53,14 @@ class BOMLOuterGradSimple(BOMLOuterGrad):
             return meta_param
 
     def apply_gradients(self, inner_objective_feed_dicts=None, outer_objective_feed_dicts=None,
-                        initializer_feed_dict=None, param_dict=OrderedDict(), train_batches=None, experiments =[], global_step=None, session=None,
-                        online=False, callback=None):
+                        initializer_feed_dict=None, param_dict=OrderedDict(), global_step=None, session=None):
 
         ss = session or tf.get_default_session()
 
         self._history.clear()
 
-        if not online:
-            _fd = utils.maybe_call(initializer_feed_dict, utils.maybe_eval(global_step, ss))
-            self._save_history(ss.run(self.initialization, feed_dict=_fd))
+        _fd = utils.maybe_call(initializer_feed_dict, utils.maybe_eval(global_step, ss))
+        self._save_history(ss.run(self.initialization, feed_dict=_fd))
 
     def _save_history(self, weights):
         self._history.append(weights)

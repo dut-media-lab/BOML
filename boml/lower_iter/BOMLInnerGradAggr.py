@@ -11,8 +11,7 @@ class BOMLInnerGradAggr(BOMLInnerGradTrad):
         super().__init__(update_op=update_op, dynamics=dynamics, objective=objective)
 
     @staticmethod
-    def compute_gradients(bml_opt, loss_inner, loss_outer=None, param_dict=OrderedDict(),
-                 var_list=None, **inner_kargs):
+    def compute_gradients(bml_opt, loss_inner, loss_outer=None, param_dict=OrderedDict(), var_list=None, **inner_kargs):
 
         minimize_kargs = {inner_arg: inner_kargs[inner_arg] for inner_arg in
                           set(inner_kargs.keys()) - set(param_dict.keys())}
@@ -20,7 +19,7 @@ class BOMLInnerGradAggr(BOMLInnerGradTrad):
         assert loss_inner is not None, 'argument:inner_objective must be initialized'
         assert {'alpha', 's', 't', 't_tensor'} <= param_dict.keys(), \
             'Necessary hyper_parameters must be initialized before calling minimize()'
-        # alpha, loss_outer, s, scalor, t, t_tensor = sorted(param_dict.items(), key=lambda x: x[0])
+        # alpha, loss_outer, s, t, t_tensor = sorted(param_dict.items(), key=lambda x: x[0])
         update_op, dynamics = BOMLInnerGradAggr.bml_inner_grad_aggr(inner_optimizer=bml_opt, loss_inner=loss_inner,
                                                                     loss_outer=loss_outer, param_dict=param_dict,
                                                                     var_list=var_list, *minimize_kargs)

@@ -2,10 +2,11 @@ from __future__ import absolute_import, print_function, division
 
 from collections import OrderedDict, deque
 
+import numpy as np
 # import py_bml.OuterOpt.outer_opt_utils as utils
 import tensorflow as tf
 from tensorflow.python.training import slot_creator
-import numpy as np
+
 import boml.extension
 from boml import utils
 from boml.upper_iter.BOMLOuterGrad import BOMLOuterGrad
@@ -53,7 +54,7 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
             ex = self.param_dict['experiment']
             model = self.param_dict['experiment'].model
             loss_func = self.param_dict['loss_func']
-            grad_hyper = [self._create_outergradient(outer_objective, hyper) for hyper in meta_param]
+            grad_outer = [self._create_outergradient(outer_objective, hyper) for hyper in meta_param]
 
             darts_derivatives = [grad for grad in tf.gradients(outer_objective, list(optimizer_dict.state))]
             darts_vector = tf.concat(axis=0, values=utils.vectorize_all(darts_derivatives))
@@ -63,7 +64,7 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
                                                            darts_derivatives=darts_derivaives)
             self._diff_initializer = tf.group(self._diff_initializer,
                                               tf.variables_initializer(fin_diff_part),
-                                              tf.variables_initializer(grad_hyper))
+                                              tf.variables_initializer(grad_outer))
             right_diff_0 = dict(zip(model.task_parameter.keys(), [tf.add(state, fin_diff)
                                                                   for state, fin_diff in
                                                                   zip(model.task_parameter.values(),
@@ -77,14 +78,22 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
                                                label=ex.y, method='MetaRepr'), xs=meta_param)
             right_diff = tf.gradients(loss_func(pred=model.re_forward(task_parameter=right_diff_0).out,
                                                 label=ex.y, method='MetaRepr'), xs=meta_param)
-
-            grad_param = [tf.divide(tf.add(right_dif, -left_dif), 2 * self.Epsilon)
+            meta_grads =[]
+            for grad_outerparameter,right_dif,left_dif in zip(grad_outer, right_diff, left_diff):
+                meta_grad = grad_outerparameter
+                if right_dif is not None and left_dif is not None:
+                    grad_param = tf.divide(tf.subtract(right_dif, left_dif), 2 * self.Epsilon)
+                    meta_grad -= self.param_dict['learning_rate'] * grad_param
+                meta_grads.append(meta_grad)
+            '''
+            grad_param = [tf.divide(tf.subtract(right_dif, left_dif), 2 * self.Epsilon)
                           for right_dif, left_dif in zip(right_diff, left_diff)]
 
             hyper_grads = [grad_hyperparameter - self.param_dict['learning_rate'] * grad_parameter
-                           for grad_hyperparameter, grad_parameter in zip(grad_hyper, grad_param)]
-            doo_dhypers = self._create_hyper_gradients(hyper_grads=hyper_grads,
-                                                       meta_param=meta_param)
+                           for grad_hyperparameter, grad_parameter in zip(grad_outer, grad_param)]
+        '''
+            doo_dhypers = self._create_meta_gradients(hyper_grads=meta_grads,
+                                                      meta_param=meta_param)
             self._darts_initializer = tf.group(self._darts_initializer, tf.variables_initializer(doo_dhypers))
             for h, doo_dh in zip(meta_param, doo_dhypers):
                 assert doo_dh is not None, BOMLOuterGrad._ERROR_HYPER_DETACHED.format(doo_dh)
@@ -92,7 +101,7 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
             return meta_param
 
     @staticmethod
-    def _create_hyper_gradients(hyper_grads, meta_param):
+    def _create_meta_gradients(hyper_grads, meta_param):
         hyper_gradients = [slot_creator.create_slot(v.initialized_value(), utils.val_or_zero(der, v), 'alpha')
                            for v, der in zip(meta_param, hyper_grads)]
         [tf.add_to_collection(boml.extension.GraphKeys.OUTERGRADIENTS, hyper_grad) for hyper_grad in hyper_gradients]
@@ -130,8 +139,7 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
             )
 
     def apply_gradients(self, inner_objective_feed_dicts=None, outer_objective_feed_dicts=None,
-                        initializer_feed_dict=None, param_dict=OrderedDict(), train_batches=None, experiments=[], global_step=None, session=None,
-                        online=False, callback=None):
+                        initializer_feed_dict=None, param_dict=OrderedDict(),  global_step=None, session=None):
         if self._inner_method == 'Aggr':
             alpha = param_dict['alpha']
             t_tensor = param_dict['t_tensor']
@@ -140,9 +148,8 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
 
         self._history.clear()
 
-        if not online:
-            _fd = utils.maybe_call(initializer_feed_dict, utils.maybe_eval(global_step, ss))
-            self._save_history(ss.run(self.initialization, feed_dict=_fd))
+        _fd = utils.maybe_call(initializer_feed_dict, utils.maybe_eval(global_step, ss))
+        self._save_history(ss.run(self.initialization, feed_dict=_fd))
 
         _fd = inner_objective_feed_dicts
         if self._inner_method == 'Aggr':
@@ -154,9 +161,6 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
                 tmp[0][0] = 1.0
                 _fd[t_tensor] = tmp
         self._save_history(ss.run(self.iteration, feed_dict=_fd))
-
-        # initialization of support variables (supports stochastic evaluation of outer objective via global_step ->
-        # variable)
 
         _fd = utils.maybe_call(outer_objective_feed_dicts, utils.maybe_eval(global_step, ss))
         # now adding also the initializer_feed_dict because of tf quirk...
