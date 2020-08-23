@@ -168,8 +168,7 @@ class BOMLOptimizer(object):
 
     def ll_problem(self, inner_objective, learning_rate, T, inner_objective_optimizer='SGD', outer_objective=None,
                    learn_lr=False, alpha_init=0.0, s=1.0, t=1.0, learn_alpha=False, learn_st=False,
-                   learn_alpha_itr=False, var_list=None,
-                   init_dynamics_dict=None, first_order=False, loss_func=utils.cross_entropy,
+                   learn_alpha_itr=False, var_list=None, first_order=False, loss_func=utils.cross_entropy,
                    momentum=0.5,beta1=0.0, beta2=0.999,experiment=None, **inner_kargs):
         """
         After construction of neural networks, solutions to lower level problems should be regulated in LL_Problem.
@@ -192,13 +191,11 @@ class BOMLOptimizer(object):
         :param momentum: specific parameter for Optimizer.BMLOptMomentum to set initial value of momentum
         :param beta1: specific parameter for Optimizer.BMLOptMomentum to set initial value of Adam
         :param beta2: specific parameter for Optimizer.BMLOptMomentum to set initial value of Adam
-        :param regularization: whether to add regularization terms in the inner objective
         :param experiment: instance of Experiment to use in the Lower Level Problem, especifially needed in the
          `MetaInit` type of methods.
         :param var_list: optional list of variables (of the inner optimization problem)from
-        :param init_dynamics_dict: optional dictrionary that defines Phi_0 (see `OptimizerDict.set_init_dynamics`)
         :param inner_kargs: optional arguments to pass to `py_bml.core.optimizer.minimize`
-        :return: `OptimizerDict` from py_bml.core.
+        :return: `BOMLInnerGrad` from boml.lower_iter.
         """
         if self._learning_rate is None:
             if learn_lr:
@@ -288,8 +285,6 @@ class BOMLOptimizer(object):
         else:
             pass
 
-        if init_dynamics_dict:
-            inner_grad.set_init_dynamics(init_dynamics_dict)
         return inner_grad
 
     def ul_problem(self, outer_objective, meta_learning_rate,inner_grad, mlr_decay=1.e-5,
@@ -449,6 +444,13 @@ class BOMLOptimizer(object):
         :return: the outergradient object underlying this wrapper.
         """
         return self._outer_gradient
+
+    @property
+    def innergradient(self):
+        """
+        :return: the innergradient object underlying this wrapper.
+        """
+        return self._inner_gradient
 
     @property
     def learning_rate(self):

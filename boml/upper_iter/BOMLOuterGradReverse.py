@@ -58,23 +58,15 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
             lag_phi_t = utils.dot(alpha_vec, dyn_vec, name='iter_wise_lagrangian_part1')
 
             alpha_dot_B = tf.gradients(lag_phi_t, meta_param)
-            if optimizer_dict.init_dynamics is not None:
-                lag_phi0 = utils.dot(alpha_vec, utils.vectorize_all([d for (s, d) in optimizer_dict.init_dynamics]))
-                alpha_dot_B0 = tf.gradients(lag_phi0, meta_param)
-            else:
-                alpha_dot_B0 = [None] * len(meta_param)
 
             hyper_grad_vars, hyper_grad_step = [], tf.no_op()
-            for dl_dh, a_d_b0, hyper in zip(alpha_dot_B, alpha_dot_B0, meta_param):
-                assert dl_dh is not None or a_d_b0 is not None, BOMLOuterGrad._ERROR_HYPER_DETACHED.format(hyper)
+            for dl_dh, hyper in zip(alpha_dot_B, meta_param):
+                assert dl_dh is not None, BOMLOuterGrad._ERROR_HYPER_DETACHED.format(hyper)
                 hgv = None
                 if dl_dh is not None:
                     hgv = self._create_outergradient(outer_objective, hyper)
 
                     hyper_grad_step = tf.group(hyper_grad_step, hgv.assign_add(dl_dh))
-                if a_d_b0 is not None:
-                    hgv = hgv + a_d_b0 if hgv is not None else a_d_b0
-                    # here hyper_grad_step has nothing to do...
                 hyper_grad_vars.append(hgv)
                 # first update hypergradinet then alphas.
             with tf.control_dependencies([hyper_grad_step]):

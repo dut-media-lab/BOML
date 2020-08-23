@@ -107,20 +107,6 @@ class BOMLInnerGradTrad(object):
         """
         return {v: his[k] for k, v in enumerate(self.state)}
 
-    def set_init_dynamics(self, init_dictionary):
-        """
-        With this function is possible to set an initializer for the dynamics. Multiple calls of this method on the
-        same variable will override the dynamics.
-
-        :param init_dictionary: a dictionary of (state_variable: tensor or variable, that represents the initial
-                                dynamics Phi_0.
-        """
-        if self._init_dyn is None:
-            self._init_dyn = OrderedDict([(v, tf.identity(v)) for v in self.state])  # do nothing
-        for k, v in init_dictionary.items():
-            assert k in self._init_dyn, 'Can set initial dynamics only for state variables in this object, got %s' % k
-            self._init_dyn[k] = v
-
     @property
     def init_dynamics(self):
         """

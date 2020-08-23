@@ -43,11 +43,6 @@ class BOMLInnerGradAggr(BOMLInnerGradTrad):
                                                                  colocate_gradients_with_ops=colocate_gradients_with_ops,
                                                                  grad_loss=grad_loss)
         vars_with_grad = [v for g, v in grads_and_vars_inner if g is not None]
-        if not vars_with_grad:
-            raise ValueError(
-                "No gradients provided for any variable, check your graph for ops"
-                " that do not support gradients, between variables %s and loss %s." %
-                ([str(v) for _, v in grads_and_vars_inner], loss_inner))
         grads_and_vars = BOMLInnerGradAggr.combine_grads(inner_grads=grads_and_vars_inner,
                                                          outer_grads=grads_and_vars_outer,
                                                          alpha=param_dict['alpha'], s=param_dict['s'],

@@ -6,14 +6,14 @@ os.environ['DATASETS_FOLDER'] = '../'
 os.environ['EXPERIMENTS_FOLDER'] = '../'
 import boml.extension
 
-import boml as pybml
+import boml as boml
 from train_script.script_helper import *
 import numpy as np
 import inspect, time
 from shutil import copyfile
 
-map_dict = {'omniglot': {'data_loader': pybml.meta_omniglot, 'model': pybml.BOMLNetOmniglotMetaInitV1},
-            'miniimagenet': {'data_loader': pybml.meta_mini_imagenet, 'model': pybml.BOMLNetMiniMetaInitV1}}
+map_dict = {'omniglot': {'data_loader': boml.meta_omniglot, 'model': boml.BOMLNetOmniglotMetaInitV1},
+            'miniimagenet': {'data_loader': boml.meta_mini_imagenet, 'model': boml.BOMLNetMiniMetaInitV1}}
 
 
 def build(metasets, learn_lr, lr0, MBS, T, mlr0,mlr_decay=1.e-5, process_fn=None, method='MetaInit',inner_method='Simple', outer_method='Simple',
@@ -21,30 +21,30 @@ def build(metasets, learn_lr, lr0, MBS, T, mlr0,mlr_decay=1.e-5, process_fn=None
 
     exs = [dl.BMLExperiment(metasets) for _ in range(MBS)]
 
-    pybml_ho = pybml.BOMLOptimizer(method=method, inner_method=inner_method, outer_method=outer_method,experiments=exs)
-    meta_model = pybml_ho.meta_learner(_input=exs[0].x, dataset=metasets, meta_model='V1',
+    boml_ho = boml.BOMLOptimizer(method=method, inner_method=inner_method, outer_method=outer_method,experiments=exs)
+    meta_model = boml_ho.meta_learner(_input=exs[0].x, dataset=metasets, meta_model='V1',
                                         name='HyperRepr', use_T=use_T,use_Warp=use_Warp)
 
     for k, ex in enumerate(exs):
-        ex.model = pybml_ho.base_learner(_input=ex.x, meta_learner=meta_model,
+        ex.model = boml_ho.base_learner(_input=ex.x, meta_learner=meta_model,
                                          name='Task_Net_%s' % k)
         ex.errors['training'] = boml.utils.cross_entropy(pred=ex.model.out, label=ex.y, method=method)
         ex.scores['accuracy'] = tf.contrib.metrics.accuracy(tf.argmax(tf.nn.softmax(ex.model.out), 1),
                                                             tf.argmax(ex.y, 1))
-        ex.optimizers['apply_updates'], _ = pybml.BOMLOptSGD(learning_rate=lr0).minimize(ex.errors['training'],
+        ex.optimizers['apply_updates'], _ = boml.BOMLOptSGD(learning_rate=lr0).minimize(ex.errors['training'],
                                                                                         var_list=ex.model.var_list)
-        optim_dict = pybml_ho.ll_problem(inner_objective=ex.errors['training'], learning_rate=lr0,
+        optim_dict = boml_ho.ll_problem(inner_objective=ex.errors['training'], learning_rate=lr0,
                                          inner_objective_optimizer=args.inner_opt,
                                          T=T, experiment=ex, var_list=ex.model.var_list, learn_lr=learn_lr,
                                          first_order=first_order)
         ex.errors['validation'] = boml.utils.cross_entropy(pred=ex.model.re_forward(ex.x_).out, label=ex.y_, method=method)
-        pybml_ho.ul_problem(outer_objective=ex.errors['validation'], meta_learning_rate=mlr0, inner_grad=optim_dict,
+        boml_ho.ul_problem(outer_objective=ex.errors['validation'], meta_learning_rate=mlr0, inner_grad=optim_dict,
                             outer_objective_optimizer=args.outer_opt,mlr_decay=mlr_decay,
                             meta_param=tf.get_collection(boml.extension.GraphKeys.METAPARAMETERS))
-
-    pybml_ho.aggregate_all(gradient_clip=process_fn)
+        print(boml_ho.innergradient.apply_updates)
+    boml_ho.aggregate_all(gradient_clip=process_fn)
     saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES), max_to_keep=10)
-    return exs, pybml_ho, saver
+    return exs, boml_ho, saver
 
 
 # training and testing function
@@ -71,15 +71,15 @@ def train_and_test(metasets, name_of_exp,method, inner_method, outer_method, use
     print('copying {} into {}'.format(executing_file_path, exp_dir))
     copyfile(executing_file_path, os.path.join(exp_dir, executing_file_path.split('/')[-1]))
 
-    exs, pybml_ho, saver = build(metasets, learn_lr, lr0,MBS, T, mlr0,mlr_decay, process_fn,
+    exs, boml_ho, saver = build(metasets, learn_lr, lr0,MBS, T, mlr0,mlr_decay, process_fn,
                                  method, inner_method, outer_method, use_T, use_Warp, first_order)
 
     sess = tf.Session(config=boml.utils.set_gpu())
 
-    meta_train(exp_dir, metasets, exs, pybml_ho, saver, sess, n_test_episodes, MBS, seed, resume, T,
+    meta_train(exp_dir, metasets, exs, boml_ho, saver, sess, n_test_episodes, MBS, seed, resume, T,
                n_meta_iterations, print_interval, save_interval)
 
-    meta_test(exp_dir, metasets, exs, pybml_ho, saver, sess, args.classes, args.examples_train, lr0,
+    meta_test(exp_dir, metasets, exs, boml_ho, saver, sess, args.classes, args.examples_train, lr0,
               n_test_episodes, MBS, seed, T, list(range(n_meta_iterations)))
 
 

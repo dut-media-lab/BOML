@@ -54,9 +54,14 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
             ex = self.param_dict['experiment']
             model = self.param_dict['experiment'].model
             loss_func = self.param_dict['loss_func']
-            grad_outer = [self._create_outergradient(outer_objective, hyper) for hyper in meta_param]
 
+            # compute the first-order gradient of updated outer parameters with ones-step forward
+            grads_outer = [self._create_outergradient(outer_objective, hyper) for hyper in meta_param]
+
+            # compute the first-order gradient of  the initial task parameters
             darts_derivatives = [grad for grad in tf.gradients(outer_objective, list(optimizer_dict.state))]
+
+            # compute the differentiation part, multiplied by Epsilon
             darts_vector = tf.concat(axis=0, values=utils.vectorize_all(darts_derivatives))
             self.Epsilon = 0.01 / tf.norm(tensor=darts_vector, ord=2)
             darts_derivaives = [self.Epsilon * darts_derivative for darts_derivative in darts_derivatives]
@@ -64,7 +69,8 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
                                                            darts_derivatives=darts_derivaives)
             self._diff_initializer = tf.group(self._diff_initializer,
                                               tf.variables_initializer(fin_diff_part),
-                                              tf.variables_initializer(grad_outer))
+                                              tf.variables_initializer(grads_outer))
+
             right_diff_0 = dict(zip(model.task_parameter.keys(), [tf.add(state, fin_diff)
                                                                   for state, fin_diff in
                                                                   zip(model.task_parameter.values(),
@@ -78,36 +84,18 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
                                                label=ex.y, method='MetaRepr'), xs=meta_param)
             right_diff = tf.gradients(loss_func(pred=model.re_forward(task_parameter=right_diff_0).out,
                                                 label=ex.y, method='MetaRepr'), xs=meta_param)
-            meta_grads =[]
-            for grad_outerparameter,right_dif,left_dif in zip(grad_outer, right_diff, left_diff):
-                meta_grad = grad_outerparameter
+
+            # compute the second-order part and add them to the first-order item
+            for grad_outer, left_dif, right_dif in zip(grads_outer, left_diff, right_diff):
                 if right_dif is not None and left_dif is not None:
                     grad_param = tf.divide(tf.subtract(right_dif, left_dif), 2 * self.Epsilon)
-                    meta_grad -= self.param_dict['learning_rate'] * grad_param
-                meta_grads.append(meta_grad)
-            '''
-            grad_param = [tf.divide(tf.subtract(right_dif, left_dif), 2 * self.Epsilon)
-                          for right_dif, left_dif in zip(right_diff, left_diff)]
+                    meta_grad = self.param_dict['learning_rate'] * grad_param
+                    self._darts_initializer = tf.group(self._darts_initializer, grad_outer.assign_sub(meta_grad))
 
-            hyper_grads = [grad_hyperparameter - self.param_dict['learning_rate'] * grad_parameter
-                           for grad_hyperparameter, grad_parameter in zip(grad_outer, grad_param)]
-        '''
-            doo_dhypers = self._create_meta_gradients(hyper_grads=meta_grads,
-                                                      meta_param=meta_param)
-            self._darts_initializer = tf.group(self._darts_initializer, tf.variables_initializer(doo_dhypers))
-            for h, doo_dh in zip(meta_param, doo_dhypers):
+            for h, doo_dh in zip(meta_param, grads_outer):
                 assert doo_dh is not None, BOMLOuterGrad._ERROR_HYPER_DETACHED.format(doo_dh)
                 self._hypergrad_dictionary[h].append(doo_dh)
             return meta_param
-
-    @staticmethod
-    def _create_meta_gradients(hyper_grads, meta_param):
-        hyper_gradients = [slot_creator.create_slot(v.initialized_value(), utils.val_or_zero(der, v), 'alpha')
-                           for v, der in zip(meta_param, hyper_grads)]
-        [tf.add_to_collection(boml.extension.GraphKeys.OUTERGRADIENTS, hyper_grad) for hyper_grad in hyper_gradients]
-        boml.extension.remove_from_collection(boml.extension.GraphKeys.GLOBAL_VARIABLES, *hyper_gradients)
-        # this prevents the 'automatic' initialization with tf.global_variables_initializer.
-        return hyper_gradients
 
     @staticmethod
     def _create_darts_derivatives(var_list, darts_derivatives):
@@ -151,6 +139,7 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
         _fd = utils.maybe_call(initializer_feed_dict, utils.maybe_eval(global_step, ss))
         self._save_history(ss.run(self.initialization, feed_dict=_fd))
 
+        # perform one-step update to the task parameters and store  weights along the optimization path
         _fd = inner_objective_feed_dicts
         if self._inner_method == 'Aggr':
             _fd.update(outer_objective_feed_dicts)
@@ -162,14 +151,16 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
                 _fd[t_tensor] = tmp
         self._save_history(ss.run(self.iteration, feed_dict=_fd))
 
+        # compute the differentiation part, multiplied by Epsilon with one-step forward pass
         _fd = utils.maybe_call(outer_objective_feed_dicts, utils.maybe_eval(global_step, ss))
-        # now adding also the initializer_feed_dict because of tf quirk...
         darts_init_fd = utils.merge_dicts(_fd, inner_objective_feed_dicts)
         ss.run(self._diff_initializer, feed_dict=darts_init_fd)
 
-        del self._history[-1]  # do not consider last point
+        del self._history[-1]  # do not consider the final task parameters
 
-        state_feed_dict = utils.merge_dicts( *[od.state_feed_dict(h) for od, h in zip(sorted(self._optimizer_dicts), self._history[-1])])
+        # compute the second-order part and add them to the first-order item
+        state_feed_dict = utils.merge_dicts( *[od.state_feed_dict(h)
+                                               for od, h in zip(sorted(self._optimizer_dicts), self._history[-1])])
         new_fd = utils.merge_dicts(state_feed_dict, inner_objective_feed_dicts)
         if self._inner_method == 'Aggr':
             new_fd = utils.merge_dicts(new_fd, outer_objective_feed_dicts)
