@@ -34,11 +34,6 @@ def as_tuple_or_list(obj):
     return obj if isinstance(obj, (list, tuple)) else [obj]
 
 
-def flatten_list(lst):
-    from itertools import chain
-    return list(chain(*lst))
-
-
 def merge_dicts(*dicts):
     """
     Merges dictionaries recursively. Accepts also `None` and returns always a (possibly empty) dictionary
@@ -72,11 +67,6 @@ def vectorize_all(var_list, name=None):
     :return: vectorization of `var_list`"""
     with tf.name_scope(name, 'Vectorization', var_list) as scope:
         return tf.concat([tf.reshape(_w, [-1]) for _w in var_list], 0, name=scope)
-
-
-def reduce_all_sums(lst1, lst2, name=None):
-    with tf.name_scope(name, 'Vectorization', lst1 + lst2) as scope:
-        return tf.add_n([tf.reduce_sum(v1 * v2) for v1, v2 in zip(lst1, lst2)], name=scope)
 
 
 def add_list(lst1, lst2):
@@ -125,12 +115,6 @@ def solve_int_or_generator(int_or_generator):
     return range(int_or_generator) if isinteger(int_or_generator) else int_or_generator
 
 
-def mse_loss(pred, label):
-    pred = tf.reshape(pred, [-1])
-    label = tf.reshape(label, [-1])
-    return tf.reduce_mean(tf.square(pred - label))
-
-
 def cross_entropy(pred, label,  method='MetaInit'):
 
     # Note - with tf version <=0.12, this loss has incorrect 2nd derivatives
@@ -143,7 +127,7 @@ def cross_entropy(pred, label,  method='MetaInit'):
 
 
 def classification_acc(pred, label):
-    tf.contrib.metrics.accuracy(tf.argmax(tf.nn.softmax(pred), 1), tf.argmax(label, 1))
+    return tf.contrib.metrics.accuracy(tf.argmax(tf.nn.softmax(pred), 1), tf.argmax(label, 1))
 
 
 def set_gpu():
@@ -151,9 +135,6 @@ def set_gpu():
     gpu_config = tf.ConfigProto(allow_soft_placement=True)
     gpu_config.gpu_options.allow_growth = True
     return gpu_config
-
-def get_default_session():
-    return tf.get_default_session()
 
 
 def get_rand_state(rand):
