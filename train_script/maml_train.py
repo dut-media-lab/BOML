@@ -29,8 +29,7 @@ def build(metasets, learn_lr, lr0, MBS, T, mlr0,mlr_decay=1.e-5, process_fn=None
         ex.model = boml_ho.base_learner(_input=ex.x, meta_learner=meta_model,
                                          name='Task_Net_%s' % k)
         ex.errors['training'] = boml.utils.cross_entropy(pred=ex.model.out, label=ex.y, method=method)
-        ex.scores['accuracy'] = tf.contrib.metrics.accuracy(tf.argmax(tf.nn.softmax(ex.model.out), 1),
-                                                            tf.argmax(ex.y, 1))
+        ex.scores['accuracy'] = boml.utils.classification_acc(pred=ex.mode.out,label=ex.y)
         ex.optimizers['apply_updates'], _ = boml.BOMLOptSGD(learning_rate=lr0).minimize(ex.errors['training'],
                                                                                         var_list=ex.model.var_list)
         optim_dict = boml_ho.ll_problem(inner_objective=ex.errors['training'], learning_rate=lr0,
