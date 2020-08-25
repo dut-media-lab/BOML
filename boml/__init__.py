@@ -1,4 +1,4 @@
-from boml.load_data.experiment import BMLExperiment
+from boml.load_data.experiment import BOMLExperiment
 from boml.load_data import meta_mini_imagenet, meta_omniglot, OmniglotMetaDataset,\
     ImageNetMetaDataset, mnist
 from boml.setup_model.BOMLNetMetaInitV1 import BOMLNetMetaInitV1, BOMLNetOmniglotMetaInitV1, BOMLNetMiniMetaInitV1

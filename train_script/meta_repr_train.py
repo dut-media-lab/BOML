@@ -26,7 +26,7 @@ map_dict = {'omniglot': {'data_loader': dl.datasets.load_full_dataset.meta_omnig
 def build(metasets, learn_lr, learn_alpha, learn_alpha_itr, learn_st, lr0, MBS, T, mlr0, mlr_decay,weights_initializer,
           process_fn=None, alpha_itr=0.0, method=None, inner_method=None, outer_method=None,
           use_T=False, truncate_iter=-1):
-    exs = [dl.BMLExperiment(metasets) for _ in range(MBS)]
+    exs = [dl.BOMLExperiment(metasets) for _ in range(MBS)]
     boml_ho = boml.BOMLOptimizer(method=method, inner_method=inner_method, outer_method=outer_method,
                                    truncate_iter=truncate_iter, experiments=exs)
 

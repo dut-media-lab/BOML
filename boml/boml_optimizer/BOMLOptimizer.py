@@ -4,6 +4,8 @@ import numpy as np
 import tensorflow as tf
 
 from boml import utils, extension
+from boml.load_data import BOMLExperiment
+
 importlib = __import__('importlib')
 boml_networks = importlib.import_module('boml.setup_model')
 inner_grads = importlib.import_module('boml.lower_iter')
@@ -164,8 +166,8 @@ class BOMLOptimizer(object):
         :param loss_func: specifying which type of loss function is used for the maml-based method, which should be
         consistent with the form to compute the inner objective
         :param momentum: specific parameter for Optimizer.BMLOptMomentum to set initial value of momentum
-        :param beta1: specific parameter for Optimizer.BMLOptMomentum to set initial value of Adam
-        :param beta2: specific parameter for Optimizer.BMLOptMomentum to set initial value of Adam
+        :param beta1: specific parameter for optimizer.BOMLOptMomentum to set initial value of Adam
+        :param beta2: specific parameter for optimizer.BOMLOptMomentum to set initial value of Adam
         :param experiment: instance of Experiment to use in the Lower Level Problem, especifially needed in the
          `MetaInit` type of methods.
         :param var_list: optional list of variables (of the inner optimization problem)from
@@ -227,7 +229,7 @@ class BOMLOptimizer(object):
             self._param_dict['first_order'] = first_order
 
         assert isinstance(experiment,
-                          BMLExperiment), 'MetaInit based methods require specialized ' \
+                          BOMLExperiment), 'MetaInit based methods require specialized ' \
                                           'task model for each generated task,' \
                                           'please refer to basic instruction for modules of networks'
         self._param_dict['loss_func'] = loss_func

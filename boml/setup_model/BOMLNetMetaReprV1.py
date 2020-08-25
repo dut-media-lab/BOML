@@ -80,7 +80,6 @@ class BOMLNetMetaReprV1(BOMLNet):
                 self.model_param_dict['conv' + str(i) + '_z'] = network_utils.get_identity(self.dim_hidden[0],
                                                                                   name='conv' + str(i) + '_z',
                                                                                   conv=True)
-
         elif self.use_Warp:
             for i in range(len(self.dim_hidden)):
                 self.model_param_dict['conv' + str(i) + '_z'] = network_utils.get_warp_weight(self, layer=i,
@@ -130,17 +129,17 @@ class BOMLNetMetaReprV1(BOMLNet):
 
 
 def BOMLNetOmniglotMetaReprV1(_input, outer_param_dict=OrderedDict(),model_param_dict=OrderedDict(),
-                              batch_norm=layers.batch_norm, name='BMLNetC4LOmniglot', use_T=False,
+                              batch_norm=layers.batch_norm, name='BMLNetC4LOmniglot', use_T=False,dim_output=-1,
                               use_Warp=False, outer_method='Reverse',**model_args):
 
-    return BOMLNetMetaReprV1(_input=_input, name=name, model_param_dict=model_param_dict,
+    return BOMLNetMetaReprV1(_input=_input, name=name, model_param_dict=model_param_dict,dim_output=dim_output,
                               outer_param_dict=outer_param_dict, norm=batch_norm, use_T=use_T, use_Warp=use_Warp,
                               outer_method=outer_method, **model_args)
 
 
-def BOMLNetMiniMetaReprV1(_input, outer_param_dict=OrderedDict(),model_param_dict=OrderedDict(),
+def BOMLNetMiniMetaReprV1(_input, outer_param_dict=OrderedDict(),model_param_dict=OrderedDict(),dim_output=-1,
                           batch_norm=layers.batch_norm, name='BMLNetC4LMini', use_T=False,
                           use_Warp=False, outer_method='Reverse',**model_args):
-    return BOMLNetMetaReprV1(_input=_input, name=name, use_T=use_T, use_Warp=use_Warp,
+    return BOMLNetMetaReprV1(_input=_input, name=name, use_T=use_T, use_Warp=use_Warp,dim_output=dim_output,
                               outer_param_dict=outer_param_dict, model_param_dict=model_param_dict, norm=batch_norm, channels=3,
                               dim_hidden=[32, 32, 32, 32], max_pool=True, outer_method=outer_method, **model_args)

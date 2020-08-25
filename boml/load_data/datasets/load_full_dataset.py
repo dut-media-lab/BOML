@@ -351,7 +351,7 @@ def meta_omniglot_v2(folder=OMNIGLOT_RESIZED, std_num_classes=None, examples_tra
 
 class ImageNetMetaDataset(MetaDataset):
 
-    def __init__(self, info=None, name='MiniImagenet', num_classes=None, num_examples=None, h5=False):
+    def __init__(self, info=None, name='Mini', num_classes=None, num_examples=None, h5=False):
 
         super().__init__(info, name=name, num_classes=num_classes, num_examples=num_examples)
         self._loaded_images = defaultdict(lambda: {})

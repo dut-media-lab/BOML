@@ -19,7 +19,7 @@ map_dict = {'omniglot': {'data_loader': boml.meta_omniglot, 'model': boml.BOMLNe
 def build(metasets, learn_lr, lr0, MBS, T, mlr0,mlr_decay=1.e-5, process_fn=None, method='MetaInit',inner_method='Simple', outer_method='Simple',
           use_T=False, use_Warp=False, first_order=False):
 
-    exs = [dl.BMLExperiment(metasets) for _ in range(MBS)]
+    exs = [dl.BOMLExperiment(metasets) for _ in range(MBS)]
 
     boml_ho = boml.BOMLOptimizer(method=method, inner_method=inner_method, outer_method=outer_method,experiments=exs)
     meta_model = boml_ho.meta_learner(_input=exs[0].x, dataset=metasets, meta_model='V1',

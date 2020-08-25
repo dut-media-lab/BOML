@@ -141,5 +141,5 @@ def BOMLNetOmniglotMetaInitV1(_input, dim_output, outer_param_dict=OrderedDict()
 def BOMLNetMiniMetaInitV1(_input, dim_output, outer_param_dict=OrderedDict(),model_param_dict =OrderedDict(),
                     batch_norm=layers.batch_norm, name='BMLNetC4LMini',outer_method='Simple', use_T=False, use_Warp=False,**model_args):
     return BOMLNetMetaInitV1(_input=_input, name=name, dim_output=dim_output, use_T=use_T, use_Warp=use_Warp,
-                              outer_param_dict=outer_param_dict, model_param_dict=model_param_dict,outer_method=outer_method, norm=batch_norm, channels=3, dim_hidden=[32, 32, 32, 32],
+                              outer_param_dict=outer_param_dict, model_param_dict=model_param_dict, outer_method=outer_method, norm=batch_norm, channels=3, dim_hidden=[32, 32, 32, 32],
                               max_pool=True, **model_args)

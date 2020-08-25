@@ -5,7 +5,7 @@ with feed dictionary
 import tensorflow as tf
 
 
-class BMLExperiment:
+class BOMLExperiment:
 
     def __init__(self, datasets, dtype=tf.float32):
         self.datasets = datasets
