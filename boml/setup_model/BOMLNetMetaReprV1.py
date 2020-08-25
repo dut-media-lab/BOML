@@ -14,12 +14,12 @@ class BOMLNetMetaReprV1(BOMLNet):
 
     def __init__(self, _input, name='BMLNetC4LMetaRepr', outer_param_dict=OrderedDict(),
                  model_param_dict=OrderedDict(), task_parameter=None,
-                 use_T=False, use_Warp=False, outer_method='Reverse',
+                 use_T=False, use_Warp=False, outer_method='Reverse',dim_output=-1,
                  activation=tf.nn.relu, var_collections=extension.METAPARAMETERS_COLLECTIONS,
                  conv_initializer=tf.contrib.layers.xavier_initializer_conv2d(tf.float32),
                  output_weight_initializer=tf.contrib.layers.xavier_initializer(tf.float32), norm=layers.batch_norm,
                  data_type=tf.float32, channels=1, dim_hidden=[64, 64, 64, 64], kernel=3,max_pool=False, reuse=False):
-
+        self.dim_output=dim_output
         self.kernel = kernel
         self.channels = channels
         self.dim_hidden = dim_hidden
@@ -121,7 +121,7 @@ class BOMLNetMetaReprV1(BOMLNet):
     def re_forward(self, new_input):
         return BOMLNetMetaReprV1(_input=new_input if new_input is not None else self.layers[0], name=self.name,
                                  activation=self.activation, outer_param_dict=self.outer_param_dict,
-                                 model_param_dict=self.model_param_dict,
+                                 model_param_dict=self.model_param_dict,dim_output=self.dim_output,
                                  task_parameter=self.task_parameter, use_Warp=self.use_Warp, use_T=self.use_T,
                                  var_collections=self.var_collections, dim_hidden=self.dim_hidden,
                                  output_weight_initializer=self.output_weight_initializer, max_pool=self.max_pool,
