@@ -75,7 +75,7 @@ class BOMLOuterGrad(object):
         return self._inner_objectives
 
     @property
-    def appply_updates(self):
+    def apply_updates(self):
         if self._apply_updates is None:
             self._apply_updates = tf.group(*[opt_dict.apply_updates for opt_dict in sorted(self._optimizer_dicts)])
         return self._apply_updates
