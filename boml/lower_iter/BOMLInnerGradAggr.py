@@ -42,7 +42,6 @@ class BOMLInnerGradAggr(BOMLInnerGradTrad):
                                                                  aggregation_method=aggregation_method,
                                                                  colocate_gradients_with_ops=colocate_gradients_with_ops,
                                                                  grad_loss=grad_loss)
-        vars_with_grad = [v for g, v in grads_and_vars_inner if g is not None]
         grads_and_vars = BOMLInnerGradAggr.combine_grads(inner_grads=grads_and_vars_inner,
                                                          outer_grads=grads_and_vars_outer,
                                                          alpha=param_dict['alpha'], s=param_dict['s'],
@@ -87,7 +86,7 @@ class BOMLInnerGradAggr(BOMLInnerGradTrad):
                     being optimized (possibly including auxiliary variables)
         """
         if self._iteration is None:
-            with tf.control_dependencies([self._updates_op]):  # ?
+            with tf.control_dependencies([self._updates_op]):
                 self._iteration = self._state_read()  # performs an iteration and returns the
                 # value of all variables in the state (ordered according to dyn)
 

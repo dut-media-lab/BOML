@@ -6,14 +6,11 @@ import tensorflow as tf
 from boml import utils, extension
 from boml.load_data import ImageNetMetaDataset, OmniglotMetaDataset, BMLExperiment
 
-try:
-    importlib = __import__('importlib')
-    bml_networks = importlib.import_module('boml.setup_model')
-    inner_grads = importlib.import_module('boml.lower_iter')
-    hyper_grads = importlib.import_module('boml.upper_iter')
-    bml_optimizer = importlib.import_module('boml.optimizer')
-except ImportError:
-    print('Error encountered when importing boml modules in BOMLOptimizer')
+importlib = __import__('importlib')
+boml_networks = importlib.import_module('boml.setup_model')
+inner_grads = importlib.import_module('boml.lower_iter')
+hyper_grads = importlib.import_module('boml.upper_iter')
+boml_optimizer = importlib.import_module('boml.optimizer')
 
 
 class BOMLOptimizer(object):
@@ -117,17 +114,17 @@ class BOMLOptimizer(object):
             'The dataset does not match the model chosen for meta_learner, V1,V2,...or Vk'
         if self.method == 'MetaInit':
             if isinstance(dataset.train, OmniglotMetaDataset):
-                meta_learner = getattr(bml_networks, '%s' % ('BOMLNetOmniglotMetaInit' + meta_model))(
+                meta_learner = getattr(boml_networks, '%s' % ('BOMLNetOmniglotMetaInit' + meta_model))(
                     _input=_input, dim_output=dataset.train.dim_target, name=name, use_T=use_T,use_Warp=use_Warp,**model_args)
             elif isinstance(dataset.train, ImageNetMetaDataset):
-                meta_learner = getattr(bml_networks, '%s' % ('BOMLNetMiniMetaInit' + meta_model))(
+                meta_learner = getattr(boml_networks, '%s' % ('BOMLNetMiniMetaInit' + meta_model))(
                     _input=_input, dim_output=dataset.train.dim_target, name=name, use_T=use_T, use_Warp=use_Warp,**model_args)
         elif self.method == 'MetaRepr':
             if isinstance(dataset.train, OmniglotMetaDataset):
-                meta_learner = getattr(bml_networks, '%s' % ('BOMLNetOmniglotMetaRepr' + meta_model))(
+                meta_learner = getattr(boml_networks, '%s' % ('BOMLNetOmniglotMetaRepr' + meta_model))(
                     _input=_input, name=name, use_T=use_T, outer_method=self.outer_method, **model_args)
             elif isinstance(dataset.train, ImageNetMetaDataset):
-                meta_learner = getattr(bml_networks, '%s' % ('BOMLNetMiniMetaRepr' + meta_model))(
+                meta_learner = getattr(boml_networks, '%s' % ('BOMLNetMiniMetaRepr' + meta_model))(
                     _input=_input, name=name, use_T=use_T, outer_method=self.outer_method,**model_args)
         else:
             print('initialize method arguement, should be in list \an [MetaRepr,MetaInitl]')
@@ -150,15 +147,15 @@ class BOMLOptimizer(object):
         """
         if self.method == 'MetaInit':
             if isinstance(self.data_set.train, OmniglotMetaDataset):
-                base_learner = getattr(bml_networks, '%s' % ('BOMLNetOmniglotMetaInit' + self.param_dict['meta_model']))(
+                base_learner = getattr(boml_networks, '%s' % ('BOMLNetOmniglotMetaInit' + self.param_dict['meta_model']))(
                     _input=_input, outer_param_dict=meta_learner.outer_param_dict, model_param_dict=meta_learner.model_param_dict,
                     dim_output=meta_learner.dims[-1], name=name, use_T=meta_learner.use_T, use_Warp =meta_learner.use_Warp)
             elif isinstance(self.data_set.train, ImageNetMetaDataset):
-                base_learner = getattr(bml_networks, '%s' % ('BOMLNetMiniMetaInit' + self.param_dict['meta_model']))(
+                base_learner = getattr(boml_networks, '%s' % ('BOMLNetMiniMetaInit' + self.param_dict['meta_model']))(
                     _input=_input, outer_param_dict=meta_learner.outer_param_dict, model_param_dict=meta_learner.model_param_dict,
                     dim_output=meta_learner.dims[-1], name=name, use_T=meta_learner.use_T, use_Warp=meta_learner.use_Warp)
         elif self.method == 'MetaRepr':
-            base_learner = getattr(bml_networks, 'BOMLNetFeedForward')(
+            base_learner = getattr(boml_networks, 'BOMLNetFeedForward')(
                 _input=_input, dims=self.data_set.train.dim_target, output_weight_initializer=weights_initializer,
                 name=name, use_T=meta_learner.use_T)
         else:
@@ -207,18 +204,18 @@ class BOMLOptimizer(object):
             self.param_dict['learning_rate'] = self.learning_rate
         if self.io_opt is None:
             if self.inner_method == 'Simple' or inner_objective_optimizer == 'SGD':
-                self.io_opt = getattr(bml_optimizer, '%s%s' % ('BOMLOpt', inner_objective_optimizer))(
+                self.io_opt = getattr(boml_optimizer, '%s%s' % ('BOMLOpt', inner_objective_optimizer))(
                     learning_rate=self._learning_rate, name=inner_objective_optimizer)
             elif inner_objective_optimizer == 'Adam':
-                self.io_opt = getattr(bml_optimizer, '%s%s' % ('BOMLOpt', 'Adam'))(
+                self.io_opt = getattr(boml_optimizer, '%s%s' % ('BOMLOpt', 'Adam'))(
                     learning_rate=self._learning_rate, beta1=beta1,beta2=beta2, name=inner_objective_optimizer)
             elif inner_objective_optimizer == 'Momentum':
-                self.io_opt = getattr(bml_optimizer, '%s%s' % ('BOMLOpt', 'Momentum'))(
+                self.io_opt = getattr(boml_optimizer, '%s%s' % ('BOMLOpt', 'Momentum'))(
                     learning_rate=self._learning_rate, momentum=momentum, name=inner_objective_optimizer)
             else:
-                self.io_opt = getattr(bml_optimizer, '%s%s' % ('BOMLOpt', inner_objective_optimizer))(
+                self.io_opt = getattr(boml_optimizer, '%s%s' % ('BOMLOpt', inner_objective_optimizer))(
                     learning_rate=self._learning_rate, name=inner_objective_optimizer)
-        assert isinstance(self.io_opt, getattr(bml_optimizer, 'BOMLOpt')), 'Must use an optimizer that extends ' \
+        assert isinstance(self.io_opt, getattr(boml_optimizer, 'BOMLOpt')), 'Must use an optimizer that extends ' \
                                                                           'the class boml.optimizers' \
                                                                           'found {} instead'.format(type(self.io_opt))
         if self.method == 'MetaRepr':
@@ -240,13 +237,6 @@ class BOMLOptimizer(object):
                         alpha = extension.get_outerparameter(name='alpha', initializer=alpha_vec)
                         t_tensor = tf.placeholder(shape=(T, 1), dtype=tf.float32, name='t_tensor')
                     else:
-                        '''
-                        if self.outer_method == 'Darts' and learn_alpha:
-                            print('In One-Stage RAD, alpha escapes the back propagation process, '
-                                  'so it can not be optimized with OS-RAD method  ')
-                            raise AssertionError
-                        else:
-                        '''
                         alpha = extension.get_outerparameter(initializer=alpha_init,
                                                    name='alpha') if learn_alpha else tf.constant(
                             alpha_init, name='alpha')

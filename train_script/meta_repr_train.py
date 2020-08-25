@@ -24,7 +24,7 @@ map_dict = {'omniglot': {'data_loader': dl.datasets.load_full_dataset.meta_omnig
 
 
 def build(metasets, learn_lr, learn_alpha, learn_alpha_itr, learn_st, lr0, MBS, T, mlr0, mlr_decay,weights_initializer,
-          process_fn=None,alpha_itr=0.0,method=None,inner_method=None, outer_method=None,
+          process_fn=None, alpha_itr=0.0, method=None, inner_method=None, outer_method=None,
           use_T=False, truncate_iter=-1):
     exs = [dl.BMLExperiment(metasets) for _ in range(MBS)]
     boml_ho = boml.BOMLOptimizer(method=method, inner_method=inner_method, outer_method=outer_method,
@@ -57,9 +57,12 @@ def build(metasets, learn_lr, learn_alpha, learn_alpha_itr, learn_st, lr0, MBS, 
                                         var_list=ex.model.var_list)
 
         boml_ho.ul_problem(outer_objective=ex.errors['validation'], inner_grad=optim_dict,
-                           outer_objective_optimizer=args.outer_opt, meta_learning_rate=mlr0,
+                           outer_objective_optimizer=args.outer_opt, meta_learning_rate=mlr0,mlr_decay=mlr_decay,
                            meta_param=tf.get_collection(boml.extension.GraphKeys.METAPARAMETERS))
-        print(boml_ho.innergradient.apply_updates)
+    meta_learning_rate = boml_ho.meta_learning_rate
+    apply_updates = boml_ho.innergradient.apply_updates
+    inner_objectives = boml_ho.inner_objectives
+    iteration = boml_ho.innergradient.iteration
     boml_ho.aggregate_all(gradient_clip=process_fn)
     saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES), max_to_keep=10)
     return exs, boml_ho, saver
@@ -104,8 +107,8 @@ def train_and_test(metasets, name_of_exp, method, inner_method, outer_method, us
 # training and testing function
 def build_and_test(metasets, exp_dir, method, inner_method, outer_method, use_T=False, truncate_iter=-1,
                    seed=None, lr0=0.04, T=5, MBS=4, learn_alpha=False, learn_alpha_itr=False,
-                   weights_initializer=tf.zeros_initializer,
-                   process_fn=None, n_test_episodes=600, iterations_to_test=list(range(100000)), alpha=0.0, darts=False):
+                   weights_initializer=tf.zeros_initializer, process_fn=None,
+                   n_test_episodes=600, iterations_to_test=list(range(100000)), alpha=0.0, darts=False):
     params = locals()
     print('params: {}'.format(params))
     mlr_decay = 1.e-5
@@ -162,7 +165,8 @@ def main():
                        outer_method=args.outer_method, use_T=args.use_T, truncate_iter=args.truncate_iter,
                        seed=args.seed, lr0=args.lr, T=args.T, MBS=args.meta_batch_size, weights_initializer=weights_initializer,
                        learn_alpha=args.learn_alpha, learn_alpha_itr=args.learn_alpha_itr,process_fn=process_fn,
-                       n_test_episodes=args.test_episodes, iterations_to_test=args.iterations_to_test, alpha=args.alpha,darts=args.darts)
+                       n_test_episodes=args.test_episodes, iterations_to_test=args.iterations_to_test,
+                       alpha=args.alpha, darts=args.darts)
 
 
 if __name__ == "__main__":

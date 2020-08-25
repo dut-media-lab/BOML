@@ -45,7 +45,7 @@ parser.add_argument('-mlr', '--meta-lr', type=float, default=0.3, metavar='NUMBE
 parser.add_argument('-mlrdr', '--meta-lr-decay-rate', type=float, default=1.e-5, metavar='NUMBER',
                     help='meta lr  inverse time decay rate')
 
-parser.add_argument('-cv', '--clip-value', type=float, default=0., metavar='NUMBER',
+parser.add_argument('-cv', '--clip_value', type=float, default=0., metavar='NUMBER',
                     help='meta gradient clip value (0. for no clipping)')
 parser.add_argument('-lr', '--lr', type=float, default=0.4, metavar='NUMBER',
                     help='starting learning rate')

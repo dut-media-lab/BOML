@@ -16,20 +16,17 @@ RAISE_ERROR_ON_DETACHED = False
 
 class BOMLOuterGradDarts(BOMLOuterGrad):
 
-    def __init__(self, inner_method='Trad', truncate_iter=-1, name='BMLOuterGradDarts'):
+    def __init__(self, inner_method='Trad', name='BMLOuterGradDarts'):
         """
        Utility method to initialize truncated reverse HG (not necessarily online),
-       :param truncate_iter: Maximum number of iterations that will be stored
        :param name: a name for the operations and variables that will be created
-       :return: ReverseHG object
+       :return: BMLOuterGradDarts object
            """
         super(BOMLOuterGradDarts, self).__init__(name)
         self._inner_method = inner_method
-        self._alpha_iter = tf.no_op()
-        self._reverse_initializer = tf.no_op()
         self._diff_initializer = tf.no_op()
         self._darts_initializer = tf.no_op()
-        self._history = deque(maxlen=truncate_iter + 1) if truncate_iter >= 0 else []
+        self._history = []
 
     # noinspection SpellCheckingInspection
     def compute_gradients(self, outer_objective, optimizer_dict, meta_param=None, param_dict=OrderedDict()):
@@ -119,12 +116,6 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
     @staticmethod
     def _create_outergradient(outer_obj, hyper):
         return BOMLOuterGradDarts._create_outergradient_from_dodh(hyper, tf.gradients(outer_obj, hyper)[0])
-
-    def _state_feed_dict_generator(self, history, T_or_generator):
-        for t, his in zip(utils.solve_int_or_generator(T_or_generator), history):
-            yield t, utils.merge_dicts(
-                *[od.state_feed_dict(h) for od, h in zip(sorted(self._optimizer_dicts), his)]
-            )
 
     def apply_gradients(self, inner_objective_feed_dicts=None, outer_objective_feed_dicts=None,
                         initializer_feed_dict=None, param_dict=OrderedDict(),  global_step=None, session=None):

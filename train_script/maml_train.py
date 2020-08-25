@@ -40,7 +40,10 @@ def build(metasets, learn_lr, lr0, MBS, T, mlr0,mlr_decay=1.e-5, process_fn=None
         boml_ho.ul_problem(outer_objective=ex.errors['validation'], meta_learning_rate=mlr0, inner_grad=optim_dict,
                             outer_objective_optimizer=args.outer_opt,mlr_decay=mlr_decay,
                             meta_param=tf.get_collection(boml.extension.GraphKeys.METAPARAMETERS))
-        print(boml_ho.innergradient.apply_updates)
+    meta_learning_rate = boml_ho.meta_learning_rate
+    apply_updates = boml_ho.innergradient.apply_updates
+    inner_objectives= boml_ho.inner_objectives
+    iteration =boml_ho.innergradient.iteration
     boml_ho.aggregate_all(gradient_clip=process_fn)
     saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES), max_to_keep=10)
     return exs, boml_ho, saver
