@@ -30,11 +30,11 @@ coverage:
         paths: null
         
 ignore:
+  - "boml/extension.py"
   - "boml/load_data/**/*"
-  - "boml/upper_iter/BOMLOuterGrad.py"
   - "boml/optimizer/BOMLOpt.py"
+  - "boml/upper_iter/BOMLOuterGrad.py"
   - "boml/setup_model/network_utils.py"
   - "boml/setup_model/BOMLNet.py"
-  - "boml/extension.py"
-  - "train_script/script_helper.py"
+  - "test/script_helper.py"
   

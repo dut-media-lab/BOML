@@ -8,7 +8,7 @@ source=
 omit= 
     boml/load_data/*
     boml/setup_model/network_utils.py
-    train_script/*
+    test/*
     
 [report]
 exclude_lines =
