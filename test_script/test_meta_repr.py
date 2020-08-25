@@ -7,7 +7,7 @@ sys.path.append('../')
 os.environ['DATASETS_FOLDER'] = '../'
 os.environ['EXPERIMENTS_FOLDER'] = '../'
 import boml.extension
-from test.script_helper import *
+from test_script.script_helper import *
 
 # from hr_resnet import hr_res_net_tcml_v1_builder, hr_res_net_tcml_Omniglot_builder
 from shutil import copyfile

@@ -36,5 +36,5 @@ ignore:
   - "boml/upper_iter/BOMLOuterGrad.py"
   - "boml/setup_model/network_utils.py"
   - "boml/setup_model/BOMLNet.py"
-  - "test/script_helper.py"
+  - "test_script/script_helper.py"
   
