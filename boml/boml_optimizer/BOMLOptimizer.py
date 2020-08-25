@@ -107,8 +107,6 @@ class BOMLOptimizer(object):
         self.data_set = dataset
         assert meta_model.startswith('V'),\
             'The dataset does not match the model chosen for meta_learner, V1,V2,...or Vk'
-        assert isinstance(dataset.train, (OmniglotMetaDataset, ImageNetMetaDataset)), \
-            'The dataset does not match the model chosen for meta_learner'
         meta_learner = getattr(boml_networks, '%s%s%s' % ('BOMLNet', dataset.train.name, self.method + meta_model))(
             _input=_input, dim_output=dataset.train.dim_target, name=name, use_T=use_T,
             use_Warp=use_Warp, outer_method=self.outer_method,**model_args)
