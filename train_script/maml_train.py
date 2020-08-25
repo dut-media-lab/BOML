@@ -41,7 +41,7 @@ def build(metasets, learn_lr, lr0, MBS, T, mlr0,mlr_decay=1.e-5, process_fn=None
                             outer_objective_optimizer=args.outer_opt,mlr_decay=mlr_decay,
                             meta_param=tf.get_collection(boml.extension.GraphKeys.METAPARAMETERS))
     meta_learning_rate = boml_ho.meta_learning_rate
-    apply_updates = boml_ho.innergradient.apply_updates
+    apply_updates = boml_ho.outergradient.apply_updates
     inner_objectives= boml_ho.inner_objectives
     iteration =boml_ho.innergradient.iteration
     boml_ho.aggregate_all(gradient_clip=process_fn)

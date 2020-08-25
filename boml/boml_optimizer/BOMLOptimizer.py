@@ -216,8 +216,10 @@ class BOMLOptimizer(object):
                 self.io_opt = getattr(boml_optimizer, '%s%s' % ('BOMLOpt', inner_objective_optimizer))(
                     learning_rate=self._learning_rate, name=inner_objective_optimizer)
         assert isinstance(self.io_opt, getattr(boml_optimizer, 'BOMLOpt')), 'Must use an optimizer that extends ' \
-                                                                          'the class boml.optimizers' \
-                                                                          'found {} instead'.format(type(self.io_opt))
+                                                                            'the class boml.optimizers ' \
+                                                                            'found {} instead'.format(type(self.io_opt))
+        assert self._method in ('MetaRepr','MetaInit'), \
+            'illegal initialization value for argument:method, should be in [MetaRepr, MetaInit]'
         if self.method == 'MetaRepr':
             if self.inner_method == 'Aggr':
                 assert outer_objective is not None, \
@@ -245,9 +247,7 @@ class BOMLOptimizer(object):
                     self._param_dict['t_tensor'] = t_tensor
         elif self.method == 'MetaInit':
             self._param_dict['first_order'] = first_order
-        else:
-            print('illegal initialization value for argument:method, should be in [meta_repr, maml]')
-            raise AssertionError
+
         assert isinstance(experiment,
                           BMLExperiment), 'MetaInit based methods require specialized ' \
                                           'task model for each generated task,' \

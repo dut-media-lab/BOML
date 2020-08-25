@@ -89,15 +89,6 @@ class BOMLInnerGradSimple(BOMLInnerGradTrad):
         return task_model.task_parameter, outer_param_grad, model_param_grad
 
     @property
-    def inner_param_fast_tensor(self):
-        """
-        :return: temporary weights dictionary used in maml and fomaml for back propagation
-        """
-        assert self._inner_param_fast_tensor is not None, \
-            'temporary weights dictionary must be initialized before being called'
-        return self._inner_param_fast_tensor
-
-    @property
     def outer_param_tensor(self):
         """
         :return: temporary weights dictionary used in maml and fomaml for back propagation
