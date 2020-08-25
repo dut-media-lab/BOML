@@ -1,7 +1,8 @@
 
 # BOML - A Bilevel Optimization Library in Python for Multi-Task and Meta Learning
-![Travis Status](https://travis-ci.com/bmlsoc/BOML.svg?branch=master)
+![Travis Status](https://travis-ci.com/dut-media-lab/BOML.svg?branch=master)
 ![license](https://img.shields.io/badge/license-MIT-000000.svg)
+![codecov](https://codecov.io/gh/dut-media-lab/BOML/branch/master/graph/badge.svg)](https://codecov.io/gh/dut-media-lab/BOML)
 ![Documentation Status](https://readthedocs.org/projects/pybml/badge/?version=latest)
 ![Language](https://img.shields.io/badge/language-Python-brightgreen.svg)
 
