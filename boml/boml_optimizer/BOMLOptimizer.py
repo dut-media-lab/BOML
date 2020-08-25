@@ -4,8 +4,6 @@ import numpy as np
 import tensorflow as tf
 
 from boml import utils, extension
-from boml.load_data import ImageNetMetaDataset, OmniglotMetaDataset, BMLExperiment
-
 importlib = __import__('importlib')
 boml_networks = importlib.import_module('boml.setup_model')
 inner_grads = importlib.import_module('boml.lower_iter')
@@ -106,29 +104,14 @@ class BOMLOptimizer(object):
                 self.param_dict['outer_loss_func'] = model_args['outer_loss_func']
             else:
                 self.param_dict['outer_loss_func'] = utils.cross_entropy
-
-        assert isinstance(dataset.train, (OmniglotMetaDataset, ImageNetMetaDataset)), \
-            'The dataset does not match the model chosen for meta_learner'
         self.data_set = dataset
         assert meta_model.startswith('V'),\
             'The dataset does not match the model chosen for meta_learner, V1,V2,...or Vk'
-        if self.method == 'MetaInit':
-            if isinstance(dataset.train, OmniglotMetaDataset):
-                meta_learner = getattr(boml_networks, '%s' % ('BOMLNetOmniglotMetaInit' + meta_model))(
-                    _input=_input, dim_output=dataset.train.dim_target, name=name, use_T=use_T,use_Warp=use_Warp,**model_args)
-            elif isinstance(dataset.train, ImageNetMetaDataset):
-                meta_learner = getattr(boml_networks, '%s' % ('BOMLNetMiniMetaInit' + meta_model))(
-                    _input=_input, dim_output=dataset.train.dim_target, name=name, use_T=use_T, use_Warp=use_Warp,**model_args)
-        elif self.method == 'MetaRepr':
-            if isinstance(dataset.train, OmniglotMetaDataset):
-                meta_learner = getattr(boml_networks, '%s' % ('BOMLNetOmniglotMetaRepr' + meta_model))(
-                    _input=_input, name=name, use_T=use_T, outer_method=self.outer_method, **model_args)
-            elif isinstance(dataset.train, ImageNetMetaDataset):
-                meta_learner = getattr(boml_networks, '%s' % ('BOMLNetMiniMetaRepr' + meta_model))(
-                    _input=_input, name=name, use_T=use_T, outer_method=self.outer_method,**model_args)
-        else:
-            print('initialize method arguement, should be in list \an [MetaRepr,MetaInitl]')
-            raise AssertionError
+        assert isinstance(dataset.train, (OmniglotMetaDataset, ImageNetMetaDataset)), \
+            'The dataset does not match the model chosen for meta_learner'
+        meta_learner = getattr(boml_networks, '%s%s%s' % ('BOMLNet', dataset.train.name, self.method + meta_model))(
+            _input=_input, dim_output=dataset.train.dim_target, name=name, use_T=use_T,
+            use_Warp=use_Warp, outer_method=self.outer_method,**model_args)
         self.param_dict['meta_model'] = meta_model
         self._meta_model = meta_learner
 
@@ -146,14 +129,11 @@ class BOMLOptimizer(object):
         :return: task-specific model part
         """
         if self.method == 'MetaInit':
-            if isinstance(self.data_set.train, OmniglotMetaDataset):
-                base_learner = getattr(boml_networks, '%s' % ('BOMLNetOmniglotMetaInit' + self.param_dict['meta_model']))(
-                    _input=_input, outer_param_dict=meta_learner.outer_param_dict, model_param_dict=meta_learner.model_param_dict,
-                    dim_output=meta_learner.dims[-1], name=name, use_T=meta_learner.use_T, use_Warp =meta_learner.use_Warp)
-            elif isinstance(self.data_set.train, ImageNetMetaDataset):
-                base_learner = getattr(boml_networks, '%s' % ('BOMLNetMiniMetaInit' + self.param_dict['meta_model']))(
-                    _input=_input, outer_param_dict=meta_learner.outer_param_dict, model_param_dict=meta_learner.model_param_dict,
-                    dim_output=meta_learner.dims[-1], name=name, use_T=meta_learner.use_T, use_Warp=meta_learner.use_Warp)
+            base_learner = getattr(boml_networks, '%s%s%s' % ('BOMLNet', self.data_set.train.name,
+                                                              self.method+self.param_dict['meta_model']))(
+                _input=_input, outer_param_dict=meta_learner.outer_param_dict,
+                model_param_dict=meta_learner.model_param_dict,dim_output=meta_learner.dims[-1],
+                name=name, use_T=meta_learner.use_T, outer_method=self.outer_method, use_Warp=meta_learner.use_Warp)
         elif self.method == 'MetaRepr':
             base_learner = getattr(boml_networks, 'BOMLNetFeedForward')(
                 _input=_input, dims=self.data_set.train.dim_target, output_weight_initializer=weights_initializer,
