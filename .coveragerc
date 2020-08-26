@@ -2,9 +2,6 @@
 
 [run]
 parallel=True
-source=
-    boml/lower_iter/*
-    boml/upper_iter/*
 omit= 
     boml/load_data/*
     boml/setup_model/network_utils.py

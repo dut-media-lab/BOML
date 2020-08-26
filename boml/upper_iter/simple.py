@@ -3,19 +3,22 @@ from collections import OrderedDict
 import tensorflow as tf
 
 from boml import utils
-from boml.upper_iter.BOMLOuterGrad import BOMLOuterGrad
+from boml.upper_iter.outer_grad import BOMLOuterGrad
 
 
 class BOMLOuterGradSimple(BOMLOuterGrad):
-    def __init__(self, inner_method='Simple', history=None, name='BMLOuterOptSimple'):
+    def __init__(self, inner_method="Simple", history=None, name="BMLOuterOptSimple"):
         super(BOMLOuterGradSimple, self).__init__(name)
         self._inner_method = inner_method
         self._history = history or []
         self._reverse_initializer = tf.no_op()
         self.reptile_initializer = tf.no_op()
+
     # noinspection SpellCheckingInspection
 
-    def compute_gradients(self, outer_objective, optimizer_dict, meta_param=None, param_dict =OrderedDict()):
+    def compute_gradients(
+        self, outer_objective, optimizer_dict, meta_param=None, param_dict=OrderedDict()
+    ):
         """
         Function that adds to the computational graph all the operations needend for computing
         the hypergradients in a "dynamic" way, without unrolling the entire optimization graph.
@@ -30,30 +33,49 @@ class BOMLOuterGradSimple(BOMLOuterGrad):
         :param param_dict: dictionary of parameters to specify different methods
         :return: list of outer parameters involved in the computation
         """
-        meta_param = super(BOMLOuterGradSimple, self).compute_gradients(outer_objective, optimizer_dict, meta_param)
+        meta_param = super(BOMLOuterGradSimple, self).compute_gradients(
+            outer_objective, optimizer_dict, meta_param
+        )
 
         with tf.variable_scope(outer_objective.op.name):
-            '''
+            """
             if len(meta_param) == len(list(optimizer_dict.state)):
                 doo_dhypers = tf.gradients(outer_objective,list(optimizer_dict.state))
                 #doo_dhypers = tf.gradients(outer_objective, list(optimizer_dict.model_fast_weights.values()))
             else:
-                '''
-            if param_dict['use_Warp']:
-                doo_dhypers = optimizer_dict.outer_param_tensor + optimizer_dict.model_param_tensor
-                doo_dhypers += tf.gradients(outer_objective, meta_param[len(doo_dhypers):])
+                """
+            if param_dict["use_Warp"]:
+                doo_dhypers = (
+                    optimizer_dict.outer_param_tensor
+                    + optimizer_dict.model_param_tensor
+                )
+                doo_dhypers += tf.gradients(
+                    outer_objective, meta_param[len(doo_dhypers) :]
+                )
             else:
-                doo_dhypers = tf.gradients(outer_objective,
-                                           list(optimizer_dict.state) + meta_param[len(optimizer_dict.state):])
+                doo_dhypers = tf.gradients(
+                    outer_objective,
+                    list(optimizer_dict.state)
+                    + meta_param[len(optimizer_dict.state) :],
+                )
 
             for h, doo_dh in zip(meta_param, doo_dhypers):
-                assert doo_dh is not None, BOMLOuterGrad._ERROR_HYPER_DETACHED.format(doo_dh)
+                assert doo_dh is not None, BOMLOuterGrad._ERROR_HYPER_DETACHED.format(
+                    doo_dh
+                )
                 self._hypergrad_dictionary[h].append(doo_dh)
 
             return meta_param
 
-    def apply_gradients(self, inner_objective_feed_dicts=None, outer_objective_feed_dicts=None,
-                        initializer_feed_dict=None, param_dict=OrderedDict(), global_step=None, session=None):
+    def apply_gradients(
+        self,
+        inner_objective_feed_dicts=None,
+        outer_objective_feed_dicts=None,
+        initializer_feed_dict=None,
+        param_dict=OrderedDict(),
+        global_step=None,
+        session=None,
+    ):
 
         ss = session or tf.get_default_session()
 
@@ -64,4 +86,3 @@ class BOMLOuterGradSimple(BOMLOuterGrad):
 
     def _save_history(self, weights):
         self._history.append(weights)
-

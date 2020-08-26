@@ -15,8 +15,16 @@ class BOMLNet(object):
     Base object for models
     """
 
-    def __init__(self, _input, outer_param_dict=OrderedDict(), model_param_dict=OrderedDict(),
-                 task_parameter=None, var_collections=None, name=None, reuse=False):
+    def __init__(
+        self,
+        _input,
+        outer_param_dict=OrderedDict(),
+        model_param_dict=OrderedDict(),
+        task_parameter=None,
+        var_collections=None,
+        name=None,
+        reuse=False,
+    ):
         """
         Creates an object that creates model parameters and defines the network structure.
         :param _input: the input shape for defined network
@@ -30,7 +38,7 @@ class BOMLNet(object):
             try:
                 name = tf.get_variable_scope().name
             except IndexError:
-                print('Warning: no name and no variable scope given', sys.stderr)
+                print("Warning: no name and no variable scope given", sys.stderr)
         self.outer_param_dict = outer_param_dict
         self.model_param_dict = model_param_dict
         self.task_parameter = task_parameter
@@ -47,7 +55,9 @@ class BOMLNet(object):
         self._tf_saver = None
 
         with self._variable_scope(reuse):
-            if (len(self.outer_param_dict) == 0) and (callable(getattr(self, 'create_outer_parameters', None))):
+            if (len(self.outer_param_dict) == 0) and (
+                callable(getattr(self, "create_outer_parameters", None))
+            ):
                 self.create_outer_parameters()
             self._forward()
 
@@ -73,15 +83,19 @@ class BOMLNet(object):
 
     def __add__(self, other):
         if self.name not in tf.get_variable_scope().name:
-            print('Warning: adding layers outside model variable scope', file=sys.stderr)
+            print(
+                "Warning: adding layers outside model variable scope", file=sys.stderr
+            )
         self.layers.append(other)
         return self
 
     @property
     def var_list(self):
         if len(tf.get_collection(tf.GraphKeys.MODEL_VARIABLES, self.name)) == 0:
-            assert self.task_parameter is not None, 'No Model Variables to optimize, ' \
-                                                 'please double check your computational graph'
+            assert self.task_parameter is not None, (
+                "No Model Variables to optimize, "
+                "please double check your computational graph"
+            )
             return list(self.task_parameter.values())
         else:
             return tf.get_collection(tf.GraphKeys.MODEL_VARIABLES, self.name)
@@ -91,13 +105,28 @@ class BOMLNet(object):
         return self[-1]
 
     def create_initial_parameter(self, primary_outerparameter=None):
-        assert primary_outerparameter is not None, 'Primary hyperparameters ' \
-                                                   'must be provided for initialization of slot variables'
+        assert primary_outerparameter is not None, (
+            "Primary hyperparameters "
+            "must be provided for initialization of slot variables"
+        )
         # task_weights_keys = [key for key in primary_hyperparameter.keys() if 'prob' not in key and 'z' not in key]
-        initial_parameter = OrderedDict([(primary_key, slot_creator.create_slot(primary=self.out,
-                                                                                val=primary_outerparameter[primary_key].initialized_value(),
-                                                                                name=primary_key)) for primary_key in primary_outerparameter.keys()])
-        [tf.add_to_collection(self.var_collections, initial_param) for initial_param in initial_parameter.values()]
+        initial_parameter = OrderedDict(
+            [
+                (
+                    primary_key,
+                    slot_creator.create_slot(
+                        primary=self.out,
+                        val=primary_outerparameter[primary_key].initialized_value(),
+                        name=primary_key,
+                    ),
+                )
+                for primary_key in primary_outerparameter.keys()
+            ]
+        )
+        [
+            tf.add_to_collection(self.var_collections, initial_param)
+            for initial_param in initial_parameter.values()
+        ]
         remove_from_collection(GraphKeys.GLOBAL_VARIABLES, *initial_parameter.values())
         return initial_parameter
 
@@ -116,7 +145,7 @@ class BOMLNet(object):
         """
         # TODO placeholder are not useful at all here... just change initializer of tf.Variables !
         ss = session or tf.get_default_session()
-        assert ss, 'No default session'
+        assert ss, "No default session"
         if not self._var_initializer_op:
             self._var_initializer_op = tf.variables_initializer(self.var_list)
         ss.run(self._var_initializer_op)
@@ -125,32 +154,35 @@ class BOMLNet(object):
         return self.var_list
 
     def _forward(self):
-        '''
+        """
         _forward() uses defined convolutional neural networks with initial input
         :return:
-        '''
+        """
         raise NotImplemented()
 
     def re_forward(self, new_input):
-        '''
+        """
         reuses defined convolutional with new input and update the output results
         :param new_input: new input with same shape as the old one
         :return:
-        '''
+        """
         raise NotImplemented()
 
     @property
     def tf_saver(self):
         if not self._tf_saver:
-            self._tf_saver = tf.train.Saver(var_list=self._variables_to_save(), max_to_keep=1)
+            self._tf_saver = tf.train.Saver(
+                var_list=self._variables_to_save(), max_to_keep=1
+            )
         return self._tf_saver
 
     def save(self, file_path, session=None, global_step=None):
         # TODO change this method! save the class (or at least the attributes you can save
-        self.tf_saver.save(session or tf.get_default_session(), file_path, global_step=global_step)
+        self.tf_saver.save(
+            session or tf.get_default_session(), file_path, global_step=global_step
+        )
 
     def restore(self, file_path, session=None, global_step=None):
-        if global_step: file_path += '-' + str(global_step)
+        if global_step:
+            file_path += "-" + str(global_step)
         self.tf_saver.restore(session or tf.get_default_session(), file_path)
-
-

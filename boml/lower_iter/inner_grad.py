@@ -5,10 +5,12 @@ from collections import OrderedDict
 import tensorflow as tf
 
 # import numpy as np
-GRADIENT_NONE_MESSAGE = 'WARNING: the gradient w.r.t.the tf.Variable\n {}\n is None;\n ' \
-                        'Check the computational graph of the inner objective, and be sure you\n' \
-                        'are not considering including variables that should not be there among the\n' \
-                        'inner variables.'
+GRADIENT_NONE_MESSAGE = (
+    "WARNING: the gradient w.r.t.the tf.Variable\n {}\n is None;\n "
+    "Check the computational graph of the inner objective, and be sure you\n"
+    "are not considering including variables that should not be there among the\n"
+    "inner variables."
+)
 
 
 class BOMLInnerGradTrad(object):
@@ -17,21 +19,35 @@ class BOMLInnerGradTrad(object):
         self._dynamics = dynamics
         self._iteration = None
         self._initialization = None
-        self._init_dyn = None  # for phi_0 (will be a dictionary (state-variable, phi_0 op)
+        self._init_dyn = (
+            None  # for phi_0 (will be a dictionary (state-variable, phi_0 op)
+        )
         self.objective = objective
         self.bml_opt = None
 
     @staticmethod
-    def compute_gradients(bml_opt, loss_inner, loss_outer=None, param_dict=OrderedDict(),
-                          var_list=None, **inner_kargs):
+    def compute_gradients(
+        bml_opt,
+        loss_inner,
+        loss_outer=None,
+        param_dict=OrderedDict(),
+        var_list=None,
+        **inner_kargs
+    ):
 
-        minimize_kargs = {inner_arg: inner_kargs[inner_arg] for inner_arg in
-                          set(inner_kargs.keys()) - set(param_dict.keys())}
+        minimize_kargs = {
+            inner_arg: inner_kargs[inner_arg]
+            for inner_arg in set(inner_kargs.keys()) - set(param_dict.keys())
+        }
 
-        assert loss_inner is not None, 'argument:inner_objective must be initialized'
-        update_op, dynamics = bml_opt.minimize(loss_inner=loss_inner, var_list=var_list, *minimize_kargs)
+        assert loss_inner is not None, "argument:inner_objective must be initialized"
+        update_op, dynamics = bml_opt.minimize(
+            loss_inner=loss_inner, var_list=var_list, *minimize_kargs
+        )
 
-        return BOMLInnerGradTrad(update_op=update_op, dynamics=dynamics, objective=loss_inner)  # loss_inner
+        return BOMLInnerGradTrad(
+            update_op=update_op, dynamics=dynamics, objective=loss_inner
+        )  # loss_inner
 
     @property
     def apply_updates(self):
@@ -39,7 +55,9 @@ class BOMLInnerGradTrad(object):
         Descent step, as returned by `tf.train.Optimizer.apply_gradients`.
         :return:
         """
-        assert self._updates_op is not None, 'descent step operation must be initialized before being called'
+        assert (
+            self._updates_op is not None
+        ), "descent step operation must be initialized before being called"
         return self._updates_op
 
     @property
@@ -53,7 +71,9 @@ class BOMLInnerGradTrad(object):
         """
         if self._iteration is None:
             with tf.control_dependencies([self._updates_op]):  # ?
-                self._iteration = self._state_read()  # performs an iteration and returns the
+                self._iteration = (
+                    self._state_read()
+                )  # performs an iteration and returns the
                 # value of all variables in the state (ordered according to dyn)
 
         return self._iteration
@@ -67,11 +87,17 @@ class BOMLInnerGradTrad(object):
         """
         if self._initialization is None:
             with tf.control_dependencies([tf.variables_initializer(self.state)]):
-                if self._init_dyn is not None:  # create assign operation for initialization
-                    self._initialization = [k.assign(v) for k, v in self._init_dyn.items()]
+                if (
+                    self._init_dyn is not None
+                ):  # create assign operation for initialization
+                    self._initialization = [
+                        k.assign(v) for k, v in self._init_dyn.items()
+                    ]
                     # return these new initialized values (and ignore variable initializers)
                 else:
-                    self._initialization = self._state_read()  # initialize state variables and
+                    self._initialization = (
+                        self._state_read()
+                    )  # initialize state variables and
                     # return the initialized value
 
         return self._initialization
@@ -99,7 +125,9 @@ class BOMLInnerGradTrad(object):
         """
         :return: generator of read value op for the state variables
         """
-        return [v.read_value() for v in self.state]  # not sure about read_value vs value
+        return [
+            v.read_value() for v in self.state
+        ]  # not sure about read_value vs value
 
     def state_feed_dict(self, his):
         """
@@ -121,4 +149,3 @@ class BOMLInnerGradTrad(object):
 
     def __len__(self):
         return len(self._dynamics)
-

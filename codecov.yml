@@ -32,9 +32,9 @@ coverage:
 ignore:
   - "boml/extension.py"
   - "boml/load_data/**/*"
-  - "boml/optimizer/BOMLOpt.py"
-  - "boml/upper_iter/BOMLOuterGrad.py"
+  - "boml/optimizer/opt.py"
+  - "boml/upper_iter/outer_grad.py"
   - "boml/setup_model/network_utils.py"
-  - "boml/setup_model/BOMLNet.py"
+  - "boml/setup_model/network.py"
   - "test_script/script_helper.py"
   

@@ -9,14 +9,15 @@ from tensorflow.python.training import slot_creator
 
 import boml.extension
 from boml import utils
-from boml.upper_iter.BOMLOuterGrad import BOMLOuterGrad
+from boml.upper_iter.outer_grad import BOMLOuterGrad
 
 RAISE_ERROR_ON_DETACHED = False
 
 
 class BOMLOuterGradReverse(BOMLOuterGrad):
-
-    def __init__(self, inner_method='Trad', truncate_iter=-1, name='BMLOuterGradReverse'):
+    def __init__(
+        self, inner_method="Trad", truncate_iter=-1, name="BMLOuterGradReverse"
+    ):
         """
        Utility method to initialize truncated reverse HG (not necessarily online),
        :param truncate_iter: Maximum number of iterations that will be stored
@@ -32,7 +33,9 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
         self._history = deque(maxlen=truncate_iter + 1) if truncate_iter >= 0 else []
 
     # noinspection SpellCheckingInspection
-    def compute_gradients(self, outer_objective, optimizer_dict, meta_param=None, param_dict=OrderedDict()):
+    def compute_gradients(
+        self, outer_objective, optimizer_dict, meta_param=None, param_dict=OrderedDict()
+    ):
         """
         Function that adds to the computational graph all the operations needend for computing
         the hypergradients in a "dynamic" way, without unrolling the entire optimization graph.
@@ -47,7 +50,9 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
 
         :return: list of outer parameters involved in the computation
         """
-        meta_param = super(BOMLOuterGradReverse, self).compute_gradients(outer_objective, optimizer_dict, meta_param)
+        meta_param = super(BOMLOuterGradReverse, self).compute_gradients(
+            outer_objective, optimizer_dict, meta_param
+        )
 
         with tf.variable_scope(outer_objective.op.name):
             doo_ds = tf.gradients(outer_objective, list(optimizer_dict.state))
@@ -55,13 +60,15 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
 
             alpha_vec = utils.vectorize_all(alphas)
             dyn_vec = utils.vectorize_all(list(optimizer_dict.dynamics))
-            lag_phi_t = utils.dot(alpha_vec, dyn_vec, name='iter_wise_lagrangian_part1')
+            lag_phi_t = utils.dot(alpha_vec, dyn_vec, name="iter_wise_lagrangian_part1")
 
             alpha_dot_B = tf.gradients(lag_phi_t, meta_param)
 
             hyper_grad_vars, hyper_grad_step = [], tf.no_op()
             for dl_dh, hyper in zip(alpha_dot_B, meta_param):
-                assert dl_dh is not None, BOMLOuterGrad._ERROR_HYPER_DETACHED.format(hyper)
+                assert dl_dh is not None, BOMLOuterGrad._ERROR_HYPER_DETACHED.format(
+                    hyper
+                )
                 hgv = None
                 if dl_dh is not None:
                     hgv = self._create_outergradient(outer_objective, hyper)
@@ -70,23 +77,44 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
                 hyper_grad_vars.append(hgv)
                 # first update hypergradinet then alphas.
             with tf.control_dependencies([hyper_grad_step]):
-                _alpha_iter = tf.group(*[alpha.assign(dl_ds) for alpha, dl_ds
-                                         in zip(alphas, tf.gradients(lag_phi_t, list(optimizer_dict.state)))])
+                _alpha_iter = tf.group(
+                    *[
+                        alpha.assign(dl_ds)
+                        for alpha, dl_ds in zip(
+                            alphas, tf.gradients(lag_phi_t, list(optimizer_dict.state))
+                        )
+                    ]
+                )
             self._alpha_iter = tf.group(self._alpha_iter, _alpha_iter)
             # put all the backward iterations toghether
-            [self._hypergrad_dictionary[h].append(hg) for h, hg in zip(meta_param, hyper_grad_vars)]
-            self._reverse_initializer = tf.group(self._reverse_initializer,
-                                                 tf.variables_initializer(alphas),
-                                                 tf.variables_initializer([h for h in hyper_grad_vars
-                                                                           if hasattr(h, 'initializer')]))
+            [
+                self._hypergrad_dictionary[h].append(hg)
+                for h, hg in zip(meta_param, hyper_grad_vars)
+            ]
+            self._reverse_initializer = tf.group(
+                self._reverse_initializer,
+                tf.variables_initializer(alphas),
+                tf.variables_initializer(
+                    [h for h in hyper_grad_vars if hasattr(h, "initializer")]
+                ),
+            )
             return meta_param
 
     @staticmethod
     def _create_lagrangian_multipliers(optimizer_dict, doo_ds):
-        lag_mul = [slot_creator.create_slot(v.initialized_value(), utils.val_or_zero(der, v), 'alpha') for v, der
-                   in zip(optimizer_dict.state, doo_ds)]
-        [tf.add_to_collection(boml.extension.GraphKeys.LAGRANGIAN_MULTIPLIERS, lm) for lm in lag_mul]
-        boml.extension.remove_from_collection(boml.extension.GraphKeys.GLOBAL_VARIABLES, *lag_mul)
+        lag_mul = [
+            slot_creator.create_slot(
+                v.initialized_value(), utils.val_or_zero(der, v), "alpha"
+            )
+            for v, der in zip(optimizer_dict.state, doo_ds)
+        ]
+        [
+            tf.add_to_collection(boml.extension.GraphKeys.LAGRANGIAN_MULTIPLIERS, lm)
+            for lm in lag_mul
+        ]
+        boml.extension.remove_from_collection(
+            boml.extension.GraphKeys.GLOBAL_VARIABLES, *lag_mul
+        )
         # this prevents the 'automatic' initialization with tf.global_variables_initializer.
         return lag_mul
 
@@ -96,29 +124,47 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
         Creates one hyper-gradient as a variable. doo_dhypers:  initialization, that is the derivative of
         the outer objective w.r.t this hyper
         """
-        hgs = slot_creator.create_slot(hyper, utils.val_or_zero(doo_dhypers, hyper), 'outergradient')
-        boml.extension.remove_from_collection(boml.extension.GraphKeys.GLOBAL_VARIABLES, hgs)
+        hgs = slot_creator.create_slot(
+            hyper, utils.val_or_zero(doo_dhypers, hyper), "outergradient"
+        )
+        boml.extension.remove_from_collection(
+            boml.extension.GraphKeys.GLOBAL_VARIABLES, hgs
+        )
         return hgs
 
     @staticmethod
     def _create_outergradient(outer_obj, hyper):
-        return BOMLOuterGradReverse._create_outergradient_from_dodh(hyper, tf.gradients(outer_obj, hyper)[0])
+        return BOMLOuterGradReverse._create_outergradient_from_dodh(
+            hyper, tf.gradients(outer_obj, hyper)[0]
+        )
 
     def _state_feed_dict_generator(self, history, T_or_generator):
         for t, his in zip(utils.solve_int_or_generator(T_or_generator), history):
             yield t, utils.merge_dicts(
-                *[od.state_feed_dict(h) for od, h in zip(sorted(self._optimizer_dicts), his)]
+                *[
+                    od.state_feed_dict(h)
+                    for od, h in zip(sorted(self._optimizer_dicts), his)
+                ]
             )
 
-    def apply_gradients(self, inner_objective_feed_dicts=None, outer_objective_feed_dicts=None,
-                        initializer_feed_dict=None, param_dict=OrderedDict(), train_batches=None, experiments=[], global_step=None, session=None):
+    def apply_gradients(
+        self,
+        inner_objective_feed_dicts=None,
+        outer_objective_feed_dicts=None,
+        initializer_feed_dict=None,
+        param_dict=OrderedDict(),
+        train_batches=None,
+        experiments=[],
+        global_step=None,
+        session=None,
+    ):
 
-        if self._inner_method == 'Aggr':
-            alpha = param_dict['alpha']
-            t_tensor = param_dict['t_tensor']
+        if self._inner_method == "Aggr":
+            alpha = param_dict["alpha"]
+            t_tensor = param_dict["t_tensor"]
 
         # same thing for T
-        T_or_generator = utils.as_tuple_or_list(param_dict['T'])
+        T_or_generator = utils.as_tuple_or_list(param_dict["T"])
 
         ss = session or tf.get_default_session()
 
@@ -132,7 +178,7 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
             # nonlocal t  # with nonlocal would not be necessary the variable T... not compatible with 2.7
 
             _fd = inner_objective_feed_dicts
-            if self._inner_method == 'Aggr':
+            if self._inner_method == "Aggr":
                 _fd.update(outer_objective_feed_dicts)
                 if not alpha.get_shape().as_list():
                     _fd[t_tensor] = float(t + 1.0)
@@ -146,21 +192,29 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
 
         # initialization of support variables (supports stochastic evaluation of outer objective via global_step ->
         # variable)
-        reverse_init_fd = utils.maybe_call(outer_objective_feed_dicts, utils.maybe_eval(global_step, ss))
+        reverse_init_fd = utils.maybe_call(
+            outer_objective_feed_dicts, utils.maybe_eval(global_step, ss)
+        )
         # now adding also the initializer_feed_dict because of tf quirk...
-        maybe_init_fd = utils.maybe_call(initializer_feed_dict, utils.maybe_eval(global_step, ss))
+        maybe_init_fd = utils.maybe_call(
+            initializer_feed_dict, utils.maybe_eval(global_step, ss)
+        )
         reverse_init_fd = utils.merge_dicts(reverse_init_fd, maybe_init_fd)
         ss.run(self._reverse_initializer, feed_dict=reverse_init_fd)
 
         del self._history[-1]  # do not consider last point
 
-        for pt, state_feed_dict in self._state_feed_dict_generator(reversed(self._history), T_or_generator[-1]):
+        for pt, state_feed_dict in self._state_feed_dict_generator(
+            reversed(self._history), T_or_generator[-1]
+        ):
             # this should be fine also for truncated reverse... but check again the index t
-            t = T - pt - 1  # if T is int then len(self.history) is T + 1 and this numerator
+            t = (
+                T - pt - 1
+            )  # if T is int then len(self.history) is T + 1 and this numerator
 
             new_fd = utils.merge_dicts(state_feed_dict, inner_objective_feed_dicts)
 
-            if self._inner_method == 'Aggr':
+            if self._inner_method == "Aggr":
                 new_fd = utils.merge_dicts(new_fd, outer_objective_feed_dicts)
                 # modified - mark
                 if not alpha.shape.as_list():

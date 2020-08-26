@@ -1,4 +1,3 @@
-
-from boml.lower_iter.BOMLInnerGradTrad import BOMLInnerGradTrad
-from boml.lower_iter.BOMLInnerGradSimple import BOMLInnerGradSimple
-from boml.lower_iter.BOMLInnerGradAggr import BOMLInnerGradAggr
+from boml.lower_iter.inner_grad import BOMLInnerGradTrad
+from boml.lower_iter.simple import BOMLInnerGradSimple
+from boml.lower_iter.aggr import BOMLInnerGradAggr

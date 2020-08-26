@@ -4,19 +4,20 @@ from collections import OrderedDict
 
 import tensorflow as tf
 
-from boml.optimizer.BOMLOpt import BOMLOpt
+from boml.optimizer.opt import BOMLOpt
 
 # import numpy as np
 
-GRADIENT_NONE_MESSAGE = 'WARNING: the gradient w.r.t.the tf.Variable\n {}\n is None;\n ' \
-                        'Check the computational graph of the inner objective, and be sure you\n' \
-                        'are not considering including variables that should not be there among the\n' \
-                        'inner variables.'
+GRADIENT_NONE_MESSAGE = (
+    "WARNING: the gradient w.r.t.the tf.Variable\n {}\n is None;\n "
+    "Check the computational graph of the inner objective, and be sure you\n"
+    "are not considering including variables that should not be there among the\n"
+    "inner variables."
+)
 
 
 class BOMLOptSGD(BOMLOpt, tf.train.GradientDescentOptimizer):
-
-    def __init__(self, learning_rate, use_locking=False, name='GradientDescent'):
+    def __init__(self, learning_rate, use_locking=False, name="GradientDescent"):
         super(BOMLOptSGD, self).__init__(learning_rate, use_locking, name)
 
     def apply_gradients(self, grads_and_vars, global_step=None, name=None):
@@ -28,7 +29,9 @@ class BOMLOptSGD(BOMLOpt, tf.train.GradientDescentOptimizer):
         :return: gradient descent step :apply_updates; \n and corresponding dynamics
         """
         # grads_and_vars=self.soft_thresholding(grads_and_vars);
-        update_op = super(BOMLOptSGD, self).apply_gradients(grads_and_vars, global_step, name)
+        update_op = super(BOMLOptSGD, self).apply_gradients(
+            grads_and_vars, global_step, name
+        )
 
         dynamics = OrderedDict()
         for g, w in grads_and_vars:
@@ -38,4 +41,4 @@ class BOMLOptSGD(BOMLOpt, tf.train.GradientDescentOptimizer):
         return update_op, dynamics
 
     def __str__(self):
-        return '{}-lr={}'.format(self._name, self._learning_rate)
+        return "{}-lr={}".format(self._name, self._learning_rate)

@@ -15,7 +15,11 @@ def get_indices_balanced_classes(n_examples, labels, forbidden_indices):
     current_class = 0
     for i in range(n_examples):
         index = np.random.random_integers(0, N - 1, 1)[0]
-        while index in indices or index in forbidden_indices or np.argmax(labels[index]) != current_class:
+        while (
+            index in indices
+            or index in forbidden_indices
+            or np.argmax(labels[index]) != current_class
+        ):
             index = np.random.random_integers(0, N - 1, 1)[0]
         indices.append(index)
         current_class = (current_class + 1) % n_classes
@@ -29,14 +33,15 @@ def test_if_balanced(dataset):
     class_counter = [0] * n_classes
     for l in labels:
         class_counter[np.argmax(l)] += 1
-    print('exemple by class: ', class_counter)
+    print("exemple by class: ", class_counter)
 
 
 def maybe_cast_to_scalar(what):
     return what[0] if len(what) == 1 else what
 
 
-def pad(_example, _size): return np.concatenate([_example] * _size)
+def pad(_example, _size):
+    return np.concatenate([_example] * _size)
 
 
 def stack_or_concat(list_of_arays):
@@ -55,7 +60,11 @@ def vstack(lst):
     :param lst:
     :return:
     """
-    return sp.vstack(lst) if sp and isinstance(lst[0], sc_sp.csr.csr_matrix) else np.vstack(lst)
+    return (
+        sp.vstack(lst)
+        if sp and isinstance(lst[0], sc_sp.csr.csr_matrix)
+        else np.vstack(lst)
+    )
 
 
 def convert_sparse_matrix_to_sparse_tensor(X):
@@ -69,9 +78,9 @@ def convert_sparse_matrix_to_sparse_tensor(X):
 
 
 def get_data(d_set):
-    if hasattr(d_set, 'images'):
+    if hasattr(d_set, "images"):
         data = d_set.images
-    elif hasattr(d_set, 'data'):
+    elif hasattr(d_set, "data"):
         data = d_set.data
     else:
         raise ValueError("something wrong with the dataset %s" % d_set)
@@ -79,9 +88,9 @@ def get_data(d_set):
 
 
 def get_targets(d_set):
-    if hasattr(d_set, 'labels'):
+    if hasattr(d_set, "labels"):
         return d_set.labels
-    elif hasattr(d_set, 'target'):
+    elif hasattr(d_set, "target"):
         return d_set.target
     else:
         raise ValueError("something wrong with the dataset %s" % d_set)
@@ -115,7 +124,7 @@ def get_rand_state(rand):
     elif isinstance(rand, (int, np.ndarray, list)) or rand is None:
         return np.random.RandomState(rand)
     else:
-        raise ValueError('parameter rand {} has wrong type'.format(rand))
+        raise ValueError("parameter rand {} has wrong type".format(rand))
 
 
 def maybe_call(obj, *args, **kwargs):
@@ -151,5 +160,5 @@ def to_one_hot_enc(seq, dimension=None):
     # return np.array([create_and_set(_v) for _v in seq])
 
 
-from_env = os.getenv('DATASETS_FOLDER')
+from_env = os.getenv("DATASETS_FOLDER")
 DATA_FOLDER = from_env

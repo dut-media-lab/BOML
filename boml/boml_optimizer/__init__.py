@@ -1,1 +1,1 @@
-from boml.boml_optimizer.BOMLOptimizer import BOMLOptimizer
+from boml.boml_optimizer.optimizer import BOMLOptimizer

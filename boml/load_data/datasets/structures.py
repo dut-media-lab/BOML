@@ -12,8 +12,16 @@ try:
 except ImportError:
     it = None
 
-from boml.load_data.datasets.dl_utils import maybe_cast_to_scalar, pad, stack_or_concat, vstack, \
-    convert_sparse_matrix_to_sparse_tensor, merge_dicts, get_rand_state, maybe_call
+from boml.load_data.datasets.dl_utils import (
+    maybe_cast_to_scalar,
+    pad,
+    stack_or_concat,
+    vstack,
+    convert_sparse_matrix_to_sparse_tensor,
+    merge_dicts,
+    get_rand_state,
+    maybe_call,
+)
 
 
 class Datasets:
@@ -28,7 +36,10 @@ class Datasets:
         self._lst = [train, validation, test]
 
     def setting(self):
-        return {k: v.setting() if hasattr(v, 'setting') else None for k, v in vars(self).items()}
+        return {
+            k: v.setting() if hasattr(v, "setting") else None
+            for k, v in vars(self).items()
+        }
 
     def __getitem__(self, item):
         return self._lst[item]
@@ -38,7 +49,9 @@ class Datasets:
 
     @property
     def name(self):
-        return self.train.name  # could be that different datasets have different names....
+        return (
+            self.train.name
+        )  # could be that different datasets have different names....
 
     @staticmethod
     def from_list(list_of_datasets):
@@ -51,7 +64,7 @@ class Datasets:
         train, valid, test = None, None, None
         train = list_of_datasets[0]
         if len(list_of_datasets) > 3:
-            print('There are more then 3 Datasets here...')
+            print("There are more then 3 Datasets here...")
             return list_of_datasets
         if len(list_of_datasets) > 1:
             test = list_of_datasets[-1]
@@ -67,8 +80,12 @@ class Datasets:
         :param datasets_s:
         :return: a new dataset
         """
-        return Datasets.from_list([Dataset.stack(*[d[k] for d in datasets_s if d[k] is not None])
-                                   for k in range(3)])
+        return Datasets.from_list(
+            [
+                Dataset.stack(*[d[k] for d in datasets_s if d[k] is not None])
+                for k in range(3)
+            ]
+        )
 
 
 NAMED_SUPPLIER = {}
@@ -81,7 +98,9 @@ class Dataset:
      per-example basis and general infos.
     """
 
-    def __init__(self, data, target, sample_info=None, info=None, name=None, add_bias=False):
+    def __init__(
+        self, data, target, sample_info=None, info=None, name=None, add_bias=False
+    ):
         """
 
         :param data: Numpy array containing data
@@ -94,25 +113,32 @@ class Dataset:
         self._data = data
         self._add_bias = add_bias
         if self._add_bias:
-            assert isinstance(self.dim_data, int), 'Add bias not defined for non vector data'
+            assert isinstance(
+                self.dim_data, int
+            ), "Add bias not defined for non vector data"
             self._data = np.hstack((self.data, np.ones((self.num_examples, 1))))
 
         self._target = target
         if self._data is not None:  # in meta-dataset data and target can be unspecified
             if sample_info is None:
                 sample_info = {}
-            self.sample_info = np.array([sample_info] * self.num_examples) \
-                if isinstance(sample_info, dict) else sample_info
+            self.sample_info = (
+                np.array([sample_info] * self.num_examples)
+                if isinstance(sample_info, dict)
+                else sample_info
+            )
 
-            assert self.num_examples == len(self.sample_info), str(self.num_examples) + ' ' + str(len(self.sample_info))
+            assert self.num_examples == len(self.sample_info), (
+                str(self.num_examples) + " " + str(len(self.sample_info))
+            )
             assert self.num_examples == self._shape(self._target)[0]
 
         self.info = info or {}
-        self.info.setdefault('_name', name)
+        self.info.setdefault("_name", name)
 
     @property
     def name(self):
-        return self.info['_name']
+        return self.info["_name"]
 
     @property
     def bias(self):
@@ -128,10 +154,10 @@ class Dataset:
         :return:
         """
         return {
-            'num_examples': self.num_examples,
-            'dim_data': self.dim_data,
-            'dim_target': self.dim_target,
-            'info': self.info
+            "num_examples": self.num_examples,
+            "dim_data": self.dim_data,
+            "dim_target": self.dim_target,
+            "info": self.info,
         }
 
     @property
@@ -169,12 +195,20 @@ class Dataset:
 
     def convert_to_tensor(self, keep_sparse=True):
         SPARSE_SCIPY_MATRICES = (sc_sp.csr.csr_matrix, sc_sp.coo.coo_matrix)
-        matrices = ['_data', '_target']
+        matrices = ["_data", "_target"]
         for att in matrices:
-            if keep_sparse and isinstance(self.__getattribute__(att), SPARSE_SCIPY_MATRICES):
-                self.__setattr__(att, convert_sparse_matrix_to_sparse_tensor(self.__getattribute__(att)))
+            if keep_sparse and isinstance(
+                self.__getattribute__(att), SPARSE_SCIPY_MATRICES
+            ):
+                self.__setattr__(
+                    att,
+                    convert_sparse_matrix_to_sparse_tensor(self.__getattribute__(att)),
+                )
             else:
-                self.__setattr__(att, tf.convert_to_tensor(self.__getattribute__(att), dtype=tf.float32))
+                self.__setattr__(
+                    att,
+                    tf.convert_to_tensor(self.__getattribute__(att), dtype=tf.float32),
+                )
         self._tensor_mode = True
 
     def create_supplier(self, x, y, other_feeds=None, name=None):
@@ -188,7 +222,8 @@ class Dataset:
         :param other_feeds: optional other feeds (dictionary or None)
         :return: a callable.
         """
-        if not other_feeds: other_feeds = {}
+        if not other_feeds:
+            other_feeds = {}
 
         # noinspection PyUnusedLocal
         def _supplier(step=None):
@@ -215,15 +250,19 @@ class Dataset:
         :param datasets:
         :return: stacked dataset
         """
-        return Dataset(data=vstack([d.data for d in datasets]),
-                       target=stack_or_concat([d.target for d in datasets]),
-                       sample_info=np.concatenate([d.sample_info for d in datasets]),
-                       info={k: [d.info.get(k, None) for d in datasets]
-                             for k in merge_dicts(*[d.info for d in datasets])})
+        return Dataset(
+            data=vstack([d.data for d in datasets]),
+            target=stack_or_concat([d.target for d in datasets]),
+            sample_info=np.concatenate([d.sample_info for d in datasets]),
+            info={
+                k: [d.info.get(k, None) for d in datasets]
+                for k in merge_dicts(*[d.info for d in datasets])
+            },
+        )
 
 
 class MetaDataset(Dataset):
-    def __init__(self, info=None, name='MetaDataset', *args, **kwargs):
+    def __init__(self, info=None, name="MetaDataset", *args, **kwargs):
         super().__init__(None, None, None, info, name=name)
         self.args = args
         self.kwargs = kwargs
@@ -251,8 +290,10 @@ class MetaDataset(Dataset):
         :param kwargs:
         :return: one or a list of Datasets objects
         """
-        if not args: args = self.args
-        if not kwargs: kwargs = self.kwargs
+        if not args:
+            args = self.args
+        if not kwargs:
+            kwargs = self.kwargs
         rand = get_rand_state(rand)
         for _ in range(count):
             if batch_size == 1:
@@ -264,7 +305,9 @@ class MetaDataset(Dataset):
         """
         Generates a batch of Datasets
         """
-        return [self.generate_datasets(rand, *args, **kwargs) for _ in range(batch_size)]
+        return [
+            self.generate_datasets(rand, *args, **kwargs) for _ in range(batch_size)
+        ]
 
     @property
     def dim_data(self, *args, **kwargs):
@@ -286,23 +329,25 @@ class WindowedData(object):
         :param process_all: (default False) if True adds context to all data at object initialization.
                             Otherwise the windowed data is created in runtime.
         """
-        assert it is not None, 'NEED PACKAGE INTERVALTREE!'
+        assert it is not None, "NEED PACKAGE INTERVALTREE!"
         self.window = window
         self.data = data
         base_shape = self.data.shape
         self.shape = (base_shape[0], (2 * self.window + 1) * base_shape[1])
-        self.tree = it.IntervalTree([it.Interval(int(e[0]), int(e[1]) + 1) for e in row_sentence_bounds])
+        self.tree = it.IntervalTree(
+            [it.Interval(int(e[0]), int(e[1]) + 1) for e in row_sentence_bounds]
+        )
         if process_all:
-            print('adding context to all the dataset', end='- ')
+            print("adding context to all the dataset", end="- ")
             self.data = self.generate_all()
-            print('DONE')
+            print("DONE")
         self.process_all = process_all
 
     def generate_all(self):
         return self[:]
 
     def __getitem__(self, item):
-        if hasattr(self, 'process_all') and self.process_all:  # keep attr check!
+        if hasattr(self, "process_all") and self.process_all:  # keep attr check!
             return self.data[item]
         if isinstance(item, int):
             return self.get_context(item=item)
@@ -313,7 +358,7 @@ class WindowedData(object):
                     # do you want the particular element?
                     return self.get_context(item=rows)[columns]
             else:
-                raise TypeError('NOT IMPLEMENTED <|>')
+                raise TypeError("NOT IMPLEMENTED <|>")
             if isinstance(rows, slice):
                 rows = range(*rows.indices(self.shape[0]))
             return np.vstack([self.get_context(r) for r in rows])[:, columns]
@@ -330,11 +375,17 @@ class WindowedData(object):
         # print(interval)
         left, right = interval[0], interval[1]
         left_pad = max(self.window + left - item, 0)
-        right_pad = max(0, self.window - min(right, len(self) - 1) + item)  # this is to cope with reduce datasets
+        right_pad = max(
+            0, self.window - min(right, len(self) - 1) + item
+        )  # this is to cope with reduce datasets
         # print(left, right, item)
 
         # print(left_pad, right_pad)
-        base = np.concatenate(self.data[item - self.window + left_pad: item + self.window + 1 - right_pad])
+        base = np.concatenate(
+            self.data[
+                item - self.window + left_pad : item + self.window + 1 - right_pad
+            ]
+        )
         if left_pad:
             base = np.concatenate([pad(self.data[item], left_pad), base])
         if right_pad:
@@ -359,7 +410,8 @@ class ExampleVisiting:
         self.batch_size = batch_size
         self.epochs = epochs
         self.T = int(np.ceil(dataset.num_examples / batch_size))
-        if self.epochs: self.T *= self.epochs
+        if self.epochs:
+            self.T *= self.epochs
 
         self.rnd = get_rand_state(rnd)
 
@@ -367,10 +419,10 @@ class ExampleVisiting:
         self.iter_per_epoch = int(dataset.num_examples / batch_size)
 
     def setting(self):
-        excluded = ['training_schedule', 'datasets']
+        excluded = ["training_schedule", "datasets"]
         dictionary = {k: v for k, v in vars(self).items() if k not in excluded}
-        if hasattr(self.dataset, 'setting'):
-            dictionary['dataset'] = self.dataset.setting()
+        if hasattr(self.dataset, "setting"):
+            dictionary["dataset"] = self.dataset.setting()
         return dictionary
 
     def generate_visiting_scheme(self):
@@ -386,10 +438,14 @@ class ExampleVisiting:
             return _res
 
         # noinspection PyUnusedLocal
-        _tmp_ts = np.concatenate([all_indices_shuffled()
-                                  for _ in range(self.epochs or 1)])
-        self.training_schedule = _tmp_ts if self.training_schedule is None else \
-            np.concatenate([self.training_schedule, _tmp_ts])  # do not discard previous schedule,
+        _tmp_ts = np.concatenate(
+            [all_indices_shuffled() for _ in range(self.epochs or 1)]
+        )
+        self.training_schedule = (
+            _tmp_ts
+            if self.training_schedule is None
+            else np.concatenate([self.training_schedule, _tmp_ts])
+        )  # do not discard previous schedule,
         # this should allow backward passes of arbitrary length
 
         return self
@@ -415,8 +471,11 @@ class ExampleVisiting:
             if step >= self.T:
                 if step % self.T == 0:
                     if self.epochs:
-                        print('WARNING: End of the training scheme reached.'
-                              'Generating another scheme.', file=sys.stderr)
+                        print(
+                            "WARNING: End of the training scheme reached."
+                            "Generating another scheme.",
+                            file=sys.stderr,
+                        )
                     self.generate_visiting_scheme()
                 step %= self.T
 
@@ -425,8 +484,12 @@ class ExampleVisiting:
                 self.generate_visiting_scheme()
 
             # noinspection PyTypeChecker
-            nb = self.training_schedule[step * self.batch_size: min(
-                (step + 1) * self.batch_size, len(self.training_schedule))]
+            nb = self.training_schedule[
+                step
+                * self.batch_size : min(
+                    (step + 1) * self.batch_size, len(self.training_schedule)
+                )
+            ]
 
             bx = self.dataset.data[nb, :]
             by = self.dataset.target[nb, :]
@@ -436,7 +499,9 @@ class ExampleVisiting:
             #  looks like lambda was
             # else:
             #     lambda_processed_feeds = {}
-            return merge_dicts({x: bx, y: by}, *[maybe_call(of, step) for of in other_feeds])
+            return merge_dicts(
+                {x: bx, y: by}, *[maybe_call(of, step) for of in other_feeds]
+            )
 
         if name:
             NAMED_SUPPLIER[name] = _training_supplier

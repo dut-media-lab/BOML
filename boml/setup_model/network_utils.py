@@ -13,16 +13,23 @@ def conv_block(bomlnet, cweight, bweight):
 
     """ Perform, conv, batch norm, nonlinearity, and max pool """
     if bomlnet.max_pool:
-        conv_out = tf.add(tf.nn.conv2d(bomlnet.out, cweight, bomlnet.no_stride, 'SAME'), bweight)
+        conv_out = tf.add(
+            tf.nn.conv2d(bomlnet.out, cweight, bomlnet.no_stride, "SAME"), bweight
+        )
     else:
-        conv_out = tf.add(tf.nn.conv2d(bomlnet.out, cweight, bomlnet.stride, 'SAME'), bweight)
+        conv_out = tf.add(
+            tf.nn.conv2d(bomlnet.out, cweight, bomlnet.stride, "SAME"), bweight
+        )
     if bomlnet.batch_norm is not None:
-        batch_out = bomlnet.batch_norm(conv_out, activation_fn=bomlnet.activation,
-                                       variables_collections=bomlnet.var_collections)
+        batch_out = bomlnet.batch_norm(
+            conv_out,
+            activation_fn=bomlnet.activation,
+            variables_collections=bomlnet.var_collections,
+        )
     else:
         batch_out = bomlnet.activation(conv_out)
     if bomlnet.max_pool:
-        final_out = tf.nn.max_pool(batch_out, bomlnet.stride, bomlnet.stride, 'VALID')
+        final_out = tf.nn.max_pool(batch_out, bomlnet.stride, bomlnet.stride, "VALID")
         return final_out
     else:
         return batch_out
@@ -31,18 +38,25 @@ def conv_block(bomlnet, cweight, bweight):
 def conv_block_t(bomlnet, conv_weight, conv_bias, zweight):
     """ Perform, conv, batch norm, nonlinearity, and max pool """
     if bomlnet.max_pool:
-        conv_out = tf.add(tf.nn.conv2d(bomlnet.out, conv_weight, bomlnet.no_stride, 'SAME'), conv_bias)
+        conv_out = tf.add(
+            tf.nn.conv2d(bomlnet.out, conv_weight, bomlnet.no_stride, "SAME"), conv_bias
+        )
     else:
-        conv_out = tf.add(tf.nn.conv2d(bomlnet.out, conv_weight, bomlnet.stride, 'SAME'), conv_bias)
-    conv_output = tf.nn.conv2d(conv_out, zweight, bomlnet.no_stride, 'SAME')
+        conv_out = tf.add(
+            tf.nn.conv2d(bomlnet.out, conv_weight, bomlnet.stride, "SAME"), conv_bias
+        )
+    conv_output = tf.nn.conv2d(conv_out, zweight, bomlnet.no_stride, "SAME")
 
     if bomlnet.batch_norm is not None:
-        batch_out = layers.batch_norm(conv_output, activation_fn=bomlnet.activation,
-                                      variables_collections=bomlnet.var_collections)
+        batch_out = layers.batch_norm(
+            conv_output,
+            activation_fn=bomlnet.activation,
+            variables_collections=bomlnet.var_collections,
+        )
     else:
         batch_out = bomlnet.activation(conv_output)
     if bomlnet.max_pool:
-        final_out = tf.nn.max_pool(batch_out, bomlnet.stride, bomlnet.stride, 'VALID')
+        final_out = tf.nn.max_pool(batch_out, bomlnet.stride, bomlnet.stride, "VALID")
         return final_out
     else:
         return batch_out
@@ -51,19 +65,28 @@ def conv_block_t(bomlnet, conv_weight, conv_bias, zweight):
 def conv_block_warp(bomlnet, cweight, bweight, zweight, zbias):
     """ Perform, conv, batch norm, nonlinearity, and max pool """
     if bomlnet.max_pool:
-        conv_out = tf.add(tf.nn.conv2d(bomlnet.out, cweight, bomlnet.no_stride, 'SAME'), bweight)
+        conv_out = tf.add(
+            tf.nn.conv2d(bomlnet.out, cweight, bomlnet.no_stride, "SAME"), bweight
+        )
     else:
-        conv_out = tf.add(tf.nn.conv2d(bomlnet.out, cweight, bomlnet.stride, 'SAME'), bweight)
+        conv_out = tf.add(
+            tf.nn.conv2d(bomlnet.out, cweight, bomlnet.stride, "SAME"), bweight
+        )
 
-    conv_output = tf.add(tf.nn.conv2d(conv_out, zweight, bomlnet.no_stride, 'SAME'), zbias)
+    conv_output = tf.add(
+        tf.nn.conv2d(conv_out, zweight, bomlnet.no_stride, "SAME"), zbias
+    )
 
     if bomlnet.batch_norm is not None:
-        batch_out = layers.batch_norm(conv_output, activation_fn=bomlnet.activation,
-                                      variables_collections=bomlnet.var_collections, )
+        batch_out = layers.batch_norm(
+            conv_output,
+            activation_fn=bomlnet.activation,
+            variables_collections=bomlnet.var_collections,
+        )
     else:
         batch_out = bomlnet.activation(conv_output)
     if bomlnet.max_pool:
-        final_out = tf.nn.max_pool(batch_out, bomlnet.stride, bomlnet.stride, 'VALID')
+        final_out = tf.nn.max_pool(batch_out, bomlnet.stride, bomlnet.stride, "VALID")
         return final_out
     else:
         return batch_out
@@ -71,34 +94,64 @@ def conv_block_warp(bomlnet, cweight, bweight, zweight, zbias):
 
 def get_conv_weight(bomlnet, layer, initializer):
     if layer == 0:
-        return tf.get_variable('conv' + str(layer),
-                               [bomlnet.kernel, bomlnet.kernel, bomlnet.channels, bomlnet.dim_hidden[0]],
-                               initializer=initializer, dtype=bomlnet.datatype)
+        return tf.get_variable(
+            "conv" + str(layer),
+            [bomlnet.kernel, bomlnet.kernel, bomlnet.channels, bomlnet.dim_hidden[0]],
+            initializer=initializer,
+            dtype=bomlnet.datatype,
+        )
     else:
-        return tf.get_variable('conv' + str(layer),
-                               [bomlnet.kernel, bomlnet.kernel, bomlnet.dim_hidden[layer - 1], bomlnet.dim_hidden[layer]],
-                               initializer=initializer, dtype=bomlnet.datatype)
+        return tf.get_variable(
+            "conv" + str(layer),
+            [
+                bomlnet.kernel,
+                bomlnet.kernel,
+                bomlnet.dim_hidden[layer - 1],
+                bomlnet.dim_hidden[layer],
+            ],
+            initializer=initializer,
+            dtype=bomlnet.datatype,
+        )
 
 
 def get_warp_weight(bomlnet, layer, initializer):
-    return tf.get_variable('conv' + str(layer)+'_z',
-                           [bomlnet.kernel, bomlnet.kernel, bomlnet.dim_hidden[layer - 1], bomlnet.dim_hidden[layer]],
-                           initializer=initializer, dtype=bomlnet.datatype)
+    return tf.get_variable(
+        "conv" + str(layer) + "_z",
+        [
+            bomlnet.kernel,
+            bomlnet.kernel,
+            bomlnet.dim_hidden[layer - 1],
+            bomlnet.dim_hidden[layer],
+        ],
+        initializer=initializer,
+        dtype=bomlnet.datatype,
+    )
 
 
 def get_warp_bias(bomlnet, layer, initializer):
-    return tf.get_variable('bias' + str(layer)+'_z', [bomlnet.dim_hidden[layer]], initializer=initializer,
-                           dtype=bomlnet.datatype)
+    return tf.get_variable(
+        "bias" + str(layer) + "_z",
+        [bomlnet.dim_hidden[layer]],
+        initializer=initializer,
+        dtype=bomlnet.datatype,
+    )
 
 
 def get_bias_weight(bomlnet, layer, initializer):
-    return tf.get_variable('bias' + str(layer), [bomlnet.dim_hidden[layer]], initializer=initializer,
-                           dtype=bomlnet.datatype)
+    return tf.get_variable(
+        "bias" + str(layer),
+        [bomlnet.dim_hidden[layer]],
+        initializer=initializer,
+        dtype=bomlnet.datatype,
+    )
 
 
 def get_identity(dim, name, conv=True):
-    return tf.Variable(tf.eye(dim, batch_shape=[1, 1]), name=name) if conv \
+    return (
+        tf.Variable(tf.eye(dim, batch_shape=[1, 1]), name=name)
+        if conv
         else tf.Variable(tf.eye(dim), name=name)
+    )
 
 
 def as_list(obj):
@@ -131,7 +184,7 @@ def as_tuple_or_list(obj):
 
 
 def maybe_get(obj, i):
-    return obj[i] if hasattr(obj, '__getitem__') else obj
+    return obj[i] if hasattr(obj, "__getitem__") else obj
 
 
 def merge_dicts(*dicts):
@@ -154,14 +207,21 @@ def to_one_hot_enc(seq, dimension=None):
 
 def flatten_list(lst):
     from itertools import chain
+
     return list(chain(*lst))
 
 
 def filter_vars(var_name, scope):
     import tensorflow as tf
-    return [v for v in tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES,
-                                         scope=scope.name if hasattr(scope, 'name') else scope)
-            if v.name.endswith('%s:0' % var_name)]
+
+    return [
+        v
+        for v in tf.get_collection(
+            tf.GraphKeys.GLOBAL_VARIABLES,
+            scope=scope.name if hasattr(scope, "name") else scope,
+        )
+        if v.name.endswith("%s:0" % var_name)
+    ]
 
 
 def name_from_vars(var_dict, *vars_):
@@ -182,7 +242,7 @@ def name_from_vars(var_dict, *vars_):
 
 def name_from_dict(_dict, *exclude_names):
     string_dict = {str(k): str(v) for k, v in _dict.items() if k not in exclude_names}
-    return _tf_string_replace('_'.join(flatten_list(list(sorted(string_dict.items())))))
+    return _tf_string_replace("_".join(flatten_list(list(sorted(string_dict.items())))))
 
 
 def _tf_string_replace(_str):
@@ -192,8 +252,14 @@ def _tf_string_replace(_str):
     :param _str:
     :return:
     """
-    return _str.replace('[', 'p').replace(']', 'q').replace(',', 'c').replace('(', 'p').replace(')', 'q').replace(
-        ' ', '')
+    return (
+        _str.replace("[", "p")
+        .replace("]", "q")
+        .replace(",", "c")
+        .replace("(", "p")
+        .replace(")", "q")
+        .replace(" ", "")
+    )
 
 
 def get_rand_state(rand):
@@ -210,7 +276,7 @@ def get_rand_state(rand):
     elif isinstance(rand, (int, np.ndarray, list)) or rand is None:
         return np.random.RandomState(rand)
     else:
-        raise ValueError('parameter rand {} has wrong type'.format(rand))
+        raise ValueError("parameter rand {} has wrong type".format(rand))
 
 
 # SOME SCORING UTILS FUNCTIONS
@@ -218,7 +284,7 @@ def get_rand_state(rand):
 half_int = lambda _m: 1.96 * np.std(_m) / np.sqrt(len(_m) - 1)
 
 
-def mean_std_ci(measures, mul=1., tex=False):
+def mean_std_ci(measures, mul=1.0, tex=False):
     """
     Computes mean, standard deviation and 95% half-confidence interval for a list of measures.
 
@@ -237,11 +303,17 @@ def leaky_relu(x, alpha, name=None):
     Implements leaky relu with negative coefficient `alpha`
     """
     import tensorflow as tf
-    with tf.name_scope(name, 'leaky_relu_{}'.format(alpha)):
+
+    with tf.name_scope(name, "leaky_relu_{}".format(alpha)):
         return tf.nn.relu(x) - alpha * tf.nn.relu(-x)
 
 
-def get_global_step(name='GlobalStep', init=0):
+def get_global_step(name="GlobalStep", init=0):
     import tensorflow as tf
-    return tf.get_variable(name, initializer=init, trainable=False,
-                           collections=[tf.GraphKeys.GLOBAL_STEP, tf.GraphKeys.GLOBAL_VARIABLES])
+
+    return tf.get_variable(
+        name,
+        initializer=init,
+        trainable=False,
+        collections=[tf.GraphKeys.GLOBAL_STEP, tf.GraphKeys.GLOBAL_VARIABLES],
+    )

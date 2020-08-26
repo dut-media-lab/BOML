@@ -17,8 +17,19 @@ from tensorflow.contrib.learn.python.learn.datasets.mnist import read_data_sets
 
 from boml import load_data as dl
 from boml.load_data.datasets import MetaDataset
-from boml.load_data.datasets.dl_utils import get_rand_state, vstack, get_data, stack_or_concat, get_targets, \
-    as_list, get_indices_balanced_classes, test_if_balanced, to_one_hot_enc, merge_dicts, as_tuple_or_list
+from boml.load_data.datasets.dl_utils import (
+    get_rand_state,
+    vstack,
+    get_data,
+    stack_or_concat,
+    get_targets,
+    as_list,
+    get_indices_balanced_classes,
+    test_if_balanced,
+    to_one_hot_enc,
+    merge_dicts,
+    as_tuple_or_list,
+)
 
 try:
     from sklearn.datasets import make_classification, make_regression
@@ -26,107 +37,152 @@ except ImportError as _err:
     print(_err, file=sys.stderr)
     make_regression, make_classification = None, None
 
-from_env = os.getenv('DATASETS_FOLDER')
+from_env = os.getenv("DATASETS_FOLDER")
 if from_env:
     DATA_FOLDER = from_env
 else:
-    print('Environment variable DATASETS_FOLDER not found. Variables HELP_WIN and HELP_UBUNTU contain info.')
+    print(
+        "Environment variable DATASETS_FOLDER not found. Variables HELP_WIN and HELP_UBUNTU contain info."
+    )
     DATA_FOLDER = os.getcwd()
-    _COMMON_BEGIN = "You can set environment variable DATASETS_FOLDER to" \
-                    "specify root folder in which you store various datasets. \n"
+    _COMMON_BEGIN = (
+        "You can set environment variable DATASETS_FOLDER to"
+        "specify root folder in which you store various datasets. \n"
+    )
     _COMMON_END = """\n
     You can also skip this step... \n
     In this case all load_* methods take a FOLDER path as first argument. \n
     Bye."""
-    HELP_UBUNTU = _COMMON_BEGIN + """
+    HELP_UBUNTU = (
+        _COMMON_BEGIN
+        + """
     Bash command is: export DATASETS_FOLDER='absolute/path/to/dataset/folder \n
     Remember! To add the global variable kinda permanently in your system you should add export command in
     bash.bashrc file located in etc folder, if you want to set it globally, or .bashrc in your home directory
     if you want to set it only locally.
-    """ + _COMMON_END
+    """
+        + _COMMON_END
+    )
 
-    HELP_WIN = _COMMON_BEGIN + """
+    HELP_WIN = (
+        _COMMON_BEGIN
+        + """
     Cmd command is: Set DATASETS_FOLDER absolute/path/to/dataset/folder  for one session. \n
     To set it permanently use SetX instead of Set (and probably reboot system)
-    """ + _COMMON_END
+    """
+        + _COMMON_END
+    )
 
-print('Data folder is', DATA_FOLDER)
+print("Data folder is", DATA_FOLDER)
 
 # kind of private
-TIMIT_DIR = os.path.join(DATA_FOLDER, 'timit4python')
-XRMB_DIR = os.path.join(DATA_FOLDER, 'XRMB')
-IROS15_BASE_FOLDER = os.path.join(DATA_FOLDER, os.path.join('dls_collaboration', 'Learning'))
+TIMIT_DIR = os.path.join(DATA_FOLDER, "timit4python")
+XRMB_DIR = os.path.join(DATA_FOLDER, "XRMB")
+IROS15_BASE_FOLDER = os.path.join(
+    DATA_FOLDER, os.path.join("dls_collaboration", "Learning")
+)
 
 # easy to find!
-IRIS_TRAINING = os.path.join(DATA_FOLDER, 'iris', "training.csv")
-IRIS_TEST = os.path.join(DATA_FOLDER, 'iris', "test.csv")
+IRIS_TRAINING = os.path.join(DATA_FOLDER, "iris", "training.csv")
+IRIS_TEST = os.path.join(DATA_FOLDER, "iris", "test.csv")
 MNIST_DIR = os.path.join(DATA_FOLDER, "mnist_data")
 CALTECH101_30_DIR = os.path.join(DATA_FOLDER, "caltech101-30")
 CALTECH101_DIR = os.path.join(DATA_FOLDER, "caltech")
-CENSUS_TRAIN = os.path.join(DATA_FOLDER, 'census', "train.csv")
-CENSUS_TEST = os.path.join(DATA_FOLDER, 'census', "test.csv")
+CENSUS_TRAIN = os.path.join(DATA_FOLDER, "census", "train.csv")
+CENSUS_TEST = os.path.join(DATA_FOLDER, "census", "test.csv")
 CIFAR10_DIR = os.path.join(DATA_FOLDER, "CIFAR-10")
 CIFAR100_DIR = os.path.join(DATA_FOLDER, "CIFAR-100")
 REALSIM = os.path.join(DATA_FOLDER, "realsim")
 
 # scikit learn datasets
-SCIKIT_LEARN_DATA = os.path.join(DATA_FOLDER, 'scikit_learn_data')
+SCIKIT_LEARN_DATA = os.path.join(DATA_FOLDER, "scikit_learn_data")
 
-IMAGENET_BASE_FOLDER = join(DATA_FOLDER, 'imagenet')
-MINI_IMAGENET_FOLDER = join(DATA_FOLDER, join('imagenet', 'mini_v1'))
-MINI_IMAGENET_FOLDER_RES84 = join(DATA_FOLDER, join('imagenet', 'mini_res84'))
-MINI_IMAGENET_FOLDER_V2 = join(DATA_FOLDER, join('imagenet', 'mini_v2'))
-MINI_IMAGENET_FOLDER_V3 = join(DATA_FOLDER, join('imagenet', 'mini_v3'))
+IMAGENET_BASE_FOLDER = join(DATA_FOLDER, "imagenet")
+MINI_IMAGENET_FOLDER = join(DATA_FOLDER, join("imagenet", "mini_v1"))
+MINI_IMAGENET_FOLDER_RES84 = join(DATA_FOLDER, join("imagenet", "mini_res84"))
+MINI_IMAGENET_FOLDER_V2 = join(DATA_FOLDER, join("imagenet", "mini_v2"))
+MINI_IMAGENET_FOLDER_V3 = join(DATA_FOLDER, join("imagenet", "mini_v3"))
 
-OMNIGLOT_RESIZED = join(DATA_FOLDER, 'omniglot_resized')
+OMNIGLOT_RESIZED = join(DATA_FOLDER, "omniglot_resized")
 
 
 def balanced_choice_wr(a, num, rand=None):
     rand = get_rand_state(rand)
     lst = [len(a)] * (num // len(a)) + [num % len(a)]
-    return np.concatenate(
-        [rand.choice(a, size=(d,), replace=False) for d in lst]
-    )
+    return np.concatenate([rand.choice(a, size=(d,), replace=False) for d in lst])
 
 
-def mnist(folder=None, one_hot=True, partitions=None, filters=None, maps=None, shuffle=False):
-    if not folder: folder = MNIST_DIR
+def mnist(
+    folder=None, one_hot=True, partitions=None, filters=None, maps=None, shuffle=False
+):
+    if not folder:
+        folder = MNIST_DIR
     datasets = read_data_sets(folder, one_hot=one_hot)
-    train = dl.Dataset(datasets.train.images, datasets.train.labels, name='MNIST')
-    validation = dl.Dataset(datasets.validation.images, datasets.validation.labels, name='MNIST')
-    test = dl.Dataset(datasets.test.images, datasets.test.labels, name='MNIST')
+    train = dl.Dataset(datasets.train.images, datasets.train.labels, name="MNIST")
+    validation = dl.Dataset(
+        datasets.validation.images, datasets.validation.labels, name="MNIST"
+    )
+    test = dl.Dataset(datasets.test.images, datasets.test.labels, name="MNIST")
     res = [train, validation, test]
     if partitions:
-        res = redivide_data(res, partition_proportions=partitions, filters=filters, maps=maps, shuffle=shuffle)
+        res = redivide_data(
+            res,
+            partition_proportions=partitions,
+            filters=filters,
+            maps=maps,
+            shuffle=shuffle,
+        )
         res += [None] * (3 - len(res))
     return dl.Datasets.from_list(res)
 
 
-def omni_light(folder=join(DATA_FOLDER, 'omniglot-light'), add_bias=False):
+def omni_light(folder=join(DATA_FOLDER, "omniglot-light"), add_bias=False):
     """
     Extract from omniglot dataset with rotated images, 100 classes,
     3 examples per class in training set
     3 examples per class in validation set
     15 examples per class in test set
     """
-    file = h5py.File(os.path.join(folder, 'omni-light.h5'), 'r')
-    return dl.Datasets.from_list([
-        dl.Dataset(np.array(file['X_ft_tr']), np.array(file['Y_tr']),
-                   info={'original images': np.array(file['X_orig_tr'])}, add_bias=add_bias),
-        dl.Dataset(np.array(file['X_ft_val']), np.array(file['Y_val']),
-                   info={'original images': np.array(file['X_orig_val'])}, add_bias=add_bias),
-        dl.Dataset(np.array(file['X_ft_test']), np.array(file['Y_test']),
-                   info={'original images': np.array(file['X_orig_test'])}, add_bias=add_bias)
-    ])
+    file = h5py.File(os.path.join(folder, "omni-light.h5"), "r")
+    return dl.Datasets.from_list(
+        [
+            dl.Dataset(
+                np.array(file["X_ft_tr"]),
+                np.array(file["Y_tr"]),
+                info={"original images": np.array(file["X_orig_tr"])},
+                add_bias=add_bias,
+            ),
+            dl.Dataset(
+                np.array(file["X_ft_val"]),
+                np.array(file["Y_val"]),
+                info={"original images": np.array(file["X_orig_val"])},
+                add_bias=add_bias,
+            ),
+            dl.Dataset(
+                np.array(file["X_ft_test"]),
+                np.array(file["Y_test"]),
+                info={"original images": np.array(file["X_orig_test"])},
+                add_bias=add_bias,
+            ),
+        ]
+    )
 
 
 load_omni_light = omni_light
 
 
 class OmniglotMetaDataset(MetaDataset):
-
-    def __init__(self, info=None, rotations=None, name='Omniglot', num_classes=None, num_examples=None):
-        super().__init__(info, name=name, num_classes=num_classes, num_examples=num_examples)
+    def __init__(
+        self,
+        info=None,
+        rotations=None,
+        name="Omniglot",
+        num_classes=None,
+        num_examples=None,
+    ):
+        super().__init__(
+            info, name=name, num_classes=num_classes, num_examples=num_examples
+        )
         self._loaded_images = defaultdict(lambda: {})
         self.num_classes = num_classes
         assert len(num_examples) > 0
@@ -138,13 +194,15 @@ class OmniglotMetaDataset(MetaDataset):
         rand = dl.get_rand_state(rand)
 
         if not num_examples:
-            num_examples = self.kwargs['num_examples']
+            num_examples = self.kwargs["num_examples"]
         if not num_classes:
-            num_classes = self.kwargs['num_classes']
+            num_classes = self.kwargs["num_classes"]
 
-        clss = self._loaded_images if self._loaded_images else self.info['classes']
+        clss = self._loaded_images if self._loaded_images else self.info["classes"]
 
-        random_classes = rand.choice(list(clss.keys()), size=(num_classes,), replace=False)
+        random_classes = rand.choice(
+            list(clss.keys()), size=(num_classes,), replace=False
+        )
         rand_class_dict = {rnd: k for k, rnd in enumerate(random_classes)}
 
         _dts = []
@@ -157,35 +215,51 @@ class OmniglotMetaDataset(MetaDataset):
                 rand.shuffle(all_images[c])
                 img_name = all_images[c][0]
                 all_images[c].remove(img_name)
-                sample_info.append({'name': img_name, 'label': c})
+                sample_info.append({"name": img_name, "label": c})
                 data.append(clss[c][img_name])
                 targets.append(rand_class_dict[c])
 
-            if self.info['one_hot_enc']:
+            if self.info["one_hot_enc"]:
                 targets = dl.to_one_hot_enc(targets, dimension=num_classes)
 
-            _dts.append(dl.Dataset(data=np.array(np.stack(data)), target=targets, sample_info=sample_info,
-                                   info={'all_classes': random_classes}))
+            _dts.append(
+                dl.Dataset(
+                    data=np.array(np.stack(data)),
+                    target=targets,
+                    sample_info=sample_info,
+                    info={"all_classes": random_classes},
+                )
+            )
         return dl.Datasets.from_list(_dts)
 
     def load_all(self):
         from imageio import imread
         from scipy.ndimage.interpolation import rotate
-        _cls = self.info['classes']
-        _base_folder = self.info['base_folder']
+
+        _cls = self.info["classes"]
+        _base_folder = self.info["base_folder"]
 
         for c in _cls:
             all_images = list(_cls[c])
             for img_name in all_images:
                 img = imread(join(_base_folder, join(c, img_name)))
-                img = 1. - np.reshape(img, (28, 28, 1)) / 255.
+                img = 1.0 - np.reshape(img, (28, 28, 1)) / 255.0
                 for rot in self._rotations:
                     img = rotate(img, rot, reshape=False)
-                    self._loaded_images[c + os.path.sep + 'rot_' + str(rot)][img_name] = img
+                    self._loaded_images[c + os.path.sep + "rot_" + str(rot)][
+                        img_name
+                    ] = img
 
 
-def meta_omniglot(folder=OMNIGLOT_RESIZED, std_num_classes=None, examples_train=0, examples_test=0,
-                  one_hot_enc=True, _rand=0, n_splits=None):
+def meta_omniglot(
+    folder=OMNIGLOT_RESIZED,
+    std_num_classes=None,
+    examples_train=0,
+    examples_test=0,
+    one_hot_enc=True,
+    _rand=0,
+    n_splits=None,
+):
     """
     Loading function for Omniglot dataset in learning-to-learn version. Use image data as obtained from
     https://github.com/cbfinn/maml/blob/master/data/omniglot_resized/resize_images.py
@@ -201,20 +275,29 @@ def meta_omniglot(folder=OMNIGLOT_RESIZED, std_num_classes=None, examples_train=
     :param n_splits: num classes per split
     :return: a Datasets of MetaDataset s
     """
-    assert examples_train > 0, 'Wrong initialization for number of examples used for training'
-    if examples_test >0:
-        std_num_examples = (examples_train * std_num_classes, examples_test * std_num_classes)
+    assert (
+        examples_train > 0
+    ), "Wrong initialization for number of examples used for training"
+    if examples_test > 0:
+        std_num_examples = (
+            examples_train * std_num_classes,
+            examples_test * std_num_classes,
+        )
     else:
-        std_num_examples = (examples_train * std_num_classes)
+        std_num_examples = examples_train * std_num_classes
     alphabets = os.listdir(folder)
 
     labels_and_images = OrderedDict()
     for alphabet in alphabets:
         base_folder = join(folder, alphabet)
         label_names = os.listdir(base_folder)  # all characters in one alphabet
-        labels_and_images.update({alphabet + os.path.sep + ln: os.listdir(join(base_folder, ln))
-                                  # all examples of each character
-                                  for ln in label_names})
+        labels_and_images.update(
+            {
+                alphabet + os.path.sep + ln: os.listdir(join(base_folder, ln))
+                # all examples of each character
+                for ln in label_names
+            }
+        )
 
     # divide between training validation and test meta-datasets
     _rand = dl.get_rand_state(_rand)
@@ -224,17 +307,30 @@ def meta_omniglot(folder=OMNIGLOT_RESIZED, std_num_classes=None, examples_train=
 
     meta_dts = []
     for start, end in zip(n_splits, n_splits[1:]):
-        meta_dts.append(OmniglotMetaDataset(info={
-            'base_folder': folder,
-            'classes': {k: labels_and_images[k] for k in all_clss[start: end]},
-            'one_hot_enc': one_hot_enc
-        }, num_classes=std_num_classes, num_examples=std_num_examples))
+        meta_dts.append(
+            OmniglotMetaDataset(
+                info={
+                    "base_folder": folder,
+                    "classes": {k: labels_and_images[k] for k in all_clss[start:end]},
+                    "one_hot_enc": one_hot_enc,
+                },
+                num_classes=std_num_classes,
+                num_examples=std_num_examples,
+            )
+        )
 
     return dl.Datasets.from_list(meta_dts)
 
 
-def meta_omniglot_v2(folder=OMNIGLOT_RESIZED, std_num_classes=None, examples_train=None, examples_test=None,
-                     one_hot_enc=True, _rand=0, n_splits=None):
+def meta_omniglot_v2(
+    folder=OMNIGLOT_RESIZED,
+    std_num_classes=None,
+    examples_train=None,
+    examples_test=None,
+    one_hot_enc=True,
+    _rand=0,
+    n_splits=None,
+):
     """
     Loading function for Omniglot dataset in learning-to-learn version. Use image data as obtained from
     https://github.com/cbfinn/maml/blob/master/data/omniglot_resized/resize_images.py
@@ -252,9 +348,17 @@ def meta_omniglot_v2(folder=OMNIGLOT_RESIZED, std_num_classes=None, examples_tra
     """
 
     class OmniglotMetaDataset(MetaDataset):
-
-        def __init__(self, info=None, rotations=None, name='Omniglot', num_classes=None, num_examples=None):
-            super().__init__(info, name=name, num_classes=num_classes, num_examples=num_examples)
+        def __init__(
+            self,
+            info=None,
+            rotations=None,
+            name="Omniglot",
+            num_classes=None,
+            num_examples=None,
+        ):
+            super().__init__(
+                info, name=name, num_classes=num_classes, num_examples=num_examples
+            )
             self._loaded_images = defaultdict(lambda: {})
             self._rotations = rotations or [0, 90, 180, 270]
             self.num_classes = num_classes
@@ -266,12 +370,16 @@ def meta_omniglot_v2(folder=OMNIGLOT_RESIZED, std_num_classes=None, examples_tra
         def generate_datasets(self, rand=None, num_classes=None, num_examples=None):
             rand = dl.get_rand_state(rand)
 
-            if not num_examples: num_examples = self.kwargs['num_examples']
-            if not num_classes: num_classes = self.kwargs['num_classes']
+            if not num_examples:
+                num_examples = self.kwargs["num_examples"]
+            if not num_classes:
+                num_classes = self.kwargs["num_classes"]
 
-            clss = self._loaded_images if self._loaded_images else self.info['classes']
+            clss = self._loaded_images if self._loaded_images else self.info["classes"]
 
-            random_classes = rand.choice(list(clss.keys()), size=(num_classes,), replace=False)
+            random_classes = rand.choice(
+                list(clss.keys()), size=(num_classes,), replace=False
+            )
             rand_class_dict = {rnd: k for k, rnd in enumerate(random_classes)}
 
             _dts = []
@@ -288,7 +396,7 @@ def meta_omniglot_v2(folder=OMNIGLOT_RESIZED, std_num_classes=None, examples_tra
                     indices.append(clss[c][img_name])
                     targets.append(rand_class_dict[c])
 
-                if self.info['one_hot_enc']:
+                if self.info["one_hot_enc"]:
                     targets = dl.to_one_hot_enc(targets, dimension=num_classes)
 
                 data = self._img_array[indices]
@@ -299,8 +407,9 @@ def meta_omniglot_v2(folder=OMNIGLOT_RESIZED, std_num_classes=None, examples_tra
         def load_all(self):
             from scipy.ndimage import imread
             from scipy.ndimage.interpolation import rotate
-            _cls = self.info['classes']
-            _base_folder = self.info['base_folder']
+
+            _cls = self.info["classes"]
+            _base_folder = self.info["base_folder"]
 
             _id = 0
             flat_data = []
@@ -309,10 +418,12 @@ def meta_omniglot_v2(folder=OMNIGLOT_RESIZED, std_num_classes=None, examples_tra
                 all_images = list(_cls[c])
                 for img_name in all_images:
                     img = imread(join(_base_folder, join(c, img_name)))
-                    img = 1. - np.reshape(img, (28, 28, 1)) / 255.
+                    img = 1.0 - np.reshape(img, (28, 28, 1)) / 255.0
                     for rot in self._rotations:
                         img = rotate(img, rot, reshape=False)
-                        self._loaded_images[c + os.path.sep + 'rot_' + str(rot)][img_name] = _id
+                        self._loaded_images[c + os.path.sep + "rot_" + str(rot)][
+                            img_name
+                        ] = _id
                         _id += 1
                         flat_data.append(img)
                         # flat_targets maybe... no flat targets... they depend on the episode!!
@@ -321,16 +432,23 @@ def meta_omniglot_v2(folder=OMNIGLOT_RESIZED, std_num_classes=None, examples_tra
 
             # end of class
 
-    std_num_examples = (examples_train * std_num_classes, examples_test * std_num_classes)
+    std_num_examples = (
+        examples_train * std_num_classes,
+        examples_test * std_num_classes,
+    )
     alphabets = os.listdir(folder)
 
     labels_and_images = OrderedDict()
     for alphabet in alphabets:
         base_folder = join(folder, alphabet)
         label_names = os.listdir(base_folder)  # all characters in one alphabet
-        labels_and_images.update({alphabet + os.path.sep + ln: os.listdir(join(base_folder, ln))
-                                  # all examples of each character
-                                  for ln in label_names})
+        labels_and_images.update(
+            {
+                alphabet + os.path.sep + ln: os.listdir(join(base_folder, ln))
+                # all examples of each character
+                for ln in label_names
+            }
+        )
 
     # divide between training validation and test meta-datasets
     _rand = dl.get_rand_state(_rand)
@@ -340,74 +458,103 @@ def meta_omniglot_v2(folder=OMNIGLOT_RESIZED, std_num_classes=None, examples_tra
 
     meta_dts = []
     for start, end in zip(n_splits, n_splits[1:]):
-        meta_dts.append(OmniglotMetaDataset(info={
-            'base_folder': folder,
-            'classes': {k: labels_and_images[k] for k in all_clss[start: end]},
-            'one_hot_enc': one_hot_enc
-        }, num_classes=std_num_classes, num_examples=std_num_examples))
+        meta_dts.append(
+            OmniglotMetaDataset(
+                info={
+                    "base_folder": folder,
+                    "classes": {k: labels_and_images[k] for k in all_clss[start:end]},
+                    "one_hot_enc": one_hot_enc,
+                },
+                num_classes=std_num_classes,
+                num_examples=std_num_examples,
+            )
+        )
 
     return dl.Datasets.from_list(meta_dts)
 
 
 class ImageNetMetaDataset(MetaDataset):
+    def __init__(
+        self, info=None, name="Mini", num_classes=None, num_examples=None, h5=False
+    ):
 
-    def __init__(self, info=None, name='Mini', num_classes=None, num_examples=None, h5=False):
-
-        super().__init__(info, name=name, num_classes=num_classes, num_examples=num_examples)
+        super().__init__(
+            info, name=name, num_classes=num_classes, num_examples=num_examples
+        )
         self._loaded_images = defaultdict(lambda: {})
         self.num_classes = num_classes
         assert len(num_examples) > 0
-        self.examples_train =int( num_examples[0]/num_classes)
+        self.examples_train = int(num_examples[0] / num_classes)
         self._threads = []
         self.h5 = h5
 
     def load_all_images(self):
         if self.h5:
-            _file = self.info['file']
-            h5m = h5py.File(_file, 'r')
+            _file = self.info["file"]
+            h5m = h5py.File(_file, "r")
             img_per_class = 600
-            for j in range(len(h5m['X'])):
-                self._loaded_images[j // img_per_class][j] = np.array(h5m['X'][j], dtype=np.float32) / 255.
+            for j in range(len(h5m["X"])):
+                self._loaded_images[j // img_per_class][j] = (
+                    np.array(h5m["X"][j], dtype=np.float32) / 255.0
+                )
                 # images were stored as int
         else:
             from imageio import imread
+
             # from scipy.misc import imresize
-            _cls = self.info['classes']
-            _base_folder = self.info['base_folder']
+            _cls = self.info["classes"]
+            _base_folder = self.info["base_folder"]
 
             def _load_class(c):
                 all_images = list(_cls[c])
                 for img_name in all_images:
                     img = imread(join(_base_folder, join(c, img_name)))
-                    if self.info['resize']:
+                    if self.info["resize"]:
                         # noinspection PyTypeChecker
                         # img = imresize(img, size=(self.info['resize'], self.info['resize'], 3)) / 255.
-                        img = np.array(
-                            Image.fromarray(img).resize(size=(self.info['resize'], self.info['resize']))) / 255.
+                        img = (
+                            np.array(
+                                Image.fromarray(img).resize(
+                                    size=(self.info["resize"], self.info["resize"])
+                                )
+                            )
+                            / 255.0
+                        )
                     self._loaded_images[c][img_name] = img
 
             for cls in _cls:
-                self._threads.append(threading.Thread(target=lambda: _load_class(cls), daemon=True))
+                self._threads.append(
+                    threading.Thread(target=lambda: _load_class(cls), daemon=True)
+                )
                 self._threads[-1].start()
 
     def check_loaded_images(self, n_min):
-        return self._loaded_images and all([len(v) >= n_min for v in self._loaded_images.values()])
+        return self._loaded_images and all(
+            [len(v) >= n_min for v in self._loaded_images.values()]
+        )
 
-    def generate_datasets(self, rand=None, num_classes=None, num_examples=None, wait_for_n_min=None):
+    def generate_datasets(
+        self, rand=None, num_classes=None, num_examples=None, wait_for_n_min=None
+    ):
 
         rand = dl.get_rand_state(rand)
 
         if wait_for_n_min:
             import time
+
             while not self.check_loaded_images(wait_for_n_min):
                 time.sleep(5)
 
-        if not num_examples: num_examples = self.kwargs['num_examples']
-        if not num_classes: num_classes = self.kwargs['num_classes']
+        if not num_examples:
+            num_examples = self.kwargs["num_examples"]
+        if not num_classes:
+            num_classes = self.kwargs["num_classes"]
 
-        clss = self._loaded_images if self._loaded_images else self.info['classes']
+        clss = self._loaded_images if self._loaded_images else self.info["classes"]
 
-        random_classes = rand.choice(list(clss.keys()), size=(num_classes,), replace=False)
+        random_classes = rand.choice(
+            list(clss.keys()), size=(num_classes,), replace=False
+        )
         rand_class_dict = {rnd: k for k, rnd in enumerate(random_classes)}
 
         _dts = []
@@ -420,22 +567,36 @@ class ImageNetMetaDataset(MetaDataset):
                 rand.shuffle(all_images[c])
                 img_name = all_images[c][0]
                 all_images[c].remove(img_name)
-                sample_info.append({'name': img_name, 'label': c})
+                sample_info.append({"name": img_name, "label": c})
 
                 if self._loaded_images:
                     data.append(clss[c][img_name])
                 else:
                     from imageio import imread
+
                     data.append(
-                        np.array(Image.fromarray(imread(join(self.info['base_folder'], join(c, img_name)))).resize(
-                            size=(self.info['resize'], self.info['resize']))) / 255.)
+                        np.array(
+                            Image.fromarray(
+                                imread(
+                                    join(self.info["base_folder"], join(c, img_name))
+                                )
+                            ).resize(size=(self.info["resize"], self.info["resize"]))
+                        )
+                        / 255.0
+                    )
                 targets.append(rand_class_dict[c])
 
-            if self.info['one_hot_enc']:
+            if self.info["one_hot_enc"]:
                 targets = to_one_hot_enc(targets, dimension=num_classes)
 
-            _dts.append(dl.Dataset(data=np.array(np.stack(data)), target=targets, sample_info=sample_info,
-                                   info={'all_classes': random_classes}))
+            _dts.append(
+                dl.Dataset(
+                    data=np.array(np.stack(data)),
+                    target=targets,
+                    sample_info=sample_info,
+                    info={"all_classes": random_classes},
+                )
+            )
         return dl.Datasets.from_list(_dts)
 
     def all_data(self, partition_proportions=None, seed=None):
@@ -443,25 +604,39 @@ class ImageNetMetaDataset(MetaDataset):
             self.load_all_images()
             while not self.check_loaded_images(600):
                 import time
+
                 time.sleep(5)
         data, targets = [], []
         for k, c in enumerate(sorted(self._loaded_images)):
             data += list(self._loaded_images[c].values())
             targets += [k] * 600
-        if self.info['one_hot_enc']:
+        if self.info["one_hot_enc"]:
             targets = dl.to_one_hot_enc(targets, dimension=len(self._loaded_images))
-        _dts = [dl.Dataset(data=np.stack(data), target=np.array(targets), name='MiniImagenet_full')]
+        _dts = [
+            dl.Dataset(
+                data=np.stack(data), target=np.array(targets), name="MiniImagenet_full"
+            )
+        ]
         if seed:
             np.random.seed(seed)
         if partition_proportions:
-            _dts = redivide_data(_dts, partition_proportions=partition_proportions,
-                                 shuffle=True)
+            _dts = redivide_data(
+                _dts, partition_proportions=partition_proportions, shuffle=True
+            )
         return dl.Datasets.from_list(_dts)
 
 
-def meta_mini_imagenet(folder=MINI_IMAGENET_FOLDER_V3, sub_folders=None, std_num_classes=None,
-                       examples_train=None, examples_test=None, resize=84, one_hot_enc=True, load_all_images=True,
-                       h5=False):
+def meta_mini_imagenet(
+    folder=MINI_IMAGENET_FOLDER_V3,
+    sub_folders=None,
+    std_num_classes=None,
+    examples_train=None,
+    examples_test=None,
+    resize=84,
+    one_hot_enc=True,
+    load_all_images=True,
+    h5=False,
+):
     """
     Load a meta-datasets from Mini-ImageNet. Returns a Datasets of MetaDataset s,
 
@@ -477,79 +652,140 @@ def meta_mini_imagenet(folder=MINI_IMAGENET_FOLDER_V3, sub_folders=None, std_num
     :param h5:  True (default) to use HDF5 files, when False search for JPEG images.
     :return:
     """
-    assert examples_train > 0, 'Wrong initialization for number of examples used for training'
+    assert (
+        examples_train > 0
+    ), "Wrong initialization for number of examples used for training"
     if examples_test > 0:
-        std_num_examples = (examples_train * std_num_classes, examples_test * std_num_classes)
+        std_num_examples = (
+            examples_train * std_num_classes,
+            examples_test * std_num_classes,
+        )
     else:
-        std_num_examples = (examples_train * std_num_classes)
+        std_num_examples = examples_train * std_num_classes
 
     if sub_folders is None:
-        sub_folders = ['train', 'val', 'test']
+        sub_folders = ["train", "val", "test"]
     meta_dts = []
     for ds in sub_folders:
         if not h5:
             base_folder = join(folder, ds)
             label_names = os.listdir(base_folder)
-            labels_and_images = {ln: os.listdir(join(base_folder, ln)) for ln in label_names}
-            meta_dts.append(ImageNetMetaDataset(info={
-                'base_folder': base_folder,
-                'classes': labels_and_images,
-                'resize': resize,
-                'one_hot_enc': one_hot_enc
-            }, num_classes=std_num_classes, num_examples=std_num_examples, h5=False))
+            labels_and_images = {
+                ln: os.listdir(join(base_folder, ln)) for ln in label_names
+            }
+            meta_dts.append(
+                ImageNetMetaDataset(
+                    info={
+                        "base_folder": base_folder,
+                        "classes": labels_and_images,
+                        "resize": resize,
+                        "one_hot_enc": one_hot_enc,
+                    },
+                    num_classes=std_num_classes,
+                    num_examples=std_num_examples,
+                    h5=False,
+                )
+            )
         else:
-            file = join(folder, ds + '.h5')
-            meta_dts.append(ImageNetMetaDataset(info={
-                'file': file,
-                'one_hot_enc': one_hot_enc
-            }, num_classes=std_num_classes, num_examples=std_num_examples, h5=True))
+            file = join(folder, ds + ".h5")
+            meta_dts.append(
+                ImageNetMetaDataset(
+                    info={"file": file, "one_hot_enc": one_hot_enc},
+                    num_classes=std_num_classes,
+                    num_examples=std_num_examples,
+                    h5=True,
+                )
+            )
 
     dts = dl.Datasets.from_list(meta_dts)
     if load_all_images:
         import time
+
         [_d.load_all_images() for _d in dts]
-        _check_available = lambda min_num: [_d.check_loaded_images(min_num) for _d in dts]
+        _check_available = lambda min_num: [
+            _d.check_loaded_images(min_num) for _d in dts
+        ]
         while not all(_check_available(15)):
-            time.sleep(1)  # be sure that there are at least 15 images per class in each meta-dataset
+            time.sleep(
+                1
+            )  # be sure that there are at least 15 images per class in each meta-dataset
     return dts
 
 
-def random_classification_datasets(n_samples, features=100, classes=2, informative=.1, partition_proportions=(.5, .3),
-                                   rnd=None, one_hot=True, **mk_cls_kwargs):
+def random_classification_datasets(
+    n_samples,
+    features=100,
+    classes=2,
+    informative=0.1,
+    partition_proportions=(0.5, 0.3),
+    rnd=None,
+    one_hot=True,
+    **mk_cls_kwargs
+):
     rnd_state = dl.get_rand_state(rnd)
-    X, Y = make_classification(n_samples, features,
-                               n_classes=classes, random_state=rnd_state, **mk_cls_kwargs)
+    X, Y = make_classification(
+        n_samples, features, n_classes=classes, random_state=rnd_state, **mk_cls_kwargs
+    )
     if one_hot:
         Y = to_one_hot_enc(Y)
 
-    print('range of Y', np.min(Y), np.max(Y))
-    info = merge_dicts({'informative': informative, 'random_seed': rnd}, mk_cls_kwargs)
-    name = dl.em_utils.name_from_dict(info, 'w')
+    print("range of Y", np.min(Y), np.max(Y))
+    info = merge_dicts({"informative": informative, "random_seed": rnd}, mk_cls_kwargs)
+    name = dl.em_utils.name_from_dict(info, "w")
     dt = dl.Dataset(X, Y, name=name, info=info)
     datasets = dl.Datasets.from_list(redivide_data([dt], partition_proportions))
-    print('conditioning of X^T X', np.linalg.cond(datasets.train.data.T @ datasets.train.data))
+    print(
+        "conditioning of X^T X",
+        np.linalg.cond(datasets.train.data.T @ datasets.train.data),
+    )
     return datasets
 
 
-def random_regression_datasets(n_samples, features=100, outs=1, informative=.1, partition_proportions=(.5, .3),
-                               rnd=None, **mk_rgr_kwargs):
+def random_regression_datasets(
+    n_samples,
+    features=100,
+    outs=1,
+    informative=0.1,
+    partition_proportions=(0.5, 0.3),
+    rnd=None,
+    **mk_rgr_kwargs
+):
     rnd_state = dl.get_rand_state(rnd)
-    X, Y, w = make_regression(n_samples, features, int(features * informative), outs, random_state=rnd_state,
-                              coef=True, **mk_rgr_kwargs)
+    X, Y, w = make_regression(
+        n_samples,
+        features,
+        int(features * informative),
+        outs,
+        random_state=rnd_state,
+        coef=True,
+        **mk_rgr_kwargs
+    )
     if outs == 1:
         Y = np.reshape(Y, (n_samples, 1))
 
-    print('range of Y', np.min(Y), np.max(Y))
-    info = merge_dicts({'informative': informative, 'random_seed': rnd, 'w': w}, mk_rgr_kwargs)
-    name = dl.em_utils.name_from_dict(info, 'w')
+    print("range of Y", np.min(Y), np.max(Y))
+    info = merge_dicts(
+        {"informative": informative, "random_seed": rnd, "w": w}, mk_rgr_kwargs
+    )
+    name = dl.em_utils.name_from_dict(info, "w")
     dt = dl.Dataset(X, Y, name=name, info=info)
     datasets = dl.Datasets.from_list(redivide_data([dt], partition_proportions))
-    print('conditioning of X^T X', np.linalg.cond(datasets.train.data.T @ datasets.train.data))
+    print(
+        "conditioning of X^T X",
+        np.linalg.cond(datasets.train.data.T @ datasets.train.data),
+    )
     return datasets
 
 
-def redivide_data(datasets, partition_proportions=None, shuffle=False, filters=None,
-                  maps=None, balance_classes=False, rand=None):
+def redivide_data(
+    datasets,
+    partition_proportions=None,
+    shuffle=False,
+    filters=None,
+    maps=None,
+    balance_classes=False,
+    rand=None,
+):
     """
     Function that redivides datasets. Can be use also to shuffle or filter or map examples.
 
@@ -581,16 +817,23 @@ def redivide_data(datasets, partition_proportions=None, shuffle=False, filters=N
     N = all_data.shape[0]
 
     if partition_proportions:  # argument check
-        partition_proportions = list([partition_proportions] if isinstance(partition_proportions, float)
-                                     else partition_proportions)
+        partition_proportions = list(
+            [partition_proportions]
+            if isinstance(partition_proportions, float)
+            else partition_proportions
+        )
         sum_proportions = sum(partition_proportions)
-        assert sum_proportions <= 1, "partition proportions must sum up to at most one: %d" % sum_proportions
-        if sum_proportions < 1.: partition_proportions += [1. - sum_proportions]
+        assert sum_proportions <= 1, (
+            "partition proportions must sum up to at most one: %d" % sum_proportions
+        )
+        if sum_proportions < 1.0:
+            partition_proportions += [1.0 - sum_proportions]
     else:
-        partition_proportions = [1. * get_data(d).shape[0] / N for d in datasets]
+        partition_proportions = [1.0 * get_data(d).shape[0] / N for d in datasets]
 
     if shuffle:
-        if sp and isinstance(all_data, sp.sparse.csr.csr_matrix): raise NotImplementedError()
+        if sp and isinstance(all_data, sp.sparse.csr.csr_matrix):
+            raise NotImplementedError()
         # if sk_shuffle:  # TODO this does not work!!! find a way to shuffle these matrices while
         # keeping compatibility with tensorflow!
         #     all_data, all_labels, all_infos = sk_shuffle(all_data, all_labels, all_infos)
@@ -603,21 +846,27 @@ def redivide_data(datasets, partition_proportions=None, shuffle=False, filters=N
         all_infos = np.array(all_infos[permutation])
 
     if filters:
-        if sp and isinstance(all_data, sp.sparse.csr.csr_matrix): raise NotImplementedError()
+        if sp and isinstance(all_data, sp.sparse.csr.csr_matrix):
+            raise NotImplementedError()
         filters = as_list(filters)
         data_triple = [(x, y, d) for x, y, d in zip(all_data, all_labels, all_infos)]
         for fiat in filters:
-            data_triple = [xy for i, xy in enumerate(data_triple) if fiat(xy[0], xy[1], xy[2], i)]
+            data_triple = [
+                xy for i, xy in enumerate(data_triple) if fiat(xy[0], xy[1], xy[2], i)
+            ]
         all_data = np.vstack([e[0] for e in data_triple])
         all_labels = np.vstack([e[1] for e in data_triple])
         all_infos = np.vstack([e[2] for e in data_triple])
 
     if maps:
-        if sp and isinstance(all_data, sp.sparse.csr.csr_matrix): raise NotImplementedError()
+        if sp and isinstance(all_data, sp.sparse.csr.csr_matrix):
+            raise NotImplementedError()
         maps = as_list(maps)
         data_triple = [(x, y, d) for x, y, d in zip(all_data, all_labels, all_infos)]
         for _map in maps:
-            data_triple = [_map(xy[0], xy[1], xy[2], i) for i, xy in enumerate(data_triple)]
+            data_triple = [
+                _map(xy[0], xy[1], xy[2], i) for i, xy in enumerate(data_triple)
+            ]
         all_data = np.vstack([e[0] for e in data_triple])
         all_labels = np.vstack([e[1] for e in data_triple])
         all_infos = np.vstack([e[2] for e in data_triple])
@@ -628,12 +877,17 @@ def redivide_data(datasets, partition_proportions=None, shuffle=False, filters=N
     calculated_partitions = reduce(
         lambda v1, v2: v1 + [sum(v1) + v2],
         [int(N * prp) for prp in partition_proportions],
-        [0]
+        [0],
     )
     calculated_partitions[-1] = N
 
-    print('datasets.redivide_data:, computed partitions numbers -',
-          calculated_partitions, 'len all', N, end=' ')
+    print(
+        "datasets.redivide_data:, computed partitions numbers -",
+        calculated_partitions,
+        "len all",
+        N,
+        end=" ",
+    )
 
     new_general_info_dict = {}
     for data in datasets:
@@ -643,30 +897,46 @@ def redivide_data(datasets, partition_proportions=None, shuffle=False, filters=N
             new_datasets = []
             forbidden_indices = np.empty(0, dtype=np.int64)
             for d1, d2 in zip(calculated_partitions[:-1], calculated_partitions[1:-1]):
-                indices = np.array(get_indices_balanced_classes(d2 - d1, all_labels, forbidden_indices))
-                dataset = dl.Dataset(data=all_data[indices], target=all_labels[indices],
-                                     sample_info=all_infos[indices],
-                                     info=new_general_info_dict)
+                indices = np.array(
+                    get_indices_balanced_classes(d2 - d1, all_labels, forbidden_indices)
+                )
+                dataset = dl.Dataset(
+                    data=all_data[indices],
+                    target=all_labels[indices],
+                    sample_info=all_infos[indices],
+                    info=new_general_info_dict,
+                )
                 new_datasets.append(dataset)
                 forbidden_indices = np.append(forbidden_indices, indices)
                 test_if_balanced(dataset)
-            remaining_indices = np.array(list(set(list(range(N))) - set(forbidden_indices)))
-            new_datasets.append(dl.Dataset(data=all_data[remaining_indices], target=all_labels[remaining_indices],
-                                           sample_info=all_infos[remaining_indices],
-                                           info=new_general_info_dict))
+            remaining_indices = np.array(
+                list(set(list(range(N))) - set(forbidden_indices))
+            )
+            new_datasets.append(
+                dl.Dataset(
+                    data=all_data[remaining_indices],
+                    target=all_labels[remaining_indices],
+                    sample_info=all_infos[remaining_indices],
+                    info=new_general_info_dict,
+                )
+            )
         else:
             new_datasets = [
-                dl.Dataset(data=all_data[d1:d2], target=all_labels[d1:d2], sample_info=all_infos[d1:d2],
-                           info=new_general_info_dict)
+                dl.Dataset(
+                    data=all_data[d1:d2],
+                    target=all_labels[d1:d2],
+                    sample_info=all_infos[d1:d2],
+                    info=new_general_info_dict,
+                )
                 for d1, d2 in zip(calculated_partitions, calculated_partitions[1:])
             ]
 
-        print('DONE')
+        print("DONE")
 
         return new_datasets
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # pass
     # mmi = meta_mini_imagenet()
     # # st = mmi.train.generate_datasets(num_classes=10, num_examples=(123, 39))

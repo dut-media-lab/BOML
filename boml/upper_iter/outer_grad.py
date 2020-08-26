@@ -41,8 +41,9 @@ class BOMLOuterGrad(object):
 
         :return: list of outer parameters involved in the computation
         """
-        assert isinstance(bml_inner_grad, (BOMLInnerGradAggr, BOMLInnerGradSimple, BOMLInnerGradTrad)), \
-            BOMLOuterGrad._ERROR_NOT_OPTIMIZER_DICT.format(bml_inner_grad)
+        assert isinstance(
+            bml_inner_grad, (BOMLInnerGradAggr, BOMLInnerGradSimple, BOMLInnerGradTrad)
+        ), BOMLOuterGrad._ERROR_NOT_OPTIMIZER_DICT.format(bml_inner_grad)
         self._optimizer_dicts.add(bml_inner_grad)
 
         if meta_param is None:  # get default outer parameters
@@ -52,13 +53,17 @@ class BOMLOuterGrad(object):
     @property
     def initialization(self):
         if self._initialization is None:
-            self._initialization = [opt_dict.initialization for opt_dict in sorted(self._optimizer_dicts)]
+            self._initialization = [
+                opt_dict.initialization for opt_dict in sorted(self._optimizer_dicts)
+            ]
         return self._initialization
 
     @property
     def iteration(self):
         if self._iteration is None:
-            self._iteration = [opt_dict.iteration for opt_dict in sorted(self._optimizer_dicts)]
+            self._iteration = [
+                opt_dict.iteration for opt_dict in sorted(self._optimizer_dicts)
+            ]
         return self._iteration
 
     @property
@@ -70,18 +75,29 @@ class BOMLOuterGrad(object):
     @property
     def inner_objectives(self):
         if self._inner_objectives is None:
-            self._inner_objectives = [opt.objective if hasattr(opt, 'objective') else tf.constant(False)
-                                      for opt in sorted(self._optimizer_dicts)]
+            self._inner_objectives = [
+                opt.objective if hasattr(opt, "objective") else tf.constant(False)
+                for opt in sorted(self._optimizer_dicts)
+            ]
         return self._inner_objectives
 
     @property
     def apply_updates(self):
         if self._apply_updates is None:
-            self._apply_updates = tf.group(*[opt_dict.apply_updates for opt_dict in sorted(self._optimizer_dicts)])
+            self._apply_updates = tf.group(
+                *[opt_dict.apply_updates for opt_dict in sorted(self._optimizer_dicts)]
+            )
         return self._apply_updates
 
-    def apply_gradients(self, inner_objective_feed_dicts=None, outer_objective_feed_dicts=None,
-                        initializer_feed_dict=None, param_dict=OrderedDict(), global_step=None, session=None):
+    def apply_gradients(
+        self,
+        inner_objective_feed_dicts=None,
+        outer_objective_feed_dicts=None,
+        initializer_feed_dict=None,
+        param_dict=OrderedDict(),
+        global_step=None,
+        session=None,
+    ):
         """
         Runs the inner optimization dynamics for T iterations
         in the meanwhile.
@@ -112,7 +128,9 @@ class BOMLOuterGrad(object):
         if meta_param is None:
             meta_param = boml.extension.meta_parameters(tf.get_variable_scope().name)
 
-        assert all([h in self._hypergrad_dictionary for h in meta_param]), 'FINAL ERROR!'
+        assert all(
+            [h in self._hypergrad_dictionary for h in meta_param]
+        ), "FINAL ERROR!"
 
         if aggregation_fn is None:
             aggregation_fn = lambda hgrad_list: tf.reduce_mean(hgrad_list, axis=0)
@@ -124,13 +142,15 @@ class BOMLOuterGrad(object):
                 with tf.name_scope(_hg_lst[0].op.name):
                     aggr = aggregation_fn(_hg_lst) if len(_hg_lst) > 1 else _hg_lst[0]
             if process_fn is not None:
-                with tf.name_scope('process_gradients'):
+                with tf.name_scope("process_gradients"):
                     aggr = process_fn(aggr)
             tf.add_to_collection(boml.extension.GraphKeys.OUTERGRADIENTS, aggr)
             return aggr
 
-        return [(_aggregate_process_manage_collection(self._hypergrad_dictionary[h]),
-                 h) for h in meta_param]
+        return [
+            (_aggregate_process_manage_collection(self._hypergrad_dictionary[h]), h)
+            for h in meta_param
+        ]
 
     @property
     def name(self):
