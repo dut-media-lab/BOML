@@ -4,6 +4,7 @@
 ![Documentation Status](https://readthedocs.org/projects/pybml/badge/?version=latest)
 ![license](https://img.shields.io/badge/license-MIT-000000.svg)
 ![codecov](https://codecov.io/gh/dut-media-lab/BOML/branch/master/graph/badge.svg)
+![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 ![Language](https://img.shields.io/github/languages/top/dut-media-lab/BOML)
 
 
