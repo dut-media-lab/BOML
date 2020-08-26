@@ -63,7 +63,6 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
                 for hyper in meta_param
             ]
 
-            self.grad_outer.append(grads_outer[-1])
 
             # compute the first-order gradient of  the initial task parameters
             darts_derivatives = [
@@ -80,6 +79,7 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
                 self.Epsilon * darts_derivative
                 for darts_derivative in darts_derivatives
             ]
+            
             fin_diff_part = self._create_darts_derivatives(
                 var_list=optimizer_dict.state, darts_derivatives=darts_derivaives
             )
