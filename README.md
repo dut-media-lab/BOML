@@ -2,11 +2,10 @@
 # BOML - A Bilevel Optimization Library in Python for Multi-Task and Meta Learning
 ![Travis Status](https://travis-ci.com/dut-media-lab/BOML.svg?branch=master)
 ![Documentation Status](https://readthedocs.org/projects/pybml/badge/?version=latest)
-![license](https://img.shields.io/badge/license-MIT-000000.svg)
 ![codecov](https://codecov.io/gh/dut-media-lab/BOML/branch/master/graph/badge.svg)
+![license](https://img.shields.io/badge/license-MIT-000000.svg)
 ![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)
 ![Language](https://img.shields.io/github/languages/top/dut-media-lab/BOML)
-
 
 
 BOML is a modularized optimization library that unifies several ML algorithms into a common bilevel optimization framework. It provides interfaces to implement popular bilevel optimization algorithms, so that you could quickly build your own meta learning neural network and test its performance.
