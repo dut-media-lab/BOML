@@ -144,3 +144,5 @@ class BOMLInnerGradTrad(object):
         assert isinstance(other, BOMLInnerGradTrad)
         return hash(self) < hash(other)
 
+    def __len__(self):
+        return len(self._dynamics)

@@ -125,10 +125,15 @@ class BOMLOptimizer(object):
         self.param_dict["use_T"] = use_T
         self.param_dict["use_Warp"] = use_Warp
         self.param_dict["output_shape"] = dataset.train.dim_target
-        self.param_dict["model_loss_func"] = model_args["model_loss_func"] \
-            if "model_loss_func" in model_args.keys() else utils.cross_entropy
-        self.param_dict["outer_loss_func"] = model_args["outer_loss_func"] \
-            if "outer_loss_func" in model_args.keys() else utils.cross_entropy
+        if use_Warp:
+            if "model_loss_func" in model_args.keys():
+                self.param_dict["model_loss_func"] = model_args["model_loss_func"]
+            else:
+                self.param_dict["model_loss_func"] = utils.cross_entropy
+            if "outer_loss_func" in model_args.keys():
+                self.param_dict["outer_loss_func"] = model_args["outer_loss_func"]
+            else:
+                self.param_dict["outer_loss_func"] = utils.cross_entropy
         self.data_set = dataset
         assert meta_model.startswith(
             "V"
@@ -193,6 +198,11 @@ class BOMLOptimizer(object):
                 name=name,
                 use_T=meta_learner.use_T,
             )
+        else:
+            print(
+                "initialize method arguement, should be in list \an [MetaRepr,MetaInitl]"
+            )
+            raise AssertionError
         return base_learner
 
     def ll_problem(
@@ -212,8 +222,8 @@ class BOMLOptimizer(object):
         var_list=None,
         first_order=False,
         loss_func=utils.cross_entropy,
-        experiment=None,
         momentum=0.5,
+        experiment=None,
         **inner_kargs
     ):
         """
@@ -234,10 +244,12 @@ class BOMLOptimizer(object):
         :param first_order: specific parameter to define whether to use implement first order MAML, default to be `FALSE`
         :param loss_func: specifying which type of loss function is used for the maml-based method, which should be
         consistent with the form to compute the inner objective
+        :param momentum: specific parameter for Optimizer.BMLOptMomentum to set initial value of momentum
+        :param beta1: specific parameter for optimizer.BOMLOptMomentum to set initial value of Adam
+        :param beta2: specific parameter for optimizer.BOMLOptMomentum to set initial value of Adam
         :param experiment: instance of Experiment to use in the Lower Level Problem, especifially needed in the
          `MetaInit` type of methods.
         :param var_list: optional list of variables (of the inner optimization problem)from
-        :param momentum: specific parameters to be used to initialize 'Momentum' algorithm
         :param inner_kargs: optional arguments to pass to `py_bml.core.optimizer.minimize`
         :return: `BOMLInnerGrad` from boml.lower_iter.
         """
@@ -260,9 +272,11 @@ class BOMLOptimizer(object):
                     boml_optimizer, "%s%s" % ("BOMLOpt", inner_objective_optimizer)
                 )(learning_rate=self._learning_rate, name=inner_objective_optimizer)
             elif inner_objective_optimizer == "Momentum":
-                self.io_opt = getattr(
-                    boml_optimizer, "%s%s" % ("BOMLOpt", inner_objective_optimizer)
-                )(learning_rate=self._learning_rate, momentum=momentum, name=inner_objective_optimizer)
+                self.io_opt = getattr(boml_optimizer, "%s%s" % ("BOMLOpt", "Momentum"))(
+                    learning_rate=self._learning_rate,
+                    momentum=momentum,
+                    name=inner_objective_optimizer,
+                )
             else:
                 self.io_opt = getattr(
                     boml_optimizer, "%s%s" % ("BOMLOpt", inner_objective_optimizer)
@@ -324,13 +338,7 @@ class BOMLOptimizer(object):
         self._param_dict["loss_func"] = loss_func
         self._param_dict["experiment"] = experiment
 
-        if "T" in self._param_dict.keys():
-            assert self._param_dict["T"] == T, (
-                "all probems are supposed to take same gradient descent steps, "
-                "which means T must be initialized same as before"
-            )
-        else:
-            self._param_dict["T"] = T
+        self._param_dict["T"] = T
 
         inner_grad = self._inner_gradient.compute_gradients(
             bml_opt=self.io_opt,
@@ -361,12 +369,13 @@ class BOMLOptimizer(object):
         outer_objective,
         meta_learning_rate,
         inner_grad,
-        mlr_decay=1.0e-5,
+        mlr_decay=1.e-5,
         meta_param=None,
-        momentum=0.5,
         outer_objective_optimizer="Adam",
         epsilon=1.0,
+        momentum=0.5,
         tolerance=lambda _k: 0.1 * (0.9 ** _k),
+        global_step=None,
     ):
         """
         Set the outer optimization problem and the descent procedure for the optimization of the
@@ -379,10 +388,11 @@ class BOMLOptimizer(object):
         :param meta_param: optional list of outer parameters and model parameters
         :param outer_objective_optimizer: Optimizer type for the outer parameters,
         should be in list ['SGD','Momentum','Adam']
-        :param mlr_decay: the decaying rate for meta learning rate
         :param epsilon: Float, cofffecients to be used in DARTS algorithm
         :param momentum: specific parameters to be used to initialize 'Momentum' algorithm
         :param tolerance: specific function template for Implicit HG Algorithm
+        :param global_step: optional global step. By default tries to use the last variable
+        in the collection GLOBAL_STEP
         :return: itself
         """
         if self._meta_learning_rate is None:
@@ -393,14 +403,14 @@ class BOMLOptimizer(object):
                 decay_rate=mlr_decay,
             )
         if self.oo_opt is None:
-            if outer_objective_optimizer == 'Momentum':
-                self.oo_opt = getattr(
-                    boml_optimizer, "%s%s" % ("BOMLOpt", outer_objective_optimizer)
-                )(learning_rate=self._learning_rate, momentum=momentum, name=outer_objective_optimizer)
+            if outer_objective_optimizer == "Momentum":
+                self.oo_opt = tf.train.MomentumOptimizer(
+                    learning_rate=self._meta_learning_rate, momentum=momentum
+                )
             else:
-                self.oo_opt = getattr(
-                    boml_optimizer, "%s%s" % ("BOMLOpt", outer_objective_optimizer)
-                )(learning_rate=self._learning_rate, name=outer_objective_optimizer)
+                self.oo_opt = getattr(boml_optimizer, "%s%s" % ("BOMLOpt", outer_objective_optimizer))(
+                    learning_rate=self._learning_rate,
+                )
         assert isinstance(
             self._outer_gradient, getattr(hyper_grads, "BOMLOuterGrad")
         ), "Wrong name for inner method,should be in list \n [Reverse, Simple, Forward, Implicit]"
@@ -427,6 +437,8 @@ class BOMLOptimizer(object):
         )
         self._o_optim_dict[self.oo_opt].update(meta_param)
 
+        if global_step is not None:
+            self._global_step = global_step
         return self
 
     def minimize(
@@ -538,6 +550,11 @@ class BOMLOptimizer(object):
             if self._global_step:
                 with tf.control_dependencies([self._fin_hts]):
                     self._fin_hts = self._global_step.assign_add(1).op
+        else:
+            raise ValueError(
+                "BOMLOptimizer.Aggregate_all has already been called on "
+                + "this object, further calls have no effect"
+            )
         return self.run
 
     def run(

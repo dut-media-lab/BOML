@@ -1,9 +1,9 @@
 import sys
 import os
 
-sys.path.append("../")
-os.environ["DATASETS_FOLDER"] = "../"
-os.environ["EXPERIMENTS_FOLDER"] = "../"
+sys.path.append('../')
+os.environ['DATASETS_FOLDER'] = '../'
+os.environ['EXPERIMENTS_FOLDER'] = '../'
 import boml as boml
 import tensorflow as tf
 
@@ -12,7 +12,7 @@ def main():
     # def test_meta_init_v2():
     _input_1 = tf.placeholder(tf.float32, (None, 28, 28, 1))
     _input_2 = tf.placeholder(tf.float32, (None, 84, 84, 3))
-    boml_meta_repr_v1 = boml.BOMLNetMiniMetaReprV1(_input_2, use_T=True, use_Warp=True)
+    boml_meta_repr_v1= boml.BOMLNetMiniMetaReprV1(_input_2,use_T=True,use_Warp=True)
     boml_meta_init_v2_omniglot = boml.BOMLNetOmniglotMetaInitV2(_input_1, dim_output=5)
     boml_meta_init_v2 = boml.BOMLNetMiniMetaInitV2(_input_2, dim_output=5)
     boml_meta_repr_v2_omniglot = boml.BOMLNetOmniglotMetaReprV2(_input_1)
@@ -28,8 +28,8 @@ def main():
     print(boml_meta_repr_v2_omniglot.re_forward().out)
     print(boml_meta_repr_v2.re_forward().out)
     print(boml.utils.get_rand_state(6))
-    print(boml_meta_repr_v2.filter_vars("weights"))
+    print(boml_meta_repr_v2.filter_vars('weights'))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

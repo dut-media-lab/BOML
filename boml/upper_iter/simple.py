@@ -46,15 +46,17 @@ class BOMLOuterGradSimple(BOMLOuterGrad):
                 """
             if param_dict["use_Warp"]:
                 doo_dhypers = (
-                    inner_grad.outer_param_tensor + inner_grad.model_param_tensor
+                    inner_grad.outer_param_tensor
+                    + inner_grad.model_param_tensor
                 )
                 doo_dhypers += tf.gradients(
-                    outer_objective, meta_param[len(doo_dhypers) :]
+                    outer_objective, meta_param[len(doo_dhypers):]
                 )
             else:
                 doo_dhypers = tf.gradients(
                     outer_objective,
-                    list(inner_grad.state) + meta_param[len(inner_grad.state) :],
+                    list(inner_grad.state)
+                    + meta_param[len(inner_grad.state) :],
                 )
 
             for h, doo_dh in zip(meta_param, doo_dhypers):
