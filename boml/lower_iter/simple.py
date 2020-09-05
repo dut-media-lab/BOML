@@ -194,9 +194,6 @@ class BOMLInnerGradSimple(BOMLInnerGradTrad):
         Descent step, as returned by `tf.train.Optimizer.apply_gradients`.
         :return:
         """
-        assert (
-            self._updates_op is not None
-        ), "descent step operation must be initialized before being called"
         return self._updates_op
 
     @property

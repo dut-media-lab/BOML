@@ -66,8 +66,7 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
 
             # compute the first-order gradient of  the initial task parameters
             darts_derivatives = [
-                grad
-                for grad in tf.gradients(outer_objective, list(inner_grad.state))
+                grad for grad in tf.gradients(outer_objective, list(inner_grad.state))
             ]
 
             # compute the differentiation part, multiplied by Epsilon

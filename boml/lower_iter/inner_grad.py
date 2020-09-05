@@ -55,9 +55,6 @@ class BOMLInnerGradTrad(object):
         Descent step, as returned by `tf.train.Optimizer.apply_gradients`.
         :return:
         """
-        assert (
-            self._updates_op is not None
-        ), "descent step operation must be initialized before being called"
         return self._updates_op
 
     @property
@@ -147,5 +144,3 @@ class BOMLInnerGradTrad(object):
         assert isinstance(other, BOMLInnerGradTrad)
         return hash(self) < hash(other)
 
-    def __len__(self):
-        return len(self._dynamics)

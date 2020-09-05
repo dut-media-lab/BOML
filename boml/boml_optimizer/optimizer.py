@@ -213,6 +213,7 @@ class BOMLOptimizer(object):
         first_order=False,
         loss_func=utils.cross_entropy,
         experiment=None,
+        momentum=0.5,
         **inner_kargs
     ):
         """
@@ -236,6 +237,7 @@ class BOMLOptimizer(object):
         :param experiment: instance of Experiment to use in the Lower Level Problem, especifially needed in the
          `MetaInit` type of methods.
         :param var_list: optional list of variables (of the inner optimization problem)from
+        :param momentum: specific parameters to be used to initialize 'Momentum' algorithm
         :param inner_kargs: optional arguments to pass to `py_bml.core.optimizer.minimize`
         :return: `BOMLInnerGrad` from boml.lower_iter.
         """
@@ -257,6 +259,10 @@ class BOMLOptimizer(object):
                 self.io_opt = getattr(
                     boml_optimizer, "%s%s" % ("BOMLOpt", inner_objective_optimizer)
                 )(learning_rate=self._learning_rate, name=inner_objective_optimizer)
+            elif inner_objective_optimizer == "Momentum":
+                self.io_opt = getattr(
+                    boml_optimizer, "%s%s" % ("BOMLOpt", inner_objective_optimizer)
+                )(learning_rate=self._learning_rate, momentum=momentum, name=inner_objective_optimizer)
             else:
                 self.io_opt = getattr(
                     boml_optimizer, "%s%s" % ("BOMLOpt", inner_objective_optimizer)
@@ -357,6 +363,7 @@ class BOMLOptimizer(object):
         inner_grad,
         mlr_decay=1.0e-5,
         meta_param=None,
+        momentum=0.5,
         outer_objective_optimizer="Adam",
         epsilon=1.0,
         tolerance=lambda _k: 0.1 * (0.9 ** _k),
@@ -386,10 +393,14 @@ class BOMLOptimizer(object):
                 decay_rate=mlr_decay,
             )
         if self.oo_opt is None:
-            if outer_objective_optimizer == "Momentum":
-                self.oo_opt = tf.train.MomentumOptimizer(
-                    learning_rate=self._meta_learning_rate, name=outer_objective_optimizer
-                )
+            if outer_objective_optimizer == 'Momentum':
+                self.oo_opt = getattr(
+                    boml_optimizer, "%s%s" % ("BOMLOpt", outer_objective_optimizer)
+                )(learning_rate=self._learning_rate, momentum=momentum, name=outer_objective_optimizer)
+            else:
+                self.oo_opt = getattr(
+                    boml_optimizer, "%s%s" % ("BOMLOpt", outer_objective_optimizer)
+                )(learning_rate=self._learning_rate, name=outer_objective_optimizer)
         assert isinstance(
             self._outer_gradient, getattr(hyper_grads, "BOMLOuterGrad")
         ), "Wrong name for inner method,should be in list \n [Reverse, Simple, Forward, Implicit]"
