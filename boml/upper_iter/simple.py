@@ -17,7 +17,7 @@ class BOMLOuterGradSimple(BOMLOuterGrad):
     # noinspection SpellCheckingInspection
 
     def compute_gradients(
-        self, outer_objective, optimizer_dict, meta_param=None, param_dict=OrderedDict()
+        self, outer_objective, inner_grad, meta_param=None, param_dict=OrderedDict()
     ):
         """
         Function that adds to the computational graph all the operations needend for computing
@@ -26,7 +26,7 @@ class BOMLOuterGradSimple(BOMLOuterGrad):
         optimizaiton dynamics, requires much less (GPU) memory and is more flexible, allowing
         to set a termination condition to the parameters optimizaiton routine.
 
-        :param optimizer_dict: OptimzerDict object resulting from the inner objective optimization.
+        :param inner_grad: OptimzerDict object resulting from the inner objective optimization.
         :param outer_objective: A loss function for the outer parameters (scalar tensor)
         :param meta_param: Optional list of outer parameters to consider. If not provided will get all variables in the
                             hyperparameter collection in the current scope.
@@ -34,7 +34,7 @@ class BOMLOuterGradSimple(BOMLOuterGrad):
         :return: list of outer parameters involved in the computation
         """
         meta_param = super(BOMLOuterGradSimple, self).compute_gradients(
-            outer_objective, optimizer_dict, meta_param
+            outer_objective, inner_grad, meta_param
         )
 
         with tf.variable_scope(outer_objective.op.name):
@@ -46,17 +46,17 @@ class BOMLOuterGradSimple(BOMLOuterGrad):
                 """
             if param_dict["use_Warp"]:
                 doo_dhypers = (
-                    optimizer_dict.outer_param_tensor
-                    + optimizer_dict.model_param_tensor
+                    inner_grad.outer_param_tensor
+                    + inner_grad.model_param_tensor
                 )
                 doo_dhypers += tf.gradients(
-                    outer_objective, meta_param[len(doo_dhypers) :]
+                    outer_objective, meta_param[len(doo_dhypers):]
                 )
             else:
                 doo_dhypers = tf.gradients(
                     outer_objective,
-                    list(optimizer_dict.state)
-                    + meta_param[len(optimizer_dict.state) :],
+                    list(inner_grad.state)
+                    + meta_param[len(inner_grad.state) :],
                 )
 
             for h, doo_dh in zip(meta_param, doo_dhypers):

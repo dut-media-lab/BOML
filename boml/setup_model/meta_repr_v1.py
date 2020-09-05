@@ -92,15 +92,6 @@ class BOMLNetMetaReprV1(BOMLNet):
                 self, layer=i, initializer=self.bias_initializer
             )
 
-        # hyper parameters of transformation layer
-        if self.use_T:
-            for i in range(len(self.dim_hidden)):
-                self.outer_param_dict[
-                    "conv" + str(i) + "_z"
-                ] = network_utils.get_identity(
-                    self.dim_hidden[0], name="conv" + str(i) + "_z", conv=True
-                )
-
         [
             tf.add_to_collections(extension.GraphKeys.METAPARAMETERS, hyper)
             for hyper in self.outer_param_dict.values()

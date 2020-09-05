@@ -23,6 +23,7 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
        :return: BMLOuterGradDarts object
            """
         super(BOMLOuterGradDarts, self).__init__(name)
+        self.epsilon = 0.0
         self._inner_method = inner_method
         self._diff_initializer = tf.no_op()
         self._darts_initializer = tf.no_op()
@@ -30,7 +31,7 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
 
     # noinspection SpellCheckingInspection
     def compute_gradients(
-        self, outer_objective, optimizer_dict, meta_param=None, param_dict=OrderedDict()
+        self, outer_objective, inner_grad, meta_param=None, param_dict=OrderedDict()
     ):
         """
         Function that adds to the computational graph all the operations needend for computing
@@ -39,7 +40,7 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
         optimizaiton dynamics, requires much less (GPU) memory and is more flexible, allowing
         to set a termination condition to the parameters optimizaiton routine.
 
-        :param optimizer_dict: OptimzerDict object resulting from the inner objective optimization.
+        :param inner_grad: OptimzerDict object resulting from the inner objective optimization.
         :param outer_objective: A loss function for the outer parameters (scalar tensor)
         :param meta_param: Optional list of outer parameters to consider. If not provided will get all variables in the
                             hyperparameter collection in the current scope.
@@ -48,7 +49,7 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
         :return: list of outer parameters involved in the computation
         """
         meta_param = super(BOMLOuterGradDarts, self).compute_gradients(
-            outer_objective, optimizer_dict, meta_param
+            outer_objective, inner_grad, meta_param
         )
 
         with tf.variable_scope(outer_objective.op.name):
@@ -63,25 +64,23 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
                 for hyper in meta_param
             ]
 
-
             # compute the first-order gradient of  the initial task parameters
             darts_derivatives = [
                 grad
-                for grad in tf.gradients(outer_objective, list(optimizer_dict.state))
+                for grad in tf.gradients(outer_objective, list(inner_grad.state))
             ]
 
             # compute the differentiation part, multiplied by Epsilon
             darts_vector = tf.concat(
                 axis=0, values=utils.vectorize_all(darts_derivatives)
             )
-            self.Epsilon = 0.01 / tf.norm(tensor=darts_vector, ord=2)
+            self.epsilon = 0.01 / tf.norm(tensor=darts_vector, ord=2)
             darts_derivaives = [
                 self.Epsilon * darts_derivative
                 for darts_derivative in darts_derivatives
             ]
-            
             fin_diff_part = self._create_darts_derivatives(
-                var_list=optimizer_dict.state, darts_derivatives=darts_derivaives
+                var_list=inner_grad.state, darts_derivatives=darts_derivaives
             )
             self._diff_initializer = tf.group(
                 self._diff_initializer,
@@ -135,7 +134,7 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
             ):
                 if right_dif is not None and left_dif is not None:
                     grad_param = tf.divide(
-                        tf.subtract(right_dif, left_dif), 2 * self.Epsilon
+                        tf.subtract(right_dif, left_dif), 2 * self.epsilon
                     )
                     meta_grad = self.param_dict["learning_rate"] * grad_param
                     self._darts_initializer = tf.group(

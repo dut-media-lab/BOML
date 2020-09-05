@@ -44,19 +44,19 @@ class BOMLOuterGradImplicit(BOMLOuterGrad):
         self._qs = []
 
     def compute_gradients(
-        self, outer_objective, optimizer_dict, meta_param=None, param_dict=OrderedDict()
+        self, outer_objective, inner_grad, meta_param=None, param_dict=OrderedDict()
     ):
         meta_param = super(BOMLOuterGradImplicit, self).compute_gradients(
-            outer_objective, optimizer_dict, meta_param
+            outer_objective, inner_grad, meta_param
         )
-        state = list(optimizer_dict.state)
+        state = list(inner_grad.state)
 
         with tf.variable_scope(outer_objective.op.name):
             g1 = utils.vectorize_all(
                 tf.gradients(outer_objective, state)
             )  # Lower Level gradient of UL objective  w.r.t task parameters
             grads_inner_obj_vec = utils.vectorize_all(
-                tf.gradients(optimizer_dict.objective, state)
+                tf.gradients(inner_grad.objective, state)
             )  #  Lower Level gradient of LL objective  w.r.t task parameters
 
             q = self._create_q(g1)

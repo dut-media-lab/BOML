@@ -96,7 +96,7 @@ def get_outerparameter(
     :param shape: optional shape, may be not needed depending on initializer
     :param dtype: optional type,  may be not needed depending on initializer
     :param collections: optional additional collection or list of collections, which will be added to
-                        HYPERPARAMETER and GLOBAL_VARIABLES
+                        METAPARAMETER and GLOBAL_VARIABLES
     :param scalar: default False, if True splits the hyperparameter in its scalar components, i.e. each component
                     will be a single scalar hyperparameter. In this case the method returns a tensor which of the
                     desired shape (use this option with `ForwardHG`)

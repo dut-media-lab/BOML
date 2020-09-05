@@ -34,7 +34,7 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
 
     # noinspection SpellCheckingInspection
     def compute_gradients(
-        self, outer_objective, optimizer_dict, meta_param=None, param_dict=OrderedDict()
+        self, outer_objective, inner_grad, meta_param=None, param_dict=OrderedDict()
     ):
         """
         Function that adds to the computational graph all the operations needend for computing
@@ -43,7 +43,7 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
         optimizaiton dynamics, requires much less (GPU) memory and is more flexible, allowing
         to set a termination condition to the parameters optimizaiton routine.
 
-        :param optimizer_dict: OptimzerDict object resulting from the inner objective optimization.
+        :param inner_grad: OptimzerDict object resulting from the inner objective optimization.
         :param outer_objective: A loss function for the outer parameters (scalar tensor)
         :param meta_param: Optional list of outer parameters to consider. If not provided will get all variables in the
                             hyperparameter collection in the current scope.
@@ -51,15 +51,15 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
         :return: list of outer parameters involved in the computation
         """
         meta_param = super(BOMLOuterGradReverse, self).compute_gradients(
-            outer_objective, optimizer_dict, meta_param
+            outer_objective, inner_grad, meta_param
         )
 
         with tf.variable_scope(outer_objective.op.name):
-            doo_ds = tf.gradients(outer_objective, list(optimizer_dict.state))
-            alphas = self._create_lagrangian_multipliers(optimizer_dict, doo_ds)
+            doo_ds = tf.gradients(outer_objective, list(inner_grad.state))
+            alphas = self._create_lagrangian_multipliers(inner_grad, doo_ds)
 
             alpha_vec = utils.vectorize_all(alphas)
-            dyn_vec = utils.vectorize_all(list(optimizer_dict.dynamics))
+            dyn_vec = utils.vectorize_all(list(inner_grad.dynamics))
             lag_phi_t = utils.dot(alpha_vec, dyn_vec, name="iter_wise_lagrangian_part1")
 
             alpha_dot_B = tf.gradients(lag_phi_t, meta_param)
@@ -81,7 +81,7 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
                     *[
                         alpha.assign(dl_ds)
                         for alpha, dl_ds in zip(
-                            alphas, tf.gradients(lag_phi_t, list(optimizer_dict.state))
+                            alphas, tf.gradients(lag_phi_t, list(inner_grad.state))
                         )
                     ]
                 )
