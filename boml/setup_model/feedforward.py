@@ -46,16 +46,6 @@ class BOMLNetFeedForward(BOMLNet):
             self.task_parameter["fc_bias"],
         )
 
-        if self.use_T:
-            conv_z = tf.get_variable(
-                initializer=tf.eye(self.dims[-1]),
-                dtype=tf.float32,
-                collections=self.var_collections,
-                trainable=False,
-                name="conv_z",
-            )
-            self + tf.matmul(self.out, conv_z)
-
     def create_initial_parameter(self):
         self.task_parameter = OrderedDict()
         self.task_parameter["fc_weight"] = tf.get_variable(

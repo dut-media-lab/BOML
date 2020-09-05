@@ -233,7 +233,7 @@ def BOMLNetMiniMetaReprV1(
     model_param_dict=OrderedDict(),
     dim_output=-1,
     batch_norm=layers.batch_norm,
-    name="BMLNetC4LMini",
+    name="BOMLNetC4LMini",
     use_T=False,
     use_Warp=False,
     outer_method="Reverse",

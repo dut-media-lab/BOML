@@ -125,24 +125,6 @@ class BOMLInnerGradAggr(BOMLInnerGradTrad):
         return self._updates_op
 
     @property
-    def iteration(self):
-        """
-        Performs a descent step (as return by `tf.train.Optimizer.apply_gradients`) and computes the values of
-        the variables after it.
-
-        :return: A list of operation that, after performing one iteration, return the value of the state variables
-                    being optimized (possibly including auxiliary variables)
-        """
-        if self._iteration is None:
-            with tf.control_dependencies([self._updates_op]):
-                self._iteration = (
-                    self._state_read()
-                )  # performs an iteration and returns the
-                # value of all variables in the state (ordered according to dyn)
-
-        return self._iteration
-
-    @property
     def initialization(self):
         """
         :return: a list of operations that return the values of the state variables for this

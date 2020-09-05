@@ -32,7 +32,7 @@ class BOMLOptimizer(object):
 
         :param Method: define basic method for following training process, it should be included in ['MetaInit', 'MetaRepr'],
          'MetaInit' type includes methods like 'MAML, FOMAML, TNet, WarpGrad'; 'MetaRepr' type includes methods like
-         'BDA, RHG, TRHG, Implicit HG, DARTS';
+         'BDA, RHG, Truncated, Implicit HG, DARTS';
         :param inner_method: method chosen for solving LLproblem, including ['Trad' ,'Simple', 'Aggr'], 'MetaRepr' type choose
         either 'Trad' for traditional optimization strategies or 'Aggr' for Gradient Aggragation optimization 'MetaInit' type
         should choose 'Simple', and set specific parameters for detailed method choices like FOMAML or TNet.
@@ -56,21 +56,25 @@ class BOMLOptimizer(object):
         ), "initialize method arguement, should be in list [Aggr, Simple, Trad]"
         self.inner_method = inner_method
 
-        if self.inner_method in ("Aggr", "Trad") and outer_method == "Reverse":
-            outer_method = "Reverse"
-        elif self.inner_method == "Simple" and outer_method == "Simple":
-            outer_method = "Simple"
-        elif self.inner_method == "Trad" and outer_method == "Implicit":
-            outer_method = "Implicit"
-        elif self.inner_method in ("Aggr", "Trad") and outer_method == "Darts":
-            outer_method = "Darts"
+        if self.inner_method == "Simple":
+            assert (
+                outer_method == "Simple"
+            ), "Choose simple configuration of lower-level and upper-level " \
+               "calculation strategy for meta-initialization-based method"
+        elif self.inner_method == "Aggr":
+            assert outer_method in (
+                "Darts",
+                "Reverse",
+            ), "The bilevel aggregation strategy could choose Reverse Auto Differentiation" \
+               " or DARTS as upper-level calculation strategy"
         else:
-            print(
-                "Invalid combination of inner and outer methods, \
-            please check the initialization for different level of problems or "
-                "extend the base classes to formulate your own problems definition"
-            )
-            raise AssertionError
+            assert outer_method in (
+                "Reverse",
+                "Implicit",
+                "Darts",
+            ), "Invalid combination of inner and outer strategies, " \
+               "please check initialization for different level of problems or " \
+               "extend the base classes to formulate your own problems definition"
         self.outer_method = outer_method
         self._inner_gradient = getattr(
             inner_grads, "%s%s" % ("BOMLInnerGrad", self.inner_method)
@@ -109,6 +113,8 @@ class BOMLOptimizer(object):
         name="Hyper_Net",
         use_T=False,
         use_Warp=False,
+        model_loss_func=utils.cross_entropy,
+        outer_loss_func=utils.cross_entropy,
         **model_args
     ):
         """
@@ -119,21 +125,15 @@ class BOMLOptimizer(object):
         'v2' for Residual blocks with fully connected layer.
         :param name:  name for Meta model modules used for BMLNet initialization
         :param use_T: whether to use T layer for C4L neural networks
+        :param model_loss_func: forms of loss functions of task-specific layer corresponding to 'WarpGrad' method, default to be cross-entropy
+        :param outer_loss_func: forms of loss functions of task-specific layer corresponding to 'WarpGrad' method, default to be cross-entropy
         :return: BMLNet object containing the dict of hyper parameters
         """
 
         self.param_dict["use_T"] = use_T
         self.param_dict["use_Warp"] = use_Warp
-        self.param_dict["output_shape"] = dataset.train.dim_target
-        if use_Warp:
-            if "model_loss_func" in model_args.keys():
-                self.param_dict["model_loss_func"] = model_args["model_loss_func"]
-            else:
-                self.param_dict["model_loss_func"] = utils.cross_entropy
-            if "outer_loss_func" in model_args.keys():
-                self.param_dict["outer_loss_func"] = model_args["outer_loss_func"]
-            else:
-                self.param_dict["outer_loss_func"] = utils.cross_entropy
+        self.param_dict["model_loss_func"] = model_loss_func
+        self.param_dict["outer_loss_func"] = outer_loss_func
         self.data_set = dataset
         assert meta_model.startswith(
             "V"
@@ -369,13 +369,12 @@ class BOMLOptimizer(object):
         outer_objective,
         meta_learning_rate,
         inner_grad,
-        mlr_decay=1.e-5,
+        mlr_decay=1.0e-5,
         meta_param=None,
         outer_objective_optimizer="Adam",
         epsilon=1.0,
         momentum=0.5,
         tolerance=lambda _k: 0.1 * (0.9 ** _k),
-        global_step=None,
     ):
         """
         Set the outer optimization problem and the descent procedure for the optimization of the
@@ -408,9 +407,9 @@ class BOMLOptimizer(object):
                     learning_rate=self._meta_learning_rate, momentum=momentum
                 )
             else:
-                self.oo_opt = getattr(boml_optimizer, "%s%s" % ("BOMLOpt", outer_objective_optimizer))(
-                    learning_rate=self._learning_rate,
-                )
+                self.oo_opt = getattr(
+                    boml_optimizer, "%s%s" % ("BOMLOpt", outer_objective_optimizer)
+                )(learning_rate=self._learning_rate,)
         assert isinstance(
             self._outer_gradient, getattr(hyper_grads, "BOMLOuterGrad")
         ), "Wrong name for inner method,should be in list \n [Reverse, Simple, Forward, Implicit]"
@@ -425,9 +424,7 @@ class BOMLOptimizer(object):
             ), "Wrong name for outer method,should be in list [Darts]"
             setattr(self.outergradient, "Epsilon", tf.cast(epsilon, tf.float32))
             setattr(self.outergradient, "param_dict", self.param_dict)
-        if self.outer_method == "Implicit" and (
-            not hasattr(self.outergradient, "tolerance")
-        ):
+        if self.outer_method == "Implicit":
             self.outergradient.set_tolerance(tolerance=tolerance)
         meta_param = self.outergradient.compute_gradients(
             outer_objective,
@@ -437,8 +434,6 @@ class BOMLOptimizer(object):
         )
         self._o_optim_dict[self.oo_opt].update(meta_param)
 
-        if global_step is not None:
-            self._global_step = global_step
         return self
 
     def minimize(
@@ -512,8 +507,6 @@ class BOMLOptimizer(object):
             epsilon=epsilon,
         )
 
-        return
-
     def aggregate_all(self, aggregation_fn=None, gradient_clip=None):
         """
         To be called when no more dynamics or problems will be added, computes the updates
@@ -550,11 +543,6 @@ class BOMLOptimizer(object):
             if self._global_step:
                 with tf.control_dependencies([self._fin_hts]):
                     self._fin_hts = self._global_step.assign_add(1).op
-        else:
-            raise ValueError(
-                "BOMLOptimizer.Aggregate_all has already been called on "
-                + "this object, further calls have no effect"
-            )
         return self.run
 
     def run(

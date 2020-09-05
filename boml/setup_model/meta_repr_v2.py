@@ -12,7 +12,7 @@ class BOMLNetMiniMetaReprV2(BOMLNet):
     def __init__(
         self,
         _input,
-        name="BMLNetMetaReprMini",
+        name="BOMLNetMiniMetaReprV2",
         outer_param_dict=OrderedDict(),
         dim_output=-1,
         model_param_dict=OrderedDict(),
@@ -100,7 +100,7 @@ class BOMLNetOmniglotMetaReprV2(BOMLNet):
     def __init__(
         self,
         _input,
-        name="BMLNetMetaReprOmniglot",
+        name="BOMLNetOmniglotMetaReprV2",
         outer_param_dict=OrderedDict(),
         dim_output=-1,
         model_param_dict=OrderedDict(),
@@ -181,9 +181,3 @@ class BOMLNetOmniglotMetaReprV2(BOMLNet):
             outer_method=self.outer_method,
         )
 
-
-if __name__ == "__main__":
-    inp = tf.placeholder(tf.float32, (None, 84, 84, 3))
-    net = BOMLNetMiniMetaReprV2(inp)
-    print(net.out)
-    print(boml.extension.metaparameters())

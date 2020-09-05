@@ -9,7 +9,7 @@ class BOMLNetMiniMetaInitV2(BOMLNet):
         self,
         _input,
         dim_output,
-        name="BMLNetResHO",
+        name="BOMLNetMiniMetaInitV2",
         outer_param_dict=OrderedDict(),
         model_param_dict=OrderedDict(),
         task_parameter=None,

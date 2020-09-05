@@ -20,18 +20,10 @@ class BOMLExperiment:
 
     # noinspection PyBroadException
     def _compute_input_shape(self):
-        try:
-            sh = self.datasets.train.dim_data
-            return (None, sh) if isinstance(sh, int) else (None,) + sh
-        except:
-            print("Could not determine input dimension")
-            return None
+        sh = self.datasets.train.dim_data
+        return (None, sh) if isinstance(sh, int) else (None,) + sh
 
     # noinspection PyBroadException
     def _compute_output_shape(self):
-        try:
-            sh = self.datasets.train.dim_target
-            return (None, sh) if isinstance(sh, int) else (None,) + sh
-        except:
-            print("Could not determine output dimension")
-            return None
+        sh = self.datasets.train.dim_target
+        return (None, sh) if isinstance(sh, int) else (None,) + sh

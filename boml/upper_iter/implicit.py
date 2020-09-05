@@ -21,7 +21,6 @@ class BOMLOuterGradImplicit(BOMLOuterGrad):
         self,
         inner_method="Trad",
         linear_system_solver_gen=None,
-        tolerance=None,
         name="BMLOuterGradImplicit",
     ):
         super(BOMLOuterGradImplicit, self).__init__(name)
@@ -36,9 +35,7 @@ class BOMLOuterGradImplicit(BOMLOuterGrad):
             )
         self.linear_system_solver = linear_system_solver_gen
 
-        if tolerance is None:
-            tolerance = lambda _k: 0.1 * (0.9 ** _k)
-        self.tolerance = tolerance
+        self.tolerance = lambda _k: 0.1 * (0.9 ** _k)
 
         self._lin_sys = []
         self._qs = []
@@ -136,3 +133,6 @@ class BOMLOuterGradImplicit(BOMLOuterGrad):
 
     def _run_batch_initialization(self, ss, fd):
         ss.run(self.initialization, feed_dict=fd)
+
+    def set_tolerance(self,tolerance=lambda _k: 0.1 * (0.9 ** _k)):
+        self.tolerance =tolerance
