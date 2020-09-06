@@ -9,17 +9,20 @@
 
 BOML is a modularized optimization library that unifies several ML algorithms into a common bilevel optimization framework. It provides interfaces to implement popular bilevel optimization algorithms, so that you could quickly build your own meta learning neural network and test its performance.
 
-ReadMe.md file contains recommended instruction for training Maml-based and Meta-representation in few-shot learning field. It's flexible to build your own networks or use structures with attached documentation.
-## Meta Learning and Multitask Learning
+ReadMe.md file contains brief introduction to implement meta-initialization-based and meta-feature-based methods in few-shot learning field. Except for algorithms which have been proposed, various combinations of lower leve and upper level strategies are available. Moreover, it's flexible to build your own networks or use structures with attached documentation.
 
-Meta learning works fairly well when facing incoming new tasks by learning an initialization with favorable generalization capability. And it also has good performance even provided with a small amount of training data available, which gives birth to new solutions to the few-shot learning problem.
+## Meta Learning 
 
-![Hierarchically built strategies](https://latex.codecogs.com/gif.latex?\min\limits_{\mathbf{x}}&space;F(\mathbf{x},\{\mathbf{y}^i\}_{i=1}^N),&space;\quad&space;s.t.&space;\quad&space;\mathbf{y}^i\in\arg\min\limits_{\mathbf{y}^i}f(\mathbf{x},\mathbf{y}^i),&space;\&space;i=1,\cdots,N,\label{eq:bo})
+Meta learning works fairly well when facing incoming new tasks by learning an initialization with favorable generalization capability. And it also has good performance even provided with a small amount of training data available, which gives birth to various solutions for different application such as few-shot learning problem.
 
-## Bilevel Structured Optimization Routine 
-![Hierarchically built strategies](https://github.com/dut-media-lab/BOML/blob/master/figures/p1.png)
+We present a general bilevel optimization paradigm to unify different types of metalearning approaches. Specifically, we define the meta dataset as $D=\left\{D^{i}\right\}_{i=1}^{N}$, $D^{i}=$ $D_{tr}^{i} \cup D_{val}^{i}$ is linked to the $i$ -th task and $D_{tr}^{i}$ and $D_{val}^{i}$ respectively denote the training and validation sets.
 
-## Related Algorithms 
+![Bilevel Optimization Model](https://github.com/dut-media-lab/BOML/blob/master/figures/p1.png)
+
+## Generic Optimization Routine
+![Hierarchically built strategies](https://github.com/dut-media-lab/BOML/blob/master/figures/p2.png)
+
+## Related Methods 
  - [Hyperparameter optimization with approximate gradient(Implicit HG)](https://arxiv.org/abs/1602.02355)
  - [Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks(MAML)](https://arxiv.org/abs/1703.03400)
  - [On First-Order Meta-Learning Algorithms(FOMAML)](https://arxiv.org/abs/1803.02999)
@@ -30,14 +33,57 @@ Meta learning works fairly well when facing incoming new tasks by learning an in
  - [DARTS: Differentiable Architecture Search(DARTS)](https://arxiv.org/pdf/1806.09055.pdf)
  - [A Generic First-Order Algorithmic Framework for Bi-Level Programming Beyond Lower-Level Singleton(BDA)](https://arxiv.org/pdf/2006.04045.pdf)
 
-## Simple Example
+## Running examples
+```
+from boml import utils
+# initialize the BOMLOptimizer, specify strategies for ll_problem() and ul_problem()
+boml_opt= boml.BOMLOptimizer('MetaInit', 'Simple', 'Simple')
+#load dataset
+dataset = boml.load_data.meta_omniglot(num_classes, (num_train, num_test))
+ex = boml.BOMLExperiment(dataset)
+# build network structure and initializer model parameters
+meta_learner = boml_opt.meta_learner(ex.x, dataset, 'V1')
+ex.model = boml_ho.base_learner(ex.x, meta_learner)
+# lower objectives
+loss_inner = utils.cross_entropy(ex.model.out, ex.y)
+# define lower-level subproblem
+inner_grad = boml_ho.ll_problem(loss_inner, lr, T, experiment=ex)
+# define upper objectives and upper-level subproblem
+loss_outer = utils.cross_entropy(ex.model.re_forward(ex.x_).out, ex.y_)
+boml_ho.ul_problem(loss_outer, args.mlr, inner_grad,
+                    meta_param=boml.extension.metaparameters())
+# aggregate all the defined operations
+boml_ho.aggregate_all()
+```
 
 ## Documentation 
-
-For more detailed information of basic function and construction process, please refer to our help page: [Help Documentation](https://bmlsoc.github.io/BOML/)
-
-It's flexible to build your own networks or use structures in py_bm.networks. Scripts in the directory named train_script are useful for basic training process.
+For more detailed information of basic function and construction process, please refer to our [Help Documentation](https://bmlsoc.github.io/BOML/). Scripts in the directory named test_script are useful for constructing general training process.
 
 Here we give recommended settings for specific hyper paremeters to quickly test performance of popular algorithms.
+
+## License
+
+MIT License
+
+Copyright (c) 2020 Yaohua Liu
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
 
 
