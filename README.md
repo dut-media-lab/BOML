@@ -15,23 +15,12 @@ ReadMe.md file contains brief introduction to implement meta-initialization-base
 
 Meta learning works fairly well when facing incoming new tasks by learning an initialization with favorable generalization capability. And it also has good performance even provided with a small amount of training data available, which gives birth to various solutions for different application such as few-shot learning problem.
 
-We present a general bilevel optimization paradigm to unify different types of metalearning approaches. Specifically, we define the meta dataset as $D=\left\{D^{i}\right\}_{i=1}^{N}$, $D^{i}=$ $D_{tr}^{i} \cup D_{val}^{i}$ is linked to the $i$ -th task and $D_{tr}^{i}$ and $D_{val}^{i}$ respectively denote the training and validation sets.
-
-![Bilevel Optimization Model](https://github.com/dut-media-lab/BOML/blob/master/figures/p1.png)
+We present a general bilevel optimization paradigm to unify different types of meta learning approaches, and the mathematical form could be summarized as below:<br>
+<div align=center>![Bilevel Optimization Model](https://github.com/dut-media-lab/BOML/blob/master/figures/p1.png)
 
 ## Generic Optimization Routine
-![Hierarchically built strategies](https://github.com/dut-media-lab/BOML/blob/master/figures/p2.png)
-
-## Related Methods 
- - [Hyperparameter optimization with approximate gradient(Implicit HG)](https://arxiv.org/abs/1602.02355)
- - [Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks(MAML)](https://arxiv.org/abs/1703.03400)
- - [On First-Order Meta-Learning Algorithms(FOMAML)](https://arxiv.org/abs/1803.02999)
- - [Bilevel Programming for Hyperparameter Optimization and Meta-Learning(Reverse HG)](http://export.arxiv.org/pdf/1806.04910)
- - [Truncated Back-propagation for Bilevel Optimization(Truncated Reverse HG)](https://arxiv.org/pdf/1810.10667.pdf)
- - [Gradient-Based Meta-Learning with Learned Layerwise Metric and Subspace(MTNet)](http://proceedings.mlr.press/v80/lee18a/lee18a.pdf)
- - [Meta-Learning with warped gradient Descent(Warp-Grad))](https://arxiv.org/abs/1909.00025)
- - [DARTS: Differentiable Architecture Search(DARTS)](https://arxiv.org/pdf/1806.09055.pdf)
- - [A Generic First-Order Algorithmic Framework for Bi-Level Programming Beyond Lower-Level Singleton(BDA)](https://arxiv.org/pdf/2006.04045.pdf)
+Here we illustrate the generic optimization routine and hierarchically built strategies in the figure, which could be quikcly implemented in the following example.<br>
+<div align=center>![Hierarchically built strategies](https://github.com/dut-media-lab/BOML/blob/master/figures/p2.png)
 
 ## Running examples
 ```
@@ -55,11 +44,22 @@ boml_ho.ul_problem(loss_outer, args.mlr, inner_grad,
 # aggregate all the defined operations
 boml_ho.aggregate_all()
 ```
-
 ## Documentation 
 For more detailed information of basic function and construction process, please refer to our [Help Documentation](https://bmlsoc.github.io/BOML/). Scripts in the directory named test_script are useful for constructing general training process.
 
 Here we give recommended settings for specific hyper paremeters to quickly test performance of popular algorithms.
+
+## Related Methods 
+ - [Hyperparameter optimization with approximate gradient(IG)](https://arxiv.org/abs/1602.02355)
+ - [Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks(MAML)](https://arxiv.org/abs/1703.03400)
+ - [On First-Order Meta-Learning Algorithms(FOMAML)](https://arxiv.org/abs/1803.02999)
+ - [Bilevel Programming for Hyperparameter Optimization and Meta-Learning(Reverse HG)](http://export.arxiv.org/pdf/1806.04910)
+ - [Truncated Back-propagation for Bilevel Optimization(Truncated Reverse HG)](https://arxiv.org/pdf/1810.10667.pdf)
+ - [Gradient-Based Meta-Learning with Learned Layerwise Metric and Subspace(MTNet)](http://proceedings.mlr.press/v80/lee18a/lee18a.pdf)
+ - [Meta-Learning with warped gradient Descent(Warp-Grad))](https://arxiv.org/abs/1909.00025)
+ - [DARTS: Differentiable Architecture Search(DARTS)](https://arxiv.org/pdf/1806.09055.pdf)
+ - [A Generic First-Order Algorithmic Framework for Bi-Level Programming Beyond Lower-Level Singleton(BDA)](https://arxiv.org/pdf/2006.04045.pdf)
+
 
 ## License
 
