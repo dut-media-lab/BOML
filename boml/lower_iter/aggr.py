@@ -116,34 +116,3 @@ class BOMLInnerGradAggr(BOMLInnerGradTrad):
                 combine_grads.append((ll_part + ul_part, inner_grads[_][1]))
         return combine_grads
 
-    @property
-    def apply_updates(self):
-        """
-        Descent step, as returned by `tf.train.Optimizer.apply_gradients`.
-        :return:
-        """
-        return self._updates_op
-
-    @property
-    def initialization(self):
-        """
-        :return: a list of operations that return the values of the state variables for this
-                    learning dynamics after the execution of the initialization operation. If
-                    an initial dynamics is set, then it also executed.
-        """
-        if self._initialization is None:
-            with tf.control_dependencies([tf.variables_initializer(self.state)]):
-                if (
-                    self._init_dyn is not None
-                ):  # create assign operation for initialization
-                    self._initialization = [
-                        k.assign(v) for k, v in self._init_dyn.items()
-                    ]
-                    # return these new initialized values (and ignore variable initializers)
-                else:
-                    self._initialization = (
-                        self._state_read()
-                    )  # initialize state variables and
-                    # return the initialized value
-
-        return self._initialization

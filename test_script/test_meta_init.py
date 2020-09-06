@@ -45,6 +45,8 @@ def build(metasets, learn_lr, lr0, MBS, T, mlr0,mlr_decay=1.e-5, process_fn=None
     apply_updates = boml_ho.outergradient.apply_updates
     inner_objectives= boml_ho.inner_objectives
     iteration =boml_ho.innergradient.iteration
+    print(boml_ho.io_opt)
+    print(boml_ho.oo_opt)
     boml_ho.aggregate_all(gradient_clip=process_fn)
     saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES), max_to_keep=10)
     return exs, boml_ho, saver

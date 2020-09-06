@@ -107,10 +107,6 @@ class BOMLInnerGradTrad(object):
         return self._dynamics.values()
 
     @property
-    def dynamics_dict(self):
-        return self._dynamics
-
-    @property
     def state(self):
         """
         :return: A generator for all the state variables (optimized variables and possibly auxiliary variables)
