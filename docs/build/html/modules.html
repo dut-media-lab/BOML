@@ -1,0 +1,311 @@
+
+<!DOCTYPE html>
+
+<html lang="Python">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core Modules &#8212; BOML 0.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Core Built-in Functions" href="built_in.html" />
+    <link rel="prev" title="Simple Running Example" href="example.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="core-modules">
+<h1>Core Modules<a class="headerlink" href="#core-modules" title="Permalink to this headline">¶</a></h1>
+<ol class="arabic">
+<li><p>load_data</p>
+<ul>
+<li><dl>
+<dt>Related:</dt><dd><blockquote>
+<div><ul class="simple">
+<li><p>boml.load_data.meta_omniglot</p></li>
+<li><p>boml.load_data.meta_mini_imagenet</p></li>
+<li><p>boml.load_data.mnist</p></li>
+<li><p>...</p></li>
+</ul>
+</div></blockquote>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>boml.meta_omniglot<span class="o">(</span>
+        <span class="nv">folder</span><span class="o">=</span>DATA_FOLDER,
+        <span class="nv">std_num_classes</span><span class="o">=</span>None,
+        <span class="nv">examples_train</span><span class="o">=</span>None,
+        <span class="nv">examples_test</span><span class="o">=</span>None,
+        <span class="nv">one_hot_enc</span><span class="o">=</span>True,
+        <span class="nv">_rand</span><span class="o">=</span><span class="m">0</span>,
+        <span class="nv">n_splits</span><span class="o">=</span>None<span class="o">)</span>
+boml.meta_mini_imagenet<span class="o">(</span>
+  <span class="nv">folder</span><span class="o">=</span>DATA_FOLDER,
+  <span class="nv">sub_folders</span><span class="o">=</span>None,
+  <span class="nv">std_num_classes</span><span class="o">=</span>None,
+  <span class="nv">examples_train</span><span class="o">=</span>None,
+  <span class="nv">examples_test</span><span class="o">=</span>None,
+  <span class="nv">resize</span><span class="o">=</span><span class="m">84</span>,
+  <span class="nv">one_hot_enc</span><span class="o">=</span>True,
+  <span class="nv">load_all_images</span><span class="o">=</span>True,
+  <span class="nv">h5</span><span class="o">=</span>False
+  <span class="o">)</span>
+</pre></div>
+</div>
+<p>boml.load_data manages different datasets and generate batches of tasks for training and testing.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Args：</dt><dd><ul class="simple">
+<li><p>folder: str, root folder name. Use os module to modify the path to the datasets</p></li>
+<li><p>std_num_classes: number of classes for N-way classification</p></li>
+<li><p>examples_train: number of examples to be picked in each generated per classes for training (eg .1 shot, examples_train=1)</p></li>
+<li><p>examples_test: number of examples to be picked in each generated per classes for testing</p></li>
+<li><p>one_hot_enc: whether to adopt one hot encoding</p></li>
+<li><p>_rand: random seed or RandomState for generate training, validation, testing meta-datasets split</p></li>
+<li><p>n_splits: num classes per split</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Usage:</dt><dd><div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nv">dataset</span> <span class="o">=</span> boml.meta_omniglot<span class="o">(</span>
+args.num_classes,
+args.num_examples,
+args.examples_test
+<span class="o">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><p>Returns: an initialized instance of data loader</p></li>
+</ul>
+</li>
+<li><p>Experiment</p>
+<ul>
+<li><dl>
+<dt>Aliases:</dt><dd><blockquote>
+<div><ul class="simple">
+<li><p>boml.load_data.Experiment</p></li>
+</ul>
+</div></blockquote>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>boml.Experiment<span class="o">(</span>
+        <span class="nv">dataset</span><span class="o">=</span>None,
+        <span class="nv">dtype</span><span class="o">=</span>tf.float32
+        <span class="o">)</span>
+</pre></div>
+</div>
+<p>boml.Experiment manages inputs, outputs and task-specific parameters.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Args:</dt><dd><ul class="simple">
+<li><p>dataset: initialized instance of load_data</p></li>
+<li><p>dtype: default tf.float32</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Attributes:</dt><dd><ul class="simple">
+<li><p>x: input placeholder of input for your defined lower level problem</p></li>
+<li><p>y: label placeholder of output for yourdefined lower level problem</p></li>
+<li><p>x_:input placeholder of input for your defined upper level problem</p></li>
+<li><p>y_:label placeholder of output for your defined upper level problem</p></li>
+<li><p>model: used to restore the task-specific model</p></li>
+<li><p>errors: dictionary to restore defined loss functions of different levels</p></li>
+<li><p>scores: dictionary to restore defined accuracies functions</p></li>
+<li><p>optimizer: dictonary to restore optimized chosen for inner and outer loop optimization</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Usage:</dt><dd><div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nv">ex</span> <span class="o">=</span> boml.Experiment<span class="o">(</span><span class="nv">datasets</span> <span class="o">=</span> dataset<span class="o">)</span>
+ex.errors<span class="o">[</span><span class="s1">&#39;training&#39;</span><span class="o">]</span> <span class="o">=</span> boml.utils.cross_entropy<span class="o">(</span>
+<span class="nv">pred</span><span class="o">=</span>ex.model.out,
+<span class="nv">label</span><span class="o">=</span>ex.y,
+<span class="nv">method</span><span class="o">=</span><span class="s1">&#39;MetaRper&#39;</span><span class="o">)</span>
+
+ex.scores<span class="o">[</span><span class="s1">&#39;accuracy&#39;</span><span class="o">]</span> <span class="o">=</span> tf.contrib.metrics.accuracy<span class="o">(</span>
+tf.argmax<span class="o">(</span>tf.nn.softmax<span class="o">(</span>ex.model.out<span class="o">)</span>, <span class="m">1</span><span class="o">)</span>,
+tf.argmax<span class="o">(</span>ex.y, <span class="m">1</span><span class="o">))</span>
+
+ex.optimizer<span class="o">[</span><span class="s1">&#39;apply_updates&#39;</span><span class="o">]</span>, <span class="nv">_</span> <span class="o">=</span> boml.BOMLOptSGD<span class="o">(</span>
+<span class="nv">learning_rate</span><span class="o">=</span>lr0
+<span class="o">)</span>.minimize<span class="o">(</span>
+ex.errors<span class="o">[</span><span class="s1">&#39;training&#39;</span><span class="o">]</span>,
+<span class="nv">var_list</span><span class="o">=</span>ex.model.var_list
+<span class="o">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><p>Returns: an initialized instance of Experiment</p></li>
+</ul>
+</li>
+<li><p>BOMLOptimizer</p>
+<ul>
+<li><dl>
+<dt>Aliases:</dt><dd><blockquote>
+<div><ul class="simple">
+<li><p>boml.boml_optimizer.BOMLOptimizer</p></li>
+</ul>
+</div></blockquote>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>boml.BOMLOptimizer<span class="o">(</span>
+        <span class="nv">Method</span><span class="o">=</span>None,
+        <span class="nv">inner_method</span><span class="o">=</span>None,
+        <span class="nv">outer_method</span><span class="o">=</span>None,
+        <span class="nv">truncate_iter</span><span class="o">=</span>-1,
+        <span class="nv">experiments</span><span class="o">=[]</span>
+        <span class="o">)</span>
+</pre></div>
+</div>
+<p>BOMLOptimizer is the main class in <cite>boml</cite>, which takes responsibility for the whole process of model construnction and back propagation.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Args:</dt><dd><ul class="simple">
+<li><p>Method: define basic method for following training process, it should be included in [<cite>MetaInit</cite>, <cite>MetaRepr</cite>], <cite>MetaInit</cite> type includes methods like <cite>MAML</cite>, <cite>FOMAML</cite>, <cite>MT-net</cite>, <cite>WarpGrad</cite>; <cite>MetaRepr</cite> type includes methods like <cite>BA</cite>, <cite>RHG</cite>, <cite>TG</cite>, <cite>HOAG</cite>, <cite>DARTS</cite>;</p></li>
+<li><p>inner_method: method chosen for solving LLproblem, including [<cite>Trad</cite> , <cite>Simple</cite>, <cite>Aggr</cite>], MetaRepr type choose either <cite>Trad</cite> for traditional optimization strategies or <cite>Aggr</cite> for Gradient Aggragation optimization. 'MetaInit' type should choose <cite>Simple</cite>, and set specific parameters for detailed method choices like FOMAML or MT-net.</p></li>
+<li><p>outer_method: method chosen for solving LLproblem, including [<cite>Reverse</cite> ,`Simple`, <cite>DARTS</cite>, <cite>Implcit</cite>], <cite>MetaInit</cite> type should choose <cite>Simple</cite>, and set specific parameters for detailed method choices like <cite>FOMAML</cite></p></li>
+<li><p>truncate_iter: specific parameter for <cite>Truncated Gradient</cite> method, defining number of iterations to truncate in the Back propagation process</p></li>
+<li><p>experiments: list of Experiment objects that has already been initialized</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Usage:</dt><dd><div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nv">ex</span> <span class="o">=</span> boml.Experiment<span class="o">(</span>
+boml.meta_omniglot<span class="o">(</span><span class="m">5</span>,1,15<span class="o">)</span>
+<span class="o">)</span>
+<span class="nv">boml_ho</span> <span class="o">=</span> boml.BOMLOptimizer<span class="o">(</span>
+        <span class="nv">Method</span><span class="o">=</span><span class="s1">&#39;MetaRper&#39;</span>,
+        <span class="nv">inner_method</span><span class="o">=</span><span class="s1">&#39;Simple&#39;</span>,
+        <span class="nv">outer_method</span><span class="o">=</span><span class="s1">&#39;Simple&#39;</span>,
+        <span class="nv">experiments</span><span class="o">=</span>ex
+        <span class="o">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Utility Functions:</dt><dd><ul class="simple">
+<li><p>learning_rate(): returns defined inner learning rate</p></li>
+<li><p>meta_learning_rate(): returns defined outer learning rate</p></li>
+<li><p>Method: return defined method type</p></li>
+<li><p>param_dict: return the dictionary that restores general parameters, like use_T,use_Warp, output shape of defined model, learn_lr, s, t, alpha, first_order.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Returns: an initialized instance of BOMLOptimizer</p></li>
+</ul>
+</li>
+</ol>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">BOML</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Simple Running Example</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core Modules of BOML</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Core Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="built_in.html">Core Built-in Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extension.html">Extensible Modules</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Additional Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="references.html">Related Papers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">Authors and License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="example.html" title="previous chapter">Simple Running Example</a></li>
+      <li>Next: <a href="built_in.html" title="next chapter">Core Built-in Functions</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Yaohua Liu, Risheng Liu.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/modules.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

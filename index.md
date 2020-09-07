@@ -1,21 +1,21 @@
-# Welcome to the documentation for boml 
+# Welcome to the documentation for BOML
 
 ## Contents <div0 id="a0"></div0>
 1. [Introduction ](#a1)<br>
-2. [Installation and requirements ](#a2)
-3. [Quickly build your bilevel meta-learning model ](#a3)
-    - [core Modules ](#a31)
-    - [core Built-in functions of BOMLOptimizer ](#a32)
+2. [Installation and Requirements ](#a2)
+3. [Quickly Build Your Bilevel Meta-Learning Model ](#a3)
+    - [Core Modules ](#a31)
+    - [Core Built-in Functions of BOMLOptimizer ](#a32)
     - [Simple Training Example](#a33)
 4. [Modification and Extension ](#a4)
-5. [Author and liscense](#a5)
+5. [Authors and Liscense](#a5)
 
 ## Introduction <div1 id="a1"></div1>
-boml is a Bilevel Optimization Library in Python for Multi-Task and Meta Learning. Before reading the documentation, you could refer to [View on GitHub](https://github.com/liuyaohua918/boml/edit/master/README.md) for a brief introduction about meta learning and boml. <br>
-Here we provide detailed instruction to quickly get down to your research, test performance of popular algorithms and new ideas.
+BOML is a bilevel optimization library in Python for meta learning. Before reading the documentation, you could refer to [View on GitHub](https://github.com/liuyaohua918/boml/edit/master/README.md) for a brief introduction about meta learning and BOML. <br>
+Here we provide detailed instruction to quickly get down to your research and test performance of popular algorithms and new ideas.
 
 ## Installation and requirements  <div2 id="a2"></div2>
-boml implements various meta learning algorithms based on [TensorFlow](https://www.tensorflow.org/install/pip), which is one of the most popular macheine learning platform. Besides, [Numpy](https://numpy.org/install/) and basical image processing modules are required for  installation. <br>
+BOML implements various meta learning approaches based on [TensorFlow](https://www.tensorflow.org/install/pip), which is one of the most popular macheine learning platform. Besides, [Numpy](https://numpy.org/install/) and basical image processing modules are required for installation. <br>
 We also provide [requirements.txt](https://github.com/liuyaohua918/boml/requirements.txt) as reference for version control.
   ```
   1. Install from GitHub page：
@@ -23,7 +23,9 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/boml/requirem
   git clone https://github.com/liuyaohua918/boml.git
 
   python setup.py install 
-
+  
+  or
+  
   pip install requirements.txt
 
   2. use pip instruction
@@ -33,11 +35,12 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/boml/requirem
  
 ## Quickly build your bilevel meta-learning model <div3 id="a3"></div3>
   - Core Modules: <div3 id="a31"></div3>
-    1. data_loader
+    1. load_data
        - Related: 
-            - boml.data_loader.meta_omniglot <br>
-            - boml.data_loader.meta_mini_imagenet <br>
-            - boml.data_loader.mnist <br>
+            - boml.load_data.meta_omniglot <br>
+            - boml.load_data.meta_mini_imagenet <br>
+            - boml.load_data.mnist <br>
+            - ...
         ```
         boml.meta_omniglot(
             folder=DATA_FOLDER, 
@@ -58,13 +61,14 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/boml/requirem
           load_all_images=True,
           h5=False):
         ```
-        boml.data_loader manages different datasets and generate bathes of tasks for training and testing.
+        boml.load_data manages different datasets and generate batches of tasks for training and testing.
+
        - Args：<br>
-            - folder: root folder name. Use os module to modify the path to the datasets<br>
-            - std_num_classes: standard number of classes for N-way classification<br>
-             - examples_train:standard number of examples to be picked in each generated per classes for training (eg .1 shot, examples_train=1)<br>
-            - examples_test: standard number of examples to be picked in each generated per classes for testing
-            - one_hot_enc: one hot encoding<br>
+            - folder: str, root folder name. Use os module to modify the path to the datasets<br>
+            - std_num_classes: number of classes for N-way classification<br>
+            - examples_train: number of examples to be picked in each generated per classes for training (eg .1 shot, examples_train=1)<br>
+            - examples_test: number of examples to be picked in each generated per classes for testing
+            - one_hot_enc: whether to adopt one hot encoding<br>
             - _rand: random seed or RandomState for generate training, validation, testing meta-datasets split<br>
             - n_splits: num classes per split<br>
        - Usage:
@@ -75,7 +79,7 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/boml/requirem
        - Returns: an initialized instance of data loader 
     2. Experiment
        - Aliases: 
-           - boml.data_loader.Experiment
+           - boml.load_data.Experiment
         ```
         boml.Experiment(
             dataset=None, 
@@ -83,7 +87,7 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/boml/requirem
         ```
         boml.Experiment manages inputs, outputs and task-specific parameters.
        - Args:
-          - dataset: initialized instance of data_loader<br>
+          - dataset: initialized instance of load_data<br>
           - dtype: default tf.float32<br>
        - Attributes:<br>
           - x: input placeholder of input for your defined lower level problem<br>
@@ -93,19 +97,19 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/boml/requirem
           - model: used to restore the task-specific model <br>
           - errors: dictionary to restore defined loss functions of different levels<br> 
           - scores: dictionary to restore defined accuracies functions<br> 
-          - optimizers: dictonary to restore optimized chosen for inner and outer loop optimization<br>
+          - optimizer: dictonary to restore optimized chosen for inner and outer loop optimization<br>
        - Usage:
         ```
         ex = boml.Experiment(datasets = dataset)
-        ex.errors['training'] = boml.utils.cross_entropy_loss(pred=ex.model.out, label=ex.y, method='HyperOptim')
+        ex.errors['training'] = boml.utils.cross_entropy(pred=ex.model.out, label=ex.y, method='MetaRper')
         ex.scores['accuracy'] = tf.contrib.metrics.accuracy(tf.argmax(tf.nn.softmax(ex.model.out), 1), tf.argmax(ex.y, 1))
-        ex.optimizers['apply_updates'], _ = boml.BOMLOptSGD(learning_rate=lr0).minimize(ex.errors['training'],var_list=ex.model.var_list)
+        ex.optimizer['apply_updates'], _ = boml.BOMLOptSGD(learning_rate=lr0).minimize(ex.errors['training'],var_list=ex.model.var_list)
         ```
        - Returns: an initialized instance of Experiment 
   
     3. BOMLOptimizer 
        - Aliases: 
-         - boml.core.BOMLOptimizer
+         - boml.boml_optimizer.BOMLOptimizer
         ```
         boml.BOMLOptimizer(
             Method=None, 
@@ -117,35 +121,35 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/boml/requirem
         ```
         BOMLOptimizer is the main class in `boml`, which takes responsibility for the whole process of model construnction and back propagation. 
        - Args:
-          - Method: define basic method for following training process, it should be included in [`HyperOptim`, `BilevelOptim`], `HyperOptim` type includes methods like `MAML`, `FOMAML`, `TNet`, `WarpGrad`; `BilevelOptim` type includes methods like `BDA`, `RHG`, `TRHG`, `Implicit HG`, `DARTS`;<br>
-          - inner_method: method chosen for solving LLproblem, including [`Trad` ,`Simple`, `Aggr`], `BilevelOptim` type choose either `Trad` for traditional optimization strategies or `Aggr` for Gradient Aggragation optimization 'HyperOptim' type should choose `Simple`, and set specific parameters for detailed method choices like FOMAML or TNet.<br>
-          - outer_method: method chosen for solving LLproblem, including [`Reverse` ,`Simple`, `Forward`, `Implcit`], `HyperOptim` type should choose Simple, and set specific parameters for detailed method choices like `FOMAML`
-          - truncate_iter: specific parameter for `Truncated RHG` method, defining number of iterations to truncate in the Back propagation process<br>
-          - experiments: list of experiment objects that has already been initialized <br>
+          - Method: define basic method for following training process, it should be included in [`MetaInit`, `MetaRepr`], `MetaInit` type includes methods like `MAML`, `FOMAML`, `MT-net`, `WarpGrad`; `MetaRepr` type includes methods like `BA`, `RHG`, `TG`, `HOAG`, `DARTS`;<br>
+          - inner_method: method chosen for solving LLproblem, including [`Trad` ,`Simple`, `Aggr`], MetaRepr type choose either `Trad` for traditional optimization strategies or `Aggr` for Gradient Aggragation optimization. 'MetaInit' type should choose `Simple`, and set specific parameters for detailed method choices like FOMAML or MT-net.<br>
+          - outer_method: method chosen for solving LLproblem, including [`Reverse` ,`Simple`, `DARTS`, `Implcit`], `MetaInit` type should choose `Simple`, and set specific parameters for detailed method choices like `FOMAML`
+          - truncate_iter: specific parameter for `Truncated Gradient` method, defining number of iterations to truncate in the Back propagation process<br>
+          - experiments: list of Experiment objects that has already been initialized <br>
         - Usage:
         ```
         ex = boml.Experiment(boml.meta_omniglot(5,1,15))
         boml_ho = boml.BOMLOptimizer(
-            Method='HyperOptim', 
+            Method='MetaRper', 
             inner_method='Simple', 
             outer_method='Simple',
             experiments=ex)
         ```
-       - Utility functions:
+       - Utility Functions:
           - learning_rate(): returns defined inner learning rate
           - meta_learning_rate(): returns defined outer learning rate 
           - Method: return defined method type 
           - param_dict: return the dictionary that restores general parameters, like use_T,use_Warp, output shape of defined model, learn_lr, s, t, alpha, first_order.
        - Returns: an initialized instance of BOMLOptimizer
   - Core Built-in functions of BOMLOptimizer: <div3 id="a32"></div3> 
-    1. BOMLOptimizer.Meta_model:
+    1. BOMLOptimizer.meta_learner:
        - Aliases: 
-         - boml.core.BOMLOptimizer.Meta_model()
+         - boml.boml_optimizer.BOMLOptimizer.meta_learner()
         ```
-        boml.core.BOMLOptimizer.Meta_model(
+        boml.boml_optimizer.BOMLOptimizer.meta_learner(
             _input, 
             dataset, 
-            meta_model='v1', 
+            meta_model='V1', 
             name='Hyper_Net', 
             use_T=False, 
             use_Warp=False,
@@ -156,31 +160,35 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/boml/requirem
        - Args:
           - _input: orginal input for neural network construction;
           - dataset: which dataset to use for training and testing. It should be initialized before being passed into the function
-          - meta_model: model chosen for neural network construction, `v1` for C4L with fully connected layer,`v2` for Residual blocks with fully connected layer.
+          - meta_model: model chosen for neural network construction, `V1` for C4L with fully connected layer,`V2` for Residual blocks with fully connected layer.
           - name: name for Meta model modules used for BOMLNet initialization
           - use_T: whether to use T layer for C4L neural networks
-    2. BOMLOptimizer.Base_model:
+          - use_Warp: whether to use Warp layer for C4L neural networks
+          - model_args: optional arguments to set specific parameters of neural networks.
+  
+    2. BOMLOptimizer.base_learner:
        - Aliases: 
-          - boml.core.BOMLOptimizer.Base_model()
+          - boml.boml_optimizer.BOMLOptimizer.base_learner()
         ```
-        boml.core.BOMLOptimizer.Base_model(
+        boml.boml_optimizer.BOMLOptimizer.base_learner(
             _input, 
             meta_learner, name='Task_Net',
             weights_initializer=tf.zeros_initializer
         )
         ```
-       This method has to be called for every experiment and takes responsibility for defining task-specific modules and inner optimizers.
+       This method has to be called for every experiment and takes responsibility for defining task-specific modules and inner optimizer.
        - Args:
           - _input: orginal input for neural network construction of task-specific module;
-          - meta_learner: returned value of Meta_model function, which is a instance of BOMLNet or its child classes
+          - meta_learner: returned value of meta_learner function, which is a instance of BOMLNet or its child classes
           - name: name for Base model modules used for BOMLNet initialization
-          - weights_initializer: initializer function for task_specific network, called by 'BilevelOptim' method
+          - weights_initializer: initializer function for task_specific network, called by 'MetaRepr' method
        - Returns: task-specific model part
+
     3. BOMLOptimizer.ll_problem:
        - Aliases: 
-             - boml.core.BOMLOptimizer.ll_problem()
+             - boml.boml_optimizer.BOMLOptimizer.ll_problem()
         ```
-        boml.core.BOMLOptimizer.ll_problem(
+        boml.boml_optimizer.BOMLOptimizer.ll_problem(
               inner_objective,
               learning_rate, 
               T, 
@@ -195,7 +203,7 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/boml/requirem
               var_list=None,
               init_dynamics_dict=None, 
               first_order=False, 
-              loss_func=utils.cross_entropy_loss, 
+              loss_func=utils.cross_entropy, 
               momentum=0.5,
               beta1=0.0,
               beta2=0.999,
@@ -220,52 +228,42 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/boml/requirem
           - first_order: specific parameter to define whether to use implement first order MAML, default to be `FALSE`
           - loss_func: specifying which type of loss function is used for the maml-based method, which should be consistent with the form to compute the inner objective
           - momentum: specific parameter for Optimizer.BOMLOptMomentum to set initial value of momentum
-          - beta1, beta2: specific parameter for Optimizer.BOMLOptMomentum to set initial value of Adam
           - regularization: whether to add regularization terms in the inner objective 
-          - experiment: instance of Experiment to use in the Lower Level Problem, especifially needed in the `HyperOptim` type of method.
-          - scalor: coefficient of regularization term in the objective function.
-          - var_list: optional list of variables (of the inner optimization problem)from
-          - init_dynamics_dict: optional dictrionary that defines Phi_0 (see `OptimizerDict.set_init_dynamics`)
-          - inner_kargs: optional arguments to pass to `boml.core.optimizer.minimize`
+          - experiment: instance of Experiment to use in the Lower Level Problem, especifially needed in the `MetaRper` type of method.
+          - var_list: optional list of variables (of the inner optimization problem)
+          - inner_kargs: optional arguments to pass to `boml.boml_optimizer.BOMLOptimizer.compute_gradients`
        - Returns: task-specific model part
    
     4. BOMLOptimizer.ul_problem
        - Aliases:
-          - boml.core.BOMLOptimizer.ul_problem()
+          - boml.boml_optimizer.BOMLOptimizer.ul_problem()
             ```
-            boml.core.BOMLOptimizer.ul_Problem(
+            boml.boml_optimizer.BOMLOptimizer.ul_Problem(
                 outer_objective, 
                 meta_learning_rate, 
                 inner_grad,
                 meta_param=None, 
                 outer_objective_optimizer='Adam', 
-                Reptile=False, 
-                Darts=False, 
                 epsilon=1.0,
-                beta1=0.9,beta2=0.999, 
                 momentum=0.5, 
                 global_step=None
             )
             ```
-        This method define upper level problems and choose optimizers to optimize meta parameters, which should be called afer ll_problem.
+        This method define upper level problems and choose optimizer to optimize meta parameters, which should be called afer ll_problem.
         - Args:
             - outer_objective: scalar tensor for the outer objective
             - meta_learning_rate: step size for outer loop optimization
             - inner_grad: Returned value of boml.BOMLOptimizer.LLProblem()
             - meta_param: optional list of outer parameters and model parameters
             - outer_objective_optimizer: Optimizer type for the outer parameters, should be in list [`SGD`,`Momentum`,`Adam`]
-            - Reptile: BOOLEAN, specific parameters to define whether to implement `Reptile` algorithm
-            - Darts: BOOLEAN, specific parameters to define whether to implement 'DARTS' algorithm
             - epsilon: Float, cofffecients to be used in DARTS algorithm
             - momentum: specific parameters to be used to initialize `Momentum` algorithm
-            - beta1, beta2: specific parameters to be used to initialize `Adam`
-            - global_step: optional global step. By default tries to use the last variable in the collection GLOBAL_STEP
         - Returns：meta_param list, used for debugging
-    5. Aggregate_all:
+    5. aggregate_all:
        - Aliases: 
-           - boml.core.BOMLOptimizer.Aggregate_all()
+           - boml.boml_optimizer.BOMLOptimizer.aggregate_all()
           ```
-          boml.core.BOMLOptimizer.Aggregate_all(
+          boml.boml_optimizer.BOMLOptimizer.aggregate_all(
               aggregation_fn=None, 
               gradient_clip=None
               )
@@ -275,18 +273,15 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/boml/requirem
           - aggregation_fn:Optional operation to aggregate multiple outer_gradients (for the same meta parameter),by (default: reduce_mean)
           - gradient_clip: optional operation to clip the aggregated outer gradients
        - Returns: None
-     Finally, Aggregate_all has to be called to aggregate gradient of different tasks, and define operations to apply outer gradients and update meta parametes.
+     Finally, aggregate_all has to be called to aggregate gradient of different tasks, and define operations to apply outer gradients and update meta parametes.
     6. run:
        - Aliases: 
-          - boml.core.BOMLOptimizer.run()
+          - boml.boml_optimizer.BOMLOptimizer.run()
         ```
-        boml.core.BOMLOptimizer.run(
+        boml.boml_optimizer.BOMLOptimizer.run(
             inner_objective_feed_dicts=None,
             outer_objective_feed_dicts=None,
-            train_batches=None,
-            initializer_feed_dict=None, 
             session=None, 
-            online=False,
             _skip_hyper_ts=False, 
             _only_hyper_ts=False, 
             callback=None
@@ -295,29 +290,27 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/boml/requirem
        - Args:
           - inner_objective_feed_dicts: an optional feed dictionary for the inner problem. Can be a function of step, which accounts for, e.g. stochastic gradient descent.
           - outer_objective_feed_dicts: an optional feed dictionary for the outer optimization problem (passed to the evaluation of outer objective). Can be a function of hyper-iterations steps (i.e. global variable), which may account for, e.g. stochastic evaluation of outer objective.
-          - train_batches: used for Reptile Algorithm, which needs to generates mini batches of images and labels during one training step
-          - initializer_feed_dict:  an optional feed dictionary for the initialization of inner problems variables. Can be a function of hyper-iterations steps (i.e. global variable), which may account for, e.g. stochastic initialization.
           - session: optional session
-          - online: default `False` if `True` performs the online version of the algorithms (i.e. does not reinitialize the state after at each run).
           - callback: optional callback function of signature (step (int), feed_dictionary, `tf.Session`) -> None that are called after every forward iteration.
        - Returns: None
+  
   - Simple Running Example <div3 id="a33"></div3>
     ```
         from boml import utils
         from boml.script_helper import *
         dataset = boml.meta_omniglot(args.num_classes, (args.examples_train, args.examples_test))
         ex = boml.BOMLExperiment(dataset)
-        # build network structure and define hyperparameters
-        boml_ho = boml.BOMLOptimizer('HyperOptim', 'Aggr', 'Reverse')
-        meta_learner = boml_ho.Meta_learner(ex.x, dataset, 'v1', args.use_T)
+        # build network structure and define metaparameters
+        boml_ho = boml.BOMLOptimizer('MetaRper', 'Aggr', 'Reverse')
+        meta_learner = boml_ho.Meta_learner(ex.x, dataset, 'V1', args.use_T)
         ex.model = boml_ho.Base_learner(meta_learner.out, meta_learner)
         # define Lower-level problems
-        loss_inner = utils.cross_entropy_loss(ex.model.out, ex.y)
+        loss_inner = utils.cross_entropy(ex.model.out, ex.y)
         inner_grad = boml_ho.LL_problem(loss_inner, args.lr, args.T, experiment=ex)
         # define Upper-level problems
-        loss_outer = utils.cross_entropy_loss(ex.model.re_forward(ex.x_).out, ex.y_)
-        boml_ho.UL_problem(loss_outer, args.mlr, inner_grad, hyper_list=boml.extension.hyperparameters())
-        boml_ho.Aggregate_all()
+        loss_outer = utils.cross_entropy(ex.model.re_forward(ex.x_).out, ex.y_)
+        boml_ho.UL_problem(loss_outer, args.mlr, inner_grad, hyper_list=boml.extension.metaparameters())
+        boml_ho.aggregate_all()
         # meta training step
         with utils.get_default_session():
             for itr in range(args.meta_train_iterations):
@@ -342,17 +335,17 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/boml/requirem
                   - var_collections: collections to restore meta parameters created in the so called scope 
                 - Returns: dictionary that indexes the outer parameters 
             - create_model_parameters(): 
-                this method creates model parameters of upper level problems like `T layer` or `Warp Layer` , and adds them to define collections called `METAPARAMETERS`
+                this method creates model parameters of upper level problems like `T layer` or `Warp layer` , and adds them to define collections called `METAPARAMETERS`
        - Utility functions:
-            - get_conv_weight(bmlnet, layer, initializer):
+            - get_conv_weight(boml_net, layer, initializer):
                 - Args:
-                  - bmlnet: initialized instance of BOMLNet
+                  - boml_net: initialized instance of BOMLNet
                   - layer: int32, the layer-th weight of convolutional block to be created
                   - initializer: the tensorflow initializer used to initialize the filters 
               -Returns: created parameter
-            - get_bias_weight(bmlnet, layer, initializer):
+            - get_bias_weight(boml_net, layer, initializer):
                 - Args:
-                  - bmlnet: initialized instance of BOMLNet
+                  - boml_net: initialized instance of BOMLNet
                   - layer: int32, the layer-th bias of convolutional block to be created
                   - initializer: the tensorflow initializer used to initialize the bias
                 - Returns: created parameter
@@ -362,35 +355,35 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/boml/requirem
                   - name: name to initialize the metrix
                   - conv: BOOLEAN , whether initialize the metrix or initialize the real value, default to be True
                 - Returns: the created parameter
-            - conv_block(bmlnet, cweight, bweight):
-               uses defined convolutional weight and bias with current ouput of bmlnet
+            - conv_block(boml_net, cweight, bweight):
+               uses defined convolutional weight and bias with current ouput of boml_net
                 - Args:
-                  - bmlnet: initialized instance of BOMLNet
+                  - boml_net: initialized instance of BOMLNet
                   - cweight: parameter of convolutional filter
                   - bweight: parameter of bias for convolutional neural networks
-            - conb_block_t(bmlnet, conv_weight, conv_bias, zweight):
-               uses defined convolutional weight, bias, and weights of t layer  with current ouput of bmlnet
+            - conb_block_t(boml_net, conv_weight, conv_bias, zweight):
+               uses defined convolutional weight, bias, and weights of t layer  with current ouput of boml_net
                 - Args:
-                  - bmlnet: initialized instance of BOMLNet
+                  - boml_net: initialized instance of BOMLNet
                   - cweight: parameter of convolutional filter
                   - bweight: parameter of bias for convolutional neural networks
-            - conv_block_warp(bmlnet, cweight, bweight, zweight, zbias):
-              uses defined convolutional weight, bias and filters of warp layer  with current ouput of bmlnet
+            - conv_block_warp(boml_net, cweight, bweight, zweight, zbias):
+              uses defined convolutional weight, bias and filters of warp layer  with current ouput of boml_net
                 - Args:
-                  - bmlnet: initialized instance of BOMLNet
+                  - boml_net: initialized instance of BOMLNet
                   - cweight: parameter of convolutional filter
                   - bweight: parameter of bias for convolutional neural networks
     2. BOMLInnerGrad
        - Aliases:
           - boml.LLProblem.BOMLInnerGrad
        - Methods to be overridden:
-           - compute_gradients(bml_opt, loss_inner, loss_outer=None,inner_method=None, param_dict=OrderedDict(), var_list=None, **inner_kargs):
+           - compute_gradients(boml_opt, loss_inner, loss_outer=None,inner_method=None, param_dict=OrderedDict(), var_list=None, **inner_kargs):
         delivers equivalent functionality to the method called compute_gradients() in `tf.train.Optimizer`
             - Args:
-              - bml_opt: instance of boml.optimizers.BOMLOpt, which is automatically create by the method in `boml.core.BOMLOptimizer` 
-              - loss_inner: inner objective, which could be passed by `boml.core.BOMLOptimizer.ll_problem` or called directly.
-              - loss_outer: outer objective,which could be passed automatically by `boml.core.BOMLOptimizer.ll_problem`, or called directly 
-              - param_dict: automatically passed by 'boml.core.BOMLOptimizer.ll_problem'
+              - boml_opt: instance of boml.optimizer.BOMLOpt, which is automatically create by the method in `boml.boml_optimizer.BOMLOptimizer` 
+              - loss_inner: inner objective, which could be passed by `boml.boml_optimizer.BOMLOptimizer.ll_problem` or called directly.
+              - loss_outer: outer objective,which could be passed automatically by `boml.boml_optimizer.BOMLOptimizer.ll_problem`, or called directly 
+              - param_dict: automatically passed by 'boml.boml_optimizer.BOMLOptimizer.ll_problem'
               - var_list: list of lower level variables
               - inner_kargs: optional arguments, which are same as `tf.train.Optimizer`
             - Returns：self   
@@ -419,34 +412,33 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/boml/requirem
                                               variables)
               - initializer_feed_dict: Optional feed dictionary for the inner objective
               - global_step: Optional global step for the optimization process
-              - param_dict: dictionary of parameters passed by `boml.core.BOMLOptimizer`
+              - param_dict: dictionary of parameters passed by `boml.boml_optimizer.BOMLOptimizer`
               - train_batches: mini batches of data, needed when Reptile Algorithm are implemented
               - session: Optional session (otherwise will take the default session)
               - experiments: list of instances of `Experiment`, needed when Reptile Algorithm are implemented
-              - online: Performs the computation of the outer gradient in the online (or "real time") mode. Note that `ReverseHG` and `ForwardHG` behave differently.
               - callback: callback funciton for the forward optimization
        - Utility functions:
-         - hgrads_hvars(hyper_list=None, aggregation_fn=None, process_fn=None):
-                Method for getting outergradient and outer parameters as required by apply_gradient methods from tensorflow optimizers.
+         - hgrads_hvars(hyper_list=None, aggregation_fn=None, gradient_clip=None):
+                Method for getting outergradient and outer parameters as required by apply_gradient methods from tensorflow optimizer.
                 - Args：
                   - meta_param: Optional list of outer parameters to consider. If not provided will get all variables in the hyperparameter collection in the current scope.
                   - aggregation_fn: Optional operation to aggregate multiple hypergradients (for the same hyperparameter),
                                       by default reduce_mean
-                  - process_fn: Optional operation like clipping to be applied.
+                  - gradient_clip: Optional operation like clipping to be applied.
          - initialization():
                  Returns groups of operation that initializes the variables in the computational graph
           - state():
             returns current state values of lower level variables 
     4. BOMLOpt
        - Aliases: 
-           - boml.optimizers.BOMLOpt
+           - boml.optimizer.BOMLOpt
        - Methods to be overridden:
            - minimize(loss_inner, var_list=None, global_step=None, gate_gradients=tf.train.Optimizer.GATE_OP,
                aggregation_method=None, colocate_gradients_with_ops=False, name=None, grad_loss=None):
                - Returns: an `bml_inner_grad` object relative to this minimization, same as `tf.train.Optimizer.minimize.`
        - Utility functions:
            - learning_rate():
-                 - Returns: the step size of this optimizer
+                 - Returns: the step size of this BOMLOptimizer
        - Utility Functions
            - get_dafault_session():
                 get and return the default tensorflow session
@@ -457,8 +449,8 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/boml/requirem
         gets and returns the default tensorflow session
       - BatchQueueMock():
           responsible for generates batches of taskes and feed them into corresponding placeholders.
-      - cross_entropy_loss(pred, label, method):
-        return loss function that matches different methods in [`BilevelOptim`,`HyperOptim`]
+      - cross_entropy(pred, label, method):
+        return loss function that matches different methods in [MetaRepr,`MetaRper`]
       - vectorize_all(var_list, name=None):
         Vectorize the variables in the list named var_list with the given name
       - remove_from_collectinon(key,*var_list):

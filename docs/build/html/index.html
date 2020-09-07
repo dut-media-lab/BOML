@@ -1,107 +1,156 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="Python">
+<html lang="Python">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Welcome to BOML&#39;s documentation! &#8212; PyBML 1.0.1 documentation</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to BOML&#39;s documentation! &#8212; BOML 0.1.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '1.0.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Indexes" href="Contents.html" />
+    <link rel="next" title="Installation" href="installation.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <div class="section" id="welcome-to-boml-s-documentation">
 <h1>Welcome to BOML's documentation!<a class="headerlink" href="#welcome-to-boml-s-documentation" title="Permalink to this headline">¶</a></h1>
 <p><strong>Configuration &amp; Status</strong></p>
-<a class="reference external image-reference" href="https://github.com/bmlsoc/BOML"><img alt="build status" src="https://travis-ci.com/bmlsoc/BOML.svg?branch=master" /></a>
-<a class="reference external image-reference" href="https://github.com/bmlsoc/BOML"><img alt="language" src="https://img.shields.io/badge/language-Python-brightgreen.svg" /></a>
-<a class="reference external image-reference" href="https://github.com/bmlsoc/BOML"><img alt="license" src="https://img.shields.io/badge/license-MIT-000000.svg" /></a>
-<p>BOML provides interfaces to popular bilevel optimization algorithms, so that you could quickly build your own meta learning neural network and test its performance.</p>
-<div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Index</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="Contents.html">Indexes</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Contents.html#contents-div0-id-a0-div0">Contents <div0 id="a0"></div0></a></li>
-<li class="toctree-l2"><a class="reference internal" href="Contents.html#introduction-div1-id-a1-div1">Introduction <div1 id="a1"></div1></a></li>
-<li class="toctree-l2"><a class="reference internal" href="Contents.html#installation-and-requirements-div2-id-a2-div2">Installation and requirements  <div2 id="a2"></div2></a></li>
-<li class="toctree-l2"><a class="reference internal" href="Contents.html#quickly-build-your-bilevel-meta-learning-model-div3-id-a3-div3">Quickly build your bilevel meta-learning model <div3 id="a3"></div3></a></li>
-<li class="toctree-l2"><a class="reference internal" href="Contents.html#modification-and-extension-div4-id-a4-div4">Modification and extension  <div4 id="a4"></div4></a></li>
-<li class="toctree-l2"><a class="reference internal" href="Contents.html#authors-and-license-div5-id-a5-div5">Authors and license<div5 id="a5"></div5></a></li>
+<a class="reference external image-reference" href="https://github.com/dut-media-lab/BOML"><img alt="build status" src="https://travis-ci.com/dut-media-lab/BOML.svg?branch=master" /></a>
+<a class="reference external image-reference" href="https://github.com/dut-media-lab/BOML"><img alt="codecov" src="https://codecov.io/gh/dut-media-lab/BOML/branch/master/graph/badge.svg" /></a>
+<a class="reference external image-reference" href="https://github.com/dut-media-lab/BOML"><img alt="Documentation Status" src="https://readthedocs.org/projects/pybml/badge/?version=latest" /></a>
+<a class="reference external image-reference" href="https://github.com/dut-media-lab/BOML"><img alt="License" src="https://img.shields.io/badge/license-MIT-000000.svg" /></a>
+<a class="reference external image-reference" href="https://github.com/dut-media-lab/BOML"><img alt="Language" src="https://img.shields.io/github/languages/top/dut-media-lab/BOML" /></a>
+<a class="reference external image-reference" href="https://github.com/dut-media-lab/BOML"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg" /></a>
+<p>BOML is a modularized optimization library that unifies several ML algorithms into a common bilevel optimization framework. It provides interfaces to implement popular bilevel optimization algorithms, so that you could quickly build your own meta learning neural network and test its performance.</p>
+<p><strong>Key features of BOML</strong></p>
+<ul class="simple">
+<li><p>It provides a unified bilevel optimization framework to address different categories of existing meta-learning paradigms, offers a modularized algorithmic structure to integrate a variety of optimization techniques, and is flexible and extensible for potential meta-learning applications</p></li>
+<li><p>We also execute unit tests for better coverage ability with Travis CI and Codecov, develop comprehensive documentations using sphinx and guarantee the code quality by following PEP8 naming convention.</p></li>
+<li><p>we adopt functional interfaces similar to conventional optimizers, which could help researchers quickly get familiar with the procedures.</p></li>
 </ul>
-</li>
+<p><strong>Related Links</strong></p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/elseifn/BOML">Go to the project home page</a></p></li>
+<li><p><a class="reference external" href="https://codeload.github.com/elseifn/BOML/zip/master">Download the latest code bundle</a></p></li>
+</ul>
+<p><strong>Optimization Routine</strong></p>
+<p>The figure below illustrates the general optimization routine by organized modules in BOML.</p>
+<img alt="Bilevel Optimization Routine" class="align-center" src="_images/optimization_routine.png" />
+<p><strong>Documentation</strong></p>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Simple Running Example</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Core Modules of BOML</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Core Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="built_in.html">Core Built-in Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extension.html">Extensible Modules</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Additional Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="references.html">Related Papers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">Authors and License</a></li>
 </ul>
 </div>
 </div>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">BOML</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Simple Running Example</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core Modules of BOML</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Core Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="built_in.html">Core Built-in Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extension.html">Extensible Modules</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Additional Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="references.html">Related Papers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">Authors and License</a></li>
+</ul>
+
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="Contents.html" title="next chapter">Indexes</a></li>
+      <li>Next: <a href="installation.html" title="next chapter">Installation</a></li>
   </ul></li>
 </ul>
 </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/index.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020, BMLS.
+      &copy;2020, Yaohua Liu, Risheng Liu.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="_sources/index.rst.txt"

@@ -1,0 +1,491 @@
+
+<!DOCTYPE html>
+
+<html lang="Python">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extensible Modules &#8212; BOML 0.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Related Papers" href="references.html" />
+    <link rel="prev" title="Core Built-in Functions" href="built_in.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="extensible-modules">
+<h1>Extensible Modules<a class="headerlink" href="#extensible-modules" title="Permalink to this headline">¶</a></h1>
+<ul>
+<li><dl>
+<dt>Extensible Base Calsses and Modules</dt><dd><ol class="arabic">
+<li><p>BOMLNet
+- Aliases：</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>boml.networks.BOMLNet</p></li>
+</ul>
+</div></blockquote>
+<ul>
+<li><p>Methods to be overridden:</p>
+<blockquote>
+<div><ul>
+<li><dl class="simple">
+<dt>forward()：</dt><dd><p>It uses defined convolutional neural networks with initial input</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>re_forward(new_input):</dt><dd><p>It reuses defined convolutional with new input and update the output results</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>create_outer_parameters():</dt><dd><p>This method creates parameters of upper level problems, and adds them to define collections called <cite>METAPARAMETERS</cite></p>
+<ul class="simple">
+<li><p>Args:
+- var_collections: collections to restore meta parameters created in the so called scope</p></li>
+<li><p>Returns: dictionary that indexes the outer parameters</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>create_model_parameters():</p>
+<blockquote>
+<div><p>This method creates model parameters of upper level problems like <cite>T layer</cite> or <cite>Warp layer</cite> , and adds them to define collections called <cite>METAPARAMETERS</cite>.</p>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Utility functions:</p>
+<blockquote>
+<div><ul>
+<li><p>get_conv_weight(boml_net, layer, initializer):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Args:
+- boml_net: initialized instance of BOMLNet
+- layer: int32, the layer-th weight of convolutional block to be created
+- initializer: the tensorflow initializer used to initialize the filters</p></li>
+</ul>
+</div></blockquote>
+<p>-Returns: created parameter</p>
+</li>
+<li><p>get_bias_weight(boml_net, layer, initializer):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Args:</p>
+<ul>
+<li><p>boml_net: initialized instance of BOMLNet</p></li>
+<li><p>layer: int32, the layer-th bias of convolutional block to be created</p></li>
+<li><p>initializer: the tensorflow initializer used to initialize the bias</p></li>
+</ul>
+</li>
+<li><p>Returns: created parameter</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>get_identity(dim, name, conv=True):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Args:</p>
+<ul>
+<li><p>dim: the dimension of identity metrix</p></li>
+<li><p>name: name to initialize the metrix</p></li>
+<li><p>conv: BOOLEAN , whether initialize the metrix or initialize the real value, default to be True</p></li>
+</ul>
+</li>
+<li><p>Returns: the created parameter</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>conv_block(boml_net, cweight, bweight):</p>
+<blockquote>
+<div><p>It uses defined convolutional weight and bias with current ouput of boml_net</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Args:
+- boml_net: initialized instance of BOMLNet
+- cweight: parameter of convolutional filter
+- bweight: parameter of bias for convolutional neural networks</p></li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+</li>
+<li><p>conb_block_t(boml_net, conv_weight, conv_bias, zweight):</p>
+<blockquote>
+<div><p>uses defined convolutional weight, bias, and weights of t layer  with current ouput of boml_net</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Args:</p>
+<ul>
+<li><p>boml_net: initialized instance of BOMLNet</p></li>
+<li><p>conv_weight: parameter of convolution filter for convolutional neural networks</p></li>
+<li><p>conv_bias: parameter of bias for convolutional neural networks</p></li>
+<li><p>zweight: parameter of convolution filter for T-layer</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+</li>
+<li><p>conv_block_warp(boml_net, cweight, bweight, zweight, zbias):</p>
+<p>uses defined convolutional weight, bias and filters of warp layer  with current ouput of boml_net</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Args:</p>
+<ul>
+<li><p>boml_net: initialized instance of BOMLNet</p></li>
+<li><p>cweight: parameter of convolution filter for convolutional neural networks</p></li>
+<li><p>bweight: parameter of bias for convolutional neural networks</p></li>
+<li><p>zweight: parameter of convolution filter for Warp-layer</p></li>
+<li><p>zbias: parameter of bias for Warp-layer</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</li>
+<li><p>BOMLInnerGrad</p>
+<ul>
+<li><p>Aliases:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>boml.LLProblem.BOMLInnerGrad</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Methods to be overridden:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>compute_gradients( boml_opt, loss_inner, loss_outer=None, inner_method=None, param_dict=OrderedDict(), var_list=None, <a href="#id1"><span class="problematic" id="id2">**</span></a>inner_kargs):</p></li>
+</ul>
+<p>The method delivers equivalent functionality to the method called compute_gradients() in <cite>tf.train.Optimizer</cite>.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Args:</p>
+<ul>
+<li><p>boml_opt: instance of boml.optimizer.BOMLOpt, which is automatically create by the method in <cite>boml.boml_optimizer.BOMLOptimizer</cite></p></li>
+<li><p>loss_inner: inner objective, which could be passed by <cite>boml.boml_optimizer.BOMLOptimizer.ll_problem</cite> or called directly.</p></li>
+<li><p>loss_outer: outer objective,which could be passed automatically by <cite>boml.boml_optimizer.BOMLOptimizer.ll_problem</cite>, or called directly</p></li>
+<li><p>param_dict: automatically passed by 'boml.boml_optimizer.BOMLOptimizer.ll_problem'</p></li>
+<li><p>var_list: list of lower level variables</p></li>
+<li><p>inner_kargs: optional arguments, which are same as <cite>tf.train.Optimizer</cite></p></li>
+</ul>
+</li>
+<li><p>Returns：self</p></li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+</li>
+<li><p>Utility functions:</p>
+<blockquote>
+<div><ul>
+<li><p>apply_updates():</p>
+<blockquote>
+<div><p>Descent step, as returned by <cite>tf.train.Optimizer.apply_gradients</cite>.</p>
+</div></blockquote>
+</li>
+<li><p>initialization():</p>
+<blockquote>
+<div><p>list of operations that return the values of the state variables for this learning dynamics after the execution of the initialization operation. If an initial dynamics is set, then it also executed.</p>
+</div></blockquote>
+</li>
+<li><p>state():</p>
+<blockquote>
+<div><p>A generator for all the state variables (optimized variables and possibly auxiliary variables) being optimized.</p>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</li>
+<li><p>BOMLOuterGrad</p>
+<ul>
+<li><p>Aliases:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>boml.ul_problem.BOMLOuterGrad</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Methods to be overridden:</p>
+<blockquote>
+<div><ul>
+<li><p>compute_gradients(outer_objective, bml_inner_grad, meta_param=None):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Args:</p>
+<ul>
+<li><p>bml_inner_grad: OptimzerDict object resulting from the inner objective optimization.</p></li>
+<li><p>outer_objective: A loss function for the outer parameters (scalar tensor)</p></li>
+<li><p>meta_param: Optional list of outer parameters to consider. If not provided will get all variables in the hyperparameter collection in the current scope.</p></li>
+</ul>
+</li>
+<li><p>Returns: list of meta parameters involved in the computation</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<blockquote>
+<div><ul>
+<li><p>apply_gradients( inner_objective_feed_dicts=None, outer_objective_feed_dicts=None, initializer_feed_dict=None, param_dict=OrderedDict(), train_batches=None, experiments= [], global_step=None, session=None, online=False, callback=None)</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Args:</p>
+<ul>
+<li><p>inner_objective_feed_dicts: Optional feed dictionary for the inner objective</p></li>
+<li><dl class="simple">
+<dt>outer_objective_feed_dicts: Optional feed dictionary for the outer objective</dt><dd><p>(note that this is not used in ForwardHG since hypergradients are not
+variables)</p>
+</dd>
+</dl>
+</li>
+<li><p>global_step: Optional global step for the optimization process</p></li>
+<li><p>param_dict: dictionary of parameters passed by <cite>boml.boml_optimizer.BOMLOptimizer</cite></p></li>
+<li><p>session: Optional session (otherwise will take the default session)</p></li>
+<li><p>experiments: list of instances of <cite>Experiment</cite>, needed when Reptile Algorithm are implemented</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+</li>
+<li><p>Utility functions:</p>
+<blockquote>
+<div><blockquote>
+<div><ul>
+<li><p>hgrads_hvars( meta_param=None, aggregation_fn=None, gradient_clip=None):</p>
+<blockquote>
+<div><p>Method for getting outergradient and outer parameters as required by apply_gradient methods from tensorflow optimizer.</p>
+<ul class="simple">
+<li><p>Args：</p>
+<ul>
+<li><p>meta_param: Optional list of outer parameters to consider. If not provided will get all variables in the hyperparameter collection in the current scope.</p></li>
+<li><dl class="simple">
+<dt>aggregation_fn: Optional operation to aggregate multiple hypergradients (for the same hyperparameter),</dt><dd><p>by default reduce_mean</p>
+</dd>
+</dl>
+</li>
+<li><p>gradient_clip: Optional operation like clipping to be applied.</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+<ul>
+<li><p>initialization():</p>
+<blockquote>
+<div><p>Returns groups of operation that initializes the variables in the computational graph.</p>
+</div></blockquote>
+</li>
+</ul>
+<blockquote>
+<div><ul>
+<li><p>state():</p>
+<blockquote>
+<div><p>The method returns current state values of lower level variables.</p>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+</li>
+</ul>
+</li>
+<li><p>BOMLOpt</p>
+<ul>
+<li><p>Aliases:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>boml.optimizer.BOMLOpt</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Methods to be overridden:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>minimize(loss_inner, var_list=None, global_step=None, gate_gradients=tf.train.Optimizer.GATE_OP,</dt><dd><p>aggregation_method=None, colocate_gradients_with_ops=False, name=None, grad_loss=None):</p>
+<ul>
+<li><p>Returns: an <cite>bml_inner_grad</cite> object relative to this minimization, same as <cite>tf.train.Optimizer.minimize.</cite></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Utility functions:</p>
+<blockquote>
+<div><ul>
+<li><p>learning_rate():</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Returns: the step size of this BOMLOptimizer</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Utility Functions</p>
+<blockquote>
+<div><ul>
+<li><p>get_dafault_session():</p>
+<blockquote>
+<div><p>The method gets and returns the default tensorflow session</p>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</li>
+</ol>
+</dd>
+</dl>
+</li>
+<li><p>Utility Modules:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>get_default_session():</p></li>
+</ul>
+<p>The method gets and returns the default tensorflow session</p>
+<ul class="simple">
+<li><p>BatchQueueMock():</p></li>
+</ul>
+<p>The class is responsible for generates batches of taskes and feed them into corresponding placeholders.</p>
+<ul class="simple">
+<li><p>cross_entropy(pred, label, method):</p></li>
+</ul>
+<p>It returns loss function that matches different methods in [MetaRepr,`MetaRper`]</p>
+<ul class="simple">
+<li><p>vectorize_all(var_list, name=None):</p></li>
+</ul>
+<p>The method vectorize the variables in the list named var_list with the given name</p>
+<ul class="simple">
+<li><p>remove_from_collectinon(key,*var_list):</p></li>
+</ul>
+<p>The method removes the variables in the var_list according to the given Graph key</p>
+<ul class="simple">
+<li><p>set_gpu():</p></li>
+</ul>
+<p>The method sets primary parameters of GPU configuration.</p>
+</div></blockquote>
+</li>
+</ul>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">BOML</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Simple Running Example</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core Modules of BOML</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Core Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="built_in.html">Core Built-in Functions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Extensible Modules</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Additional Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="references.html">Related Papers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">Authors and License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="built_in.html" title="previous chapter">Core Built-in Functions</a></li>
+      <li>Next: <a href="references.html" title="next chapter">Related Papers</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Yaohua Liu, Risheng Liu.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/extension.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

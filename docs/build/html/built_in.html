@@ -1,0 +1,376 @@
+
+<!DOCTYPE html>
+
+<html lang="Python">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core Built-in Functions &#8212; BOML 0.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Extensible Modules" href="extension.html" />
+    <link rel="prev" title="Core Modules" href="modules.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="core-built-in-functions">
+<h1>Core Built-in Functions<a class="headerlink" href="#core-built-in-functions" title="Permalink to this headline">¶</a></h1>
+<ol class="arabic">
+<li><p>BOMLOptimizer.meta_learner:</p>
+<ul>
+<li><dl>
+<dt>Aliases:</dt><dd><blockquote>
+<div><ul class="simple">
+<li><p>boml.boml_optimizer.BOMLOptimizer.meta_learner()</p></li>
+</ul>
+</div></blockquote>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>boml.boml_optimizer.BOMLOptimizer.meta_learner<span class="o">(</span>
+        _input,
+        dataset,
+        <span class="nv">meta_model</span><span class="o">=</span><span class="s1">&#39;V1&#39;</span>,
+        <span class="nv">name</span><span class="o">=</span><span class="s1">&#39;Hyper_Net&#39;</span>,
+        <span class="nv">use_T</span><span class="o">=</span>False,
+        <span class="nv">use_Warp</span><span class="o">=</span>False,
+        **model_args
+<span class="o">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+</ul>
+<p>This method must be called once at first to build meta modules and initialize meta parameters and neural networks.</p>
+<ul>
+<li><p>Args:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>_input: orginal input for neural network construction;</p></li>
+<li><p>dataset: which dataset to use for training and testing. It should be initialized before being passed into the function</p></li>
+<li><p>meta_model: model chosen for neural network construction, <cite>V1</cite> for C4L with fully connected layer,`V2` for Residual blocks with fully connected layer.</p></li>
+<li><p>name: name for Meta model modules used for BOMLNet initialization</p></li>
+<li><p>use_T: whether to use T layer for C4L neural networks</p></li>
+<li><p>use_Warp: whether to use Warp layer for C4L neural networks</p></li>
+<li><p>model_args: optional arguments to set specific parameters of neural networks.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</li>
+<li><p>BOMLOptimizer.base_learner:</p>
+<ul>
+<li><dl>
+<dt>Aliases:</dt><dd><blockquote>
+<div><ul class="simple">
+<li><p>boml.boml_optimizer.BOMLOptimizer.base_learner()</p></li>
+</ul>
+</div></blockquote>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>boml.boml_optimizer.BOMLOptimizer.base_learner<span class="o">(</span>
+        _input,
+        meta_learner, <span class="nv">name</span><span class="o">=</span><span class="s1">&#39;Task_Net&#39;</span>,
+        <span class="nv">weights_initializer</span><span class="o">=</span>tf.zeros_initializer
+<span class="o">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+</ul>
+<p>This method has to be called for every experiment and takes responsibility for defining task-specific modules and inner optimizer.</p>
+<ul>
+<li><p>Args:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>_input: orginal input for neural network construction of task-specific module;</p></li>
+<li><p>meta_learner: returned value of meta_learner function, which is a instance of BOMLNet or its child classes</p></li>
+<li><p>name: name for Base model modules used for BOMLNet initialization</p></li>
+<li><p>weights_initializer: initializer function for task_specific network, called by 'MetaRepr' method</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Returns: task-specific model part</p></li>
+</ul>
+</li>
+<li><p>BOMLOptimizer.ll_problem:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>Aliases:</dt><dd><ul>
+<li><p>boml.boml_optimizer.BOMLOptimizer.ll_problem()</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>boml.boml_optimizer.BOMLOptimizer.ll_problem<span class="o">(</span>
+          inner_objective,
+          learning_rate,
+          T,
+          <span class="nv">inner_objective_optimizer</span><span class="o">=</span><span class="s1">&#39;SGD&#39;</span>,
+          <span class="nv">outer_objective</span><span class="o">=</span>None,
+          <span class="nv">learn_lr</span><span class="o">=</span>False,
+          <span class="nv">alpha_init</span><span class="o">=</span><span class="m">0</span>.0,
+          <span class="nv">s</span><span class="o">=</span><span class="m">1</span>.0, <span class="nv">t</span><span class="o">=</span><span class="m">1</span>.0,
+          <span class="nv">learn_alpha</span><span class="o">=</span>False,
+          <span class="nv">learn_st</span><span class="o">=</span>False,
+          <span class="nv">learn_alpha_itr</span><span class="o">=</span>False,
+          <span class="nv">var_list</span><span class="o">=</span>None,
+          <span class="nv">init_dynamics_dict</span><span class="o">=</span>None,
+          <span class="nv">first_order</span><span class="o">=</span>False,
+          <span class="nv">loss_func</span><span class="o">=</span>utils.cross_entropy,
+          <span class="nv">momentum</span><span class="o">=</span><span class="m">0</span>.5,
+          <span class="nv">beta1</span><span class="o">=</span><span class="m">0</span>.0,
+          <span class="nv">beta2</span><span class="o">=</span><span class="m">0</span>.999,
+          <span class="nv">regularization</span><span class="o">=</span>None,
+          <span class="nv">experiment</span><span class="o">=</span>None,
+          <span class="nv">scalor</span><span class="o">=</span><span class="m">0</span>.0,
+          **inner_kargs
+<span class="o">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>After construction of neural networks, solutions to lower level problems should be regulated in ll_problem.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Args:</dt><dd><ul>
+<li><p>inner_objective: loss function for the inner optimization problem</p></li>
+<li><p>learning_rate: step size for inner loop optimization</p></li>
+<li><p>T: numbers of steps for inner gradient descent optimization</p></li>
+<li><p>inner_objective_optimizer: Optimizer type for the outer parameters, should be in list [<cite>SGD</cite>,`Momentum`,`Adam`]</p></li>
+<li><p>outer_objective: loss function for the outer optimization problem, which need to be claimed in BDA agorithm</p></li>
+<li><p>alpha_init: initial value of ratio of inner objective to outer objective in BDA algorithm</p></li>
+<li><p>s,t: coefficients of aggregation of inner and outer objectives in BDA algorithm, default to be 1.0</p></li>
+<li><p>learn_alpha: specify parameter for BDA algorithm to decide whether to initialize alpha as a hyper parameter</p></li>
+<li><p>learn_alpha_itr: parameter for BDA algorithm to specify whether to initialize alpha as a vector, of which every dimension's value is step-wise scale factor fot the optimization process</p></li>
+<li><p>learn_st: specify parameter for BDA algorithm to decide whether to initialize s and t as hyper parameters</p></li>
+<li><p>first_order: specific parameter to define whether to use implement first order MAML, default to be <cite>FALSE</cite></p></li>
+<li><p>loss_func: specifying which type of loss function is used for the maml-based method, which should be consistent with the form to compute the inner objective</p></li>
+<li><p>momentum: specific parameter for Optimizer.BOMLOptMomentum to set initial value of momentum</p></li>
+<li><p>regularization: whether to add regularization terms in the inner objective</p></li>
+<li><p>experiment: instance of Experiment to use in the Lower Level Problem, especifially needed in the <cite>MetaRper</cite> type of method.</p></li>
+<li><p>var_list: optional list of variables (of the inner optimization problem)</p></li>
+<li><p>inner_kargs: optional arguments to pass to <cite>boml.boml_optimizer.BOMLOptimizer.compute_gradients</cite></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Returns: task-specific model part</p></li>
+</ul>
+</li>
+<li><p>BOMLOptimizer.ul_problem</p>
+<ul>
+<li><p>Aliases:</p>
+<blockquote>
+<div><blockquote>
+<div><ul>
+<li><p>boml.boml_optimizer.BOMLOptimizer.ul_problem()</p>
+<blockquote>
+<div><div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>boml.boml_optimizer.BOMLOptimizer.ul_Problem<span class="o">(</span>
+        outer_objective,
+        meta_learning_rate,
+        inner_grad,
+        <span class="nv">meta_param</span><span class="o">=</span>None,
+        <span class="nv">outer_objective_optimizer</span><span class="o">=</span><span class="s1">&#39;Adam&#39;</span>,
+        <span class="nv">epsilon</span><span class="o">=</span><span class="m">1</span>.0,
+        <span class="nv">momentum</span><span class="o">=</span><span class="m">0</span>.5,
+        <span class="nv">global_step</span><span class="o">=</span>None
+<span class="o">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+<p>This method define upper level problems and choose optimizer to optimize meta parameters, which should be called afer ll_problem.</p>
+<ul>
+<li><p>Args:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>outer_objective: scalar tensor for the outer objective</p></li>
+<li><p>meta_learning_rate: step size for outer loop optimization</p></li>
+<li><p>inner_grad: Returned value of boml.BOMLOptimizer.LLProblem()</p></li>
+<li><p>meta_param: optional list of outer parameters and model parameters</p></li>
+<li><p>outer_objective_optimizer: Optimizer type for the outer parameters, should be in list [<cite>SGD</cite>,`Momentum`,`Adam`]</p></li>
+<li><p>epsilon: Float, cofffecients to be used in DARTS algorithm</p></li>
+<li><p>momentum: specific parameters to be used to initialize <cite>Momentum</cite> algorithm</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Returns：meta_param list, used for debugging</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</li>
+<li><p>aggregate_all:</p>
+<ul>
+<li><p>Aliases:</p>
+<blockquote>
+<div><blockquote>
+<div><ul class="simple">
+<li><p>boml.boml_optimizer.BOMLOptimizer.aggregate_all()</p></li>
+</ul>
+</div></blockquote>
+<dl class="simple">
+<dt>::</dt><dd><dl class="simple">
+<dt>boml.boml_optimizer.BOMLOptimizer.aggregate_all(</dt><dd><p>aggregation_fn=None,
+gradient_clip=None
+)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+</li>
+<li><dl class="simple">
+<dt>Args:</dt><dd><ul class="simple">
+<li><p>aggregation_fn:Optional operation to aggregate multiple outer_gradients (for the same meta parameter),by (default: reduce_mean)</p></li>
+<li><p>gradient_clip: optional operation to clip the aggregated outer gradients</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Returns: None</p></li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<div><p>Finally, aggregate_all has to be called to aggregate gradient of different tasks, and define operations to apply outer gradients and update meta parametes.</p>
+</div></blockquote>
+<ol class="arabic" start="6">
+<li><p>run:</p>
+<ul>
+<li><dl>
+<dt>Aliases:</dt><dd><ul class="simple">
+<li><p>boml.boml_optimizer.BOMLOptimizer.run()</p></li>
+</ul>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>boml.boml_optimizer.BOMLOptimizer.run<span class="o">(</span>
+        <span class="nv">inner_objective_feed_dicts</span><span class="o">=</span>None,
+        <span class="nv">outer_objective_feed_dicts</span><span class="o">=</span>None,
+        <span class="nv">session</span><span class="o">=</span>None,
+        <span class="nv">_skip_hyper_ts</span><span class="o">=</span>False,
+        <span class="nv">_only_hyper_ts</span><span class="o">=</span>False,
+        <span class="nv">callback</span><span class="o">=</span>None
+<span class="o">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Args:</dt><dd><ul class="simple">
+<li><p>inner_objective_feed_dicts: an optional feed dictionary for the inner problem. Can be a function of step, which accounts for, e.g. stochastic gradient descent.</p></li>
+<li><p>outer_objective_feed_dicts: an optional feed dictionary for the outer optimization problem (passed to the evaluation of outer objective). Can be a function of hyper-iterations steps (i.e. global variable), which may account for, e.g. stochastic evaluation of outer objective.</p></li>
+<li><p>session: optional session</p></li>
+<li><p>callback: optional callback function of signature (step (int), feed_dictionary, <cite>tf.Session</cite>) -&gt; None that are called after every forward iteration.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Returns: None</p></li>
+</ul>
+</li>
+</ol>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">BOML</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Simple Running Example</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core Modules of BOML</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Core Modules</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Core Built-in Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extension.html">Extensible Modules</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Additional Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="references.html">Related Papers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">Authors and License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="modules.html" title="previous chapter">Core Modules</a></li>
+      <li>Next: <a href="extension.html" title="next chapter">Extensible Modules</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Yaohua Liu, Risheng Liu.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/built_in.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

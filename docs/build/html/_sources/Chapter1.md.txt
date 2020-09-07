@@ -1,0 +1,19 @@
+Installation and requirements
+==============================
+
+boml implements various meta learning algorithms based on [TensorFlow](https://www.tensorflow.org/install/pip), which is one of the most popular macheine learning platform. Besides, [Numpy](https://numpy.org/install/) and basical image processing modules are required for  installation. <br>
+We also provide [requirements.txt](https://github.com/liuyaohua918/boml/requirements.txt) as reference for version control.
+```
+1. Install from GitHub page：
+
+git clone https://github.com/dut-media-lab/BOML.git
+
+python setup.py install 
+
+pip install requirements.txt
+
+2. use pip instruction
+
+pip install boml
+```
+  
