@@ -1,5 +1,5 @@
 imageio==2.9.0
-tensorflow==1.15.0
+tensorflow==1.15.2
 h5py==2.10.0
 numpy==1.19.1
 scipy==1.5.2
