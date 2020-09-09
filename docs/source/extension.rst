@@ -5,6 +5,7 @@ Extensible Modules
 
 - Extensible Base Calsses and Modules
 	1. BOMLNet 
+	
 	   - Aliases：
 	   
 		  - boml.networks.BOMLNet
@@ -96,7 +97,7 @@ Extensible Modules
 		  
 	   - Methods to be overridden:
 	   
-			- compute_gradients( boml_opt, loss_inner, loss_outer=None, inner_method=None, param_dict=OrderedDict(), var_list=None, **inner_kargs):
+			- compute_gradients( boml_opt, loss_inner, loss_outer=None, inner_method=None, param_dict=OrderedDict(), var_list=None, \*\*inner_kargs):
 			
 			The method delivers equivalent functionality to the method called compute_gradients() in `tf.train.Optimizer`.
 			

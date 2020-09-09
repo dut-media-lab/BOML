@@ -19,7 +19,7 @@ We present a general bilevel optimization paradigm to unify different types of m
 
 <div align=center>
   
-![Bilevel Optimization Model](https://github.com/dut-media-lab/BOML/blob/master/figures/p1.png)
+![Bilevel Optimization Model](https://github.com/dut-media-lab/BOML/blob/master/figures/p1.png )
 </div>
 
 ## Generic Optimization Routine
@@ -53,9 +53,7 @@ boml_ho.ul_problem(loss_outer, args.mlr, inner_grad,
 boml_ho.aggregate_all()
 ```
 ## Documentation 
-For more detailed information of basic function and construction process, please refer to our [Help Documentation](https://dut-media-lab.github.io/BOML/). Scripts in the directory named test_script are useful for constructing general training process.
-
-Here we give recommended settings for specific hyper paremeters to quickly test performance of popular algorithms.
+For more detailed information of basic function and construction process, please refer to our [Help Documentation](https://boml.readthedocs.io/en/latest/) or [Github Page](https://dut-media-lab.github.io/BOML/). Scripts in the directory named test_script are useful for constructing general training process.
 
 ## Related Methods 
  - [Hyperparameter optimization with approximate gradient(HOAG)](https://arxiv.org/abs/1602.02355)

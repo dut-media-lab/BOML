@@ -36,14 +36,9 @@ BOML is a modularized optimization library that unifies several ML algorithms in
 **Key features of BOML**
 
 - **Unified bilevel optimization framework** to address different categories of existing meta-learning paradigms. 
-- **modularized algorithmic structure** to integrate a variety of optimization techniques and popular methods.
+- **Modularized algorithmic structure** to integrate a variety of optimization techniques and popular methods.
 - **Unit tests with Travis CI and Codecov** to reach 99% coverage, and following **PEP8 naming convention** to guarantee the code quality. 
-- **Comprehensive documentations** using sphinx and **Flexible functional interfaces** similar to conventional optimizers to help researchers quickly get familiar with the procedures.
-
-**Related Links**
-
-* `Go to the project home page <https://github.com/dut-media-lab/BOML>`_
-* `Download the latest code bundle <https://codeload.github.com/elseifn/BOML/zip/master>`_
+- **Comprehensive documentations** using sphinx and **flexible functional interfaces** similar to conventional optimizers to help researchers quickly get familiar with the procedures.
 
 **Optimization Routine**
 
@@ -77,3 +72,7 @@ The figure below illustrates the general optimization routine by organized modul
 	references
 	license
 
+**Related Links**
+
+* `Go to the project home page <https://github.com/dut-media-lab/BOML>`_
+* `Download the latest code bundle <https://codeload.github.com/dut-media-lab/BOML/zip/master>`_
