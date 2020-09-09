@@ -1,4 +1,4 @@
-Core Built\-in Functions 
+Core Builtin Functions 
 ========================================
 
 .. highlight:: sh

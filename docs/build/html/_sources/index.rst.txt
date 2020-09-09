@@ -62,7 +62,7 @@ The figure below illustrates the general optimization routine by organized modul
 	:caption: Core Modules of BOML
 
 	modules
-	built_in
+	builtin
 	extension
 
 .. toctree::
