@@ -128,7 +128,7 @@ def test_meta_init():
     if args.mode == 'train':
         train_and_test(metasets, exp_string,method=args.method, inner_method=args.inner_method,
                        outer_method=args.outer_method, use_T=args.use_T, first_order=args.first_order, logdir=logdir,
-                       seed=args.seed,use_Warp=args.use_Warp, warp_labmda=args.warp_labmda,
+                       seed=args.seed,use_Warp=args.use_Warp, warp_labmda=args.warp_lambda,
                        lr0=args.lr, learn_lr=args.learn_lr, mlr0=args.meta_lr, T=args.T,
                        resume=args.resume, MBS=args.meta_batch_size, n_meta_iterations=args.n_meta_iterations,
                        process_fn=process_fn, save_interval=args.save_interval, print_interval=args.print_interval,
@@ -137,7 +137,7 @@ def test_meta_init():
     elif args.mode == 'test':
         build_and_test(metasets, exp_dir=args.expdir, method=args.method, inner_method=args.inner_method,
                        outer_method=args.outer_method, use_T=args.use_T, use_Warp=args.use_Warp,
-                       warp_labmda=args.warp_lambda, first_order=args.first_order, seed=args.seed, lr0=args.lr,
+                       warp_lambda=args.warp_lambda, first_order=args.first_order, seed=args.seed, lr0=args.lr,
                        T=args.T, MBS=args.meta_batch_size, process_fn=process_fn,
                        n_test_episodes=args.test_episodes, iterations_to_test=args.iterations_to_test)
 

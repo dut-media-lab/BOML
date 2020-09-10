@@ -57,24 +57,21 @@ class BOMLOptimizer(object):
         self.inner_method = inner_method
 
         if self.inner_method == "Simple":
-            assert (
-                outer_method == "Simple"
-            ), "Choose simple configuration of lower-level and upper-level " \
-               "calculation strategy for meta-initialization-based method"
+            assert outer_method == "Simple", (
+                "Choose simple configuration of lower-level and upper-level "
+                "calculation strategy for meta-initialization-based method"
+            )
         elif self.inner_method == "Aggr":
-            assert outer_method in (
-                "Darts",
-                "Reverse",
-            ), "The bilevel aggregation strategy could choose Reverse Auto Differentiation" \
-               " or DARTS as upper-level calculation strategy"
+            assert outer_method in ("Darts", "Reverse",), (
+                "The bilevel aggregation strategy could choose Reverse Auto Differentiation"
+                " or DARTS as upper-level calculation strategy"
+            )
         else:
-            assert outer_method in (
-                "Reverse",
-                "Implicit",
-                "Darts",
-            ), "Invalid combination of inner and outer strategies, " \
-               "please check initialization for different level of problems or " \
-               "extend the base classes to formulate your own problems definition"
+            assert outer_method in ("Reverse", "Implicit", "Darts",), (
+                "Invalid combination of inner and upper strategies, "
+                "please check initialization for different level of problems or "
+                "extend the base classes to formulate your own problems definition"
+            )
         self.outer_method = outer_method
         self._inner_gradient = getattr(
             inner_grads, "%s%s" % ("BOMLInnerGrad", self.inner_method)
@@ -214,10 +211,8 @@ class BOMLOptimizer(object):
         outer_objective=None,
         learn_lr=False,
         alpha_init=0.0,
-        s=1.0,
-        t=1.0,
+        gamma=1.0,
         learn_alpha=False,
-        learn_st=False,
         learn_alpha_itr=False,
         var_list=None,
         first_order=False,
@@ -235,8 +230,7 @@ class BOMLOptimizer(object):
         :param outer_objective: loss function for the outer optimization problem, which need to be claimed in BDA agorithm
         :param learn_lr: BOOLEAN type, which determines whether to define learning rate as an outer parameter
         :param alpha_init: initial value of ratio of inner objective to outer objective in BDA algorithm
-        :param s: coefficients of aggregation of outer objectives in BDA algorithm, default to be 1.0
-        :param t: coefficients of aggregation of inner objectives in BDA algorithm, default to be 1.0
+        :param gamma: coefficients multiplied by outer objectives in BDA algorithm, default to be 1.0
         :param learn_alpha: specify parameter for BDA algorithm to decide whether to initialize alpha as a hyper parameter
         :param learn_alpha_itr: parameter for BDA algorithm to specify whether to initialize alpha as a vector, of which
         every dimension's value is step-wise scale factor fot the optimization process
@@ -245,8 +239,6 @@ class BOMLOptimizer(object):
         :param loss_func: specifying which type of loss function is used for the maml-based method, which should be
         consistent with the form to compute the inner objective
         :param momentum: specific parameter for Optimizer.BMLOptMomentum to set initial value of momentum
-        :param beta1: specific parameter for optimizer.BOMLOptMomentum to set initial value of Adam
-        :param beta2: specific parameter for optimizer.BOMLOptMomentum to set initial value of Adam
         :param experiment: instance of Experiment to use in the Lower Level Problem, especifially needed in the
          `MetaInit` type of methods.
         :param var_list: optional list of variables (of the inner optimization problem)from
@@ -294,20 +286,13 @@ class BOMLOptimizer(object):
             if self.inner_method == "Aggr":
                 assert (
                     outer_objective is not None
-                ), "BDA must have upper_level loss functions passed to lower-level problems optimization process"
-                if not (
-                    ("s" in self._param_dict.keys()) or ("t" in self._param_dict.keys())
-                ):
-                    if learn_st:
-                        s = extension.get_outerparameter("s", s)
-                        t = extension.get_outerparameter("t", t)
-                    else:
-                        s = tf.constant(s, name="s")
-                        t = tf.constant(t, name="t")
-                    self._param_dict["s"] = s
-                    self._param_dict["t"] = t
-                if "alpha" not in self._param_dict.keys():
+                ), "BDA must have upper-level loss functions passed to lower-level problems optimization process"
 
+                if "gamma" not in self._param_dict.keys():
+                    gamma = tf.constant(gamma, name="gamma")
+                    self._param_dict["gamma"] = gamma
+
+                if "alpha" not in self._param_dict.keys():
                     if learn_alpha_itr:
                         alpha_vec = np.ones((1, T), dtype=np.float32) * alpha_init
                         alpha = extension.get_outerparameter(
@@ -341,7 +326,7 @@ class BOMLOptimizer(object):
         self._param_dict["T"] = T
 
         inner_grad = self._inner_gradient.compute_gradients(
-            bml_opt=self.io_opt,
+            boml_pot=self.io_opt,
             loss_inner=inner_objective,
             loss_outer=outer_objective,
             param_dict=self._param_dict,
@@ -374,6 +359,7 @@ class BOMLOptimizer(object):
         outer_objective_optimizer="Adam",
         epsilon=1.0,
         momentum=0.5,
+        warp_lambda=1.0,
         tolerance=lambda _k: 0.1 * (0.9 ** _k),
     ):
         """
@@ -413,6 +399,9 @@ class BOMLOptimizer(object):
         assert isinstance(
             self._outer_gradient, getattr(hyper_grads, "BOMLOuterGrad")
         ), "Wrong name for inner method,should be in list \n [Reverse, Simple, Forward, Implicit]"
+        if self.param_dict['use_Warp']:
+            setattr(self.outergradient, "lambda", tf.cast(warp_lambda, tf.float32))
+
         if self.outer_method == "Darts" and (
             not hasattr(self.outergradient, "Epsilon")
         ):
@@ -446,8 +435,7 @@ class BOMLOptimizer(object):
         outer_objective=None,
         learn_lr=False,
         alpha_init=0.0,
-        s=1.0,
-        t=1.0,
+        gamma=1.0,
         learn_alpha=False,
         learn_st=False,
         learn_alpha_itr=False,
@@ -479,6 +467,7 @@ class BOMLOptimizer(object):
             experiment=experiment,
             outer_objective=outer_objective,
             T=T,
+            gamma=gamma,
             first_order=first_order,
             learn_lr=learn_lr,
             learn_alpha=learn_alpha,
@@ -486,8 +475,6 @@ class BOMLOptimizer(object):
             learn_alpha_itr=learn_alpha_itr,
             var_list=var_list,
             alpha_init=alpha_init,
-            s=s,
-            t=t,
             momentum=momentum,
             beta2=beta2,
             beta1=beta1,
@@ -533,7 +520,7 @@ class BOMLOptimizer(object):
                             self.outergradient.hgrads_hvars(
                                 meta_param=hll,
                                 aggregation_fn=aggregation_fn,
-                                process_fn=gradient_clip,
+                                gradient_clip=gradient_clip,
                             )
                         )
                     )
@@ -553,18 +540,17 @@ class BOMLOptimizer(object):
         session=None,
     ):
         """
-        Run an hyper-iteration (i.e. train the model(s) and compute hypergradients) and updates the outer parameters.
+        Run an hyper-iteration (i.e. train the model(s) and compute hypergradients) and updates the upper parameters.
 
         :param inner_objective_feed_dicts: an optional feed dictionary for the inner problem. Can be a function of
                                             step, which accounts for, e.g. stochastic gradient descent.
-        :param outer_objective_feed_dicts: an optional feed dictionary for the outer optimization problem
-                                            (passed to the evaluation of outer objective). Can be a function of
+        :param outer_objective_feed_dicts: an optional feed dictionary for the upper-level optimization problem
+                                            (passed to the evaluation of upper objective). Can be a function of
                                             hyper-iterations steps (i.e. global variable), which may account for, e.g.
-                                            stochastic evaluation of outer objective.
+                                            stochastic evaluation of upper objective.
         :param initializer_feed_dict:  an optional feed dictionary for the initialization of inner problems variables.
-                                            Can be a function of
-                                            hyper-iterations steps (i.e. global variable), which may account for, e.g.
-                                            stochastic initialization.
+                                            Can be a function of hyper-iterations steps (i.e. global variable),
+                                            which may account for, e.g. stochastic initialization.
         :param session: optional session
         """
         self._outer_gradient.apply_gradients(
@@ -656,7 +642,7 @@ class BOMLOptimizer(object):
     @property
     def _hyperit(self):
         """
-        iteration of minimization of outer objective(s), assuming the hyper-gradients are already computed.
+        iteration of minimization of upperobjective(s), assuming the hyper-gradients are already computed.
         """
         assert (
             self._fin_hts is not None
