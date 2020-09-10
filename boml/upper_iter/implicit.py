@@ -134,5 +134,5 @@ class BOMLOuterGradImplicit(BOMLOuterGrad):
     def _run_batch_initialization(self, ss, fd):
         ss.run(self.initialization, feed_dict=fd)
 
-    def set_tolerance(self,tolerance=lambda _k: 0.1 * (0.9 ** _k)):
-        self.tolerance =tolerance
+    def set_tolerance(self, tolerance=lambda _k: 0.1 * (0.9 ** _k)):
+        self.tolerance = tolerance

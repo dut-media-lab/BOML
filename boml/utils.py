@@ -125,7 +125,7 @@ def solve_int_or_generator(int_or_generator):
 def cross_entropy(pred, label, method="MetaInit"):
 
     # Note - with tf version <=0.12, this loss has incorrect 2nd derivatives
-    assert method in ('MetaInit', 'MetaRepr'), 'Wrong value for argument method'
+    assert method in ("MetaInit", "MetaRepr"), "Wrong value for argument method"
     if method == "MetaInit":
         return tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=label)
     elif method == "MetaRepr":

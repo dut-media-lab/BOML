@@ -27,7 +27,7 @@ class BOMLInnerGradTrad(object):
 
     @staticmethod
     def compute_gradients(
-        bml_opt,
+        boml_pot,
         loss_inner,
         loss_outer=None,
         param_dict=OrderedDict(),
@@ -41,7 +41,7 @@ class BOMLInnerGradTrad(object):
         }
 
         assert loss_inner is not None, "argument:inner_objective must be initialized"
-        update_op, dynamics = bml_opt.minimize(
+        update_op, dynamics = boml_pot.minimize(
             loss_inner=loss_inner, var_list=var_list, *minimize_kargs
         )
 

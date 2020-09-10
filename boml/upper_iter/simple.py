@@ -12,6 +12,7 @@ class BOMLOuterGradSimple(BOMLOuterGrad):
         self._inner_method = inner_method
         self._history = history or []
         self._reverse_initializer = tf.no_op()
+        self.warp_lambda = tf.cast(1.0, tf.float32)
         self.reptile_initializer = tf.no_op()
 
     # noinspection SpellCheckingInspection
@@ -46,8 +47,7 @@ class BOMLOuterGradSimple(BOMLOuterGrad):
                 """
             if param_dict["use_Warp"]:
                 doo_dhypers = (
-                    inner_grad.outer_param_tensor
-                    + inner_grad.model_param_tensor
+                    self.warp_lambda * inner_grad.outer_param_tensor + inner_grad.model_param_tensor
                 )
                 doo_dhypers += tf.gradients(
                     outer_objective, meta_param[len(doo_dhypers):]
@@ -55,8 +55,7 @@ class BOMLOuterGradSimple(BOMLOuterGrad):
             else:
                 doo_dhypers = tf.gradients(
                     outer_objective,
-                    list(inner_grad.state)
-                    + meta_param[len(inner_grad.state) :],
+                    list(inner_grad.state) + meta_param[len(inner_grad.state):],
                 )
 
             for h, doo_dh in zip(meta_param, doo_dhypers):

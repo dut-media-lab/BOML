@@ -12,7 +12,7 @@ class BOMLInnerGradAggr(BOMLInnerGradTrad):
 
     @staticmethod
     def compute_gradients(
-        bml_opt,
+        boml_pot,
         loss_inner,
         loss_outer=None,
         param_dict=OrderedDict(),
@@ -28,15 +28,14 @@ class BOMLInnerGradAggr(BOMLInnerGradTrad):
         assert loss_inner is not None, "argument:inner_objective must be initialized"
         assert {
             "alpha",
-            "s",
-            "t",
+            "gamma",
             "t_tensor",
         } <= param_dict.keys(), (
             "Necessary hyper_parameters must be initialized before calling minimize()"
         )
         # alpha, loss_outer, s, t, t_tensor = sorted(param_dict.items(), key=lambda x: x[0])
         update_op, dynamics = BOMLInnerGradAggr.bml_inner_grad_aggr(
-            inner_optimizer=bml_opt,
+            inner_optimizer=boml_pot,
             loss_inner=loss_inner,
             loss_outer=loss_outer,
             param_dict=param_dict,
@@ -85,8 +84,7 @@ class BOMLInnerGradAggr(BOMLInnerGradTrad):
             inner_grads=grads_and_vars_inner,
             outer_grads=grads_and_vars_outer,
             alpha=param_dict["alpha"],
-            s=param_dict["s"],
-            t=param_dict["t"],
+            gamma=param_dict['gamma'],
             t_tensor=param_dict["t_tensor"],
         )
 
@@ -95,24 +93,24 @@ class BOMLInnerGradAggr(BOMLInnerGradTrad):
         )
 
     @staticmethod
-    def combine_grads(inner_grads, outer_grads, alpha, s, t, t_tensor):
+    def combine_grads(inner_grads, outer_grads, alpha, gamma, t_tensor):
 
         combine_grads = []
         if not alpha.get_shape().as_list():
             for _ in range(len(inner_grads)):
-                ll_part = alpha / t_tensor * t * inner_grads[_][0]
-                ul_part = (1 - alpha / t_tensor) * s * outer_grads[_][0]
+                ll_part = (1 - alpha / t_tensor) * inner_grads[_][0]
+                ul_part = (alpha / t_tensor) * gamma *  outer_grads[_][0]
                 combine_grads.append((ll_part + ul_part, inner_grads[_][1]))
         else:
             for _ in range(len(inner_grads)):
                 ll_part = (
-                    tf.norm(tf.matmul(alpha, t_tensor), ord=1) * t * inner_grads[_][0]
+                        (1 - tf.norm(tf.matmul(alpha, t_tensor), ord=1))
+                        * inner_grads[_][0]
                 )
                 ul_part = (
-                    (1 - tf.norm(tf.matmul(alpha, t_tensor), ord=1))
-                    * s
-                    * outer_grads[_][0]
+                        tf.norm(tf.matmul(alpha, t_tensor), ord=1)
+                        *  gamma
+                        * outer_grads[_][0]
                 )
                 combine_grads.append((ll_part + ul_part, inner_grads[_][1]))
         return combine_grads
-

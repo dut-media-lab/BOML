@@ -180,4 +180,3 @@ class BOMLNetOmniglotMetaReprV2(BOMLNet):
             use_T=self.use_T,
             outer_method=self.outer_method,
         )
-

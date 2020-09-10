@@ -30,21 +30,21 @@ class BOMLOuterGrad(object):
     Hyperparameter {} is detached from this optimization dynamics.
     """
 
-    def compute_gradients(self, outer_objective, bml_inner_grad, meta_param=None):
+    def compute_gradients(self, outer_objective, boml_inner_grad, meta_param=None):
         """
         Function overridden by specific methods.
 
-        :param bml_inner_grad: OptimzerDict object resulting from the inner objective optimization.
-        :param outer_objective: A loss function for the outer parameters (scalar tensor)
+        :param boml_inner_grad: inner_grad object resulting from the inner objective optimization.
+        :param outer_objective: A loss function for the outer parameters
         :param meta_param: Optional list of outer parameters to consider. If not provided will get all variables in the
                             hyperparameter collection in the current scope.
 
         :return: list of outer parameters involved in the computation
         """
         assert isinstance(
-            bml_inner_grad, (BOMLInnerGradAggr, BOMLInnerGradSimple, BOMLInnerGradTrad)
-        ), BOMLOuterGrad._ERROR_NOT_OPTIMIZER_DICT.format(bml_inner_grad)
-        self._optimizer_dicts.add(bml_inner_grad)
+            boml_inner_grad, (BOMLInnerGradAggr, BOMLInnerGradSimple, BOMLInnerGradTrad)
+        ), BOMLOuterGrad._ERROR_NOT_OPTIMIZER_DICT.format(boml_inner_grad)
+        self._optimizer_dicts.add(boml_inner_grad)
 
         if meta_param is None:  # get default outer parameters
             meta_param = boml.extension.meta_parameters(tf.get_variable_scope().name)
@@ -113,7 +113,7 @@ class BOMLOuterGrad(object):
         """
         raise NotImplementedError()
 
-    def hgrads_hvars(self, meta_param=None, aggregation_fn=None, process_fn=None):
+    def hgrads_hvars(self, meta_param=None, aggregation_fn=None, gradient_clip=None):
         """
         Method for getting outergradient and outer parameters as required by apply_gradient methods from tensorflow
         optimizers.
@@ -122,7 +122,7 @@ class BOMLOuterGrad(object):
                             hyperparameter collection in the current scope.
         :param aggregation_fn: Optional operation to aggregate multiple hypergradients (for the same hyperparameter),
                                 by default reduce_mean
-        :param process_fn: Optional operation like clipping to be applied.
+        :param gradient_clip: Optional operation like clipping to be applied.
         :return:
         """
         if meta_param is None:
@@ -141,9 +141,9 @@ class BOMLOuterGrad(object):
             else:
                 with tf.name_scope(_hg_lst[0].op.name):
                     aggr = aggregation_fn(_hg_lst) if len(_hg_lst) > 1 else _hg_lst[0]
-            if process_fn is not None:
+            if gradient_clip is not None:
                 with tf.name_scope("process_gradients"):
-                    aggr = process_fn(aggr)
+                    aggr = gradient_clip(aggr)
             tf.add_to_collection(boml.extension.GraphKeys.OUTERGRADIENTS, aggr)
             return aggr
 
@@ -155,19 +155,6 @@ class BOMLOuterGrad(object):
     @property
     def name(self):
         return self._name
-
-    # noinspection PyMethodMayBeStatic
-    def _make_callback(self):
-        """
-        Template for callbacks
-        """
-        values = []
-
-        # noinspection PyUnusedLocal
-        def _callback(t, feed_dcit, session):
-            values.append(0)  # these should not depend from any feed dictionary
-
-        return values, _callback
 
     def __str__(self):
         return self._name
