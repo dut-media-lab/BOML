@@ -88,8 +88,10 @@ parser.add_argument('-io', '--inner_opt', type=str, default='SGD', metavar='STRI
                     help='the typer of inner optimizer, which should be listed in [SGD,Adam,Momentum]')
 parser.add_argument('-oo', '--outer_opt', type=str, default='Adam', metavar='STRING',
                     help='the typer of outer optimizer, which should be listed in [SGD,Adam,Momentum]')
-
-
+parser.add_argument('-la', '--warp_lambda', type=float, default=1.0, metavar='NUMBER',
+                    help='coefficient for WarpGrad to be used in the UL calculation process')
+parser.add_argument('-ga', '--gamma', type=float, default=1.0, metavar='NUMBER',
+                    help='coefficient for BA to be used in the UL calculation process')
 
 # Logging, saving, and testing options
 parser.add_argument('-log', '--log', type=bool, default=False, metavar='BOOLEAN',
@@ -109,7 +111,7 @@ parser.add_argument('-te', '--test_episodes', type=int, default=600, metavar='NU
 # Testing options (put parser.mode = 'test')
 parser.add_argument('-exd', '--expdir', type=str, default=None, metavar='STRING',
                     help='directory of the experiment model files')
-parser.add_argument('-itt', '--iterations_to_test', type=str, default=[40000], metavar='STRING',
+parser.add_argument('-itt', '--iterations_to_test', type=str, default=[50000], metavar='STRING',
                     help='meta_iteration to test (model file must be in "exp_dir")')
 parser.add_argument('-Notes', '--Notes', type=str, default='Notes',
                     help='Something important')

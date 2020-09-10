@@ -7,6 +7,10 @@ Welcome to BOML's documentation!
 ================================
 **Configuration & Status**
 
+.. image:: https://badge.fury.io/py/boml.svg
+   :target: https://github.com/dut-media-lab/BOML
+   :alt: PyPi Package
+   
 .. image:: https://travis-ci.com/dut-media-lab/BOML.svg?branch=master
    :target: https://github.com/dut-media-lab/BOML
    :alt: build status

@@ -1,6 +1,3 @@
-import matplotlib
-
-matplotlib.use('Agg')
 import sys
 import inspect, os
 sys.path.append('../')
@@ -11,7 +8,6 @@ from test_script.script_helper import *
 
 # from hr_resnet import hr_res_net_tcml_v1_builder, hr_res_net_tcml_Omniglot_builder
 from shutil import copyfile
-from boml.setup_model import BOMLNetOmniglotMetaReprV1, BOMLNetMiniMetaReprV1
 import boml as boml
 
 import numpy as np
@@ -19,13 +15,12 @@ import tensorflow as tf
 
 dl.DATASET_FOLDER = 'datasets'
 
-map_dict = {'omniglot': {'data_loader': dl.datasets.load_full_dataset.meta_omniglot, 'model': BOMLNetOmniglotMetaReprV1},
-            'miniimagenet': {'data_loader': dl.datasets.load_full_dataset.meta_mini_imagenet, 'model': BOMLNetMiniMetaReprV1}}
+map_dict = {'omniglot': boml.meta_omniglot, 'miniimagenet': boml.meta_mini_imagenet}
 
 
-def build(metasets, learn_lr, learn_alpha, learn_alpha_itr, learn_st, lr0, MBS, T, mlr0, mlr_decay,weights_initializer,
+def build(metasets, learn_lr, learn_alpha, learn_alpha_itr, gamma, lr0, MBS, T, mlr0, mlr_decay, weights_initializer,
           process_fn=None, alpha_itr=0.0, method=None, inner_method=None, outer_method=None,
-          use_T=False,use_Warp=True, truncate_iter=-1):
+          use_T=False, use_Warp=True, truncate_iter=-1):
     exs = [dl.BOMLExperiment(metasets) for _ in range(MBS)]
     boml_ho = boml.BOMLOptimizer(method=method, inner_method=inner_method, outer_method=outer_method,
                                    truncate_iter=truncate_iter, experiments=exs)
@@ -50,8 +45,8 @@ def build(metasets, learn_lr, learn_alpha, learn_alpha_itr, learn_st, lr0, MBS, 
                                                                                          var_list=ex.model.var_list)
         optim_dict = boml_ho.ll_problem(inner_objective=inner_objective, learning_rate=lr0,
                                         inner_objective_optimizer=args.inner_opt, outer_objective=ex.errors['validation'],
-                                        alpha_init=alpha_itr, s=1.0, t=1.0, T=T,experiment=ex,learn_lr=learn_lr,
-                                        learn_alpha_itr=learn_alpha_itr, learn_alpha=learn_alpha, learn_st=learn_st,
+                                        alpha_init=alpha_itr, T=T, experiment=ex,gamma=gamma, learn_lr=learn_lr,
+                                        learn_alpha_itr=learn_alpha_itr, learn_alpha=learn_alpha,
                                         var_list=ex.model.var_list)
 
         boml_ho.ul_problem(outer_objective=ex.errors['validation'], inner_grad=optim_dict,
@@ -74,7 +69,7 @@ def build(metasets, learn_lr, learn_alpha, learn_alpha_itr, learn_st, lr0, MBS, 
 # training and testing function
 def train_and_test(metasets, name_of_exp, method, inner_method, outer_method, use_T=False,use_Warp=False,
                    truncate_iter=-1, logdir='logs/', seed=None, lr0=0.04, learn_lr=False,
-                   learn_alpha=False, learn_alpha_itr=False, learn_st=False,
+                   learn_alpha=False, learn_alpha_itr=False, gamma=1.0,
                    mlr0=0.001, mlr_decay=1.e-5, T=5, resume=True, MBS=4, n_meta_iterations=5000,
                    weights_initializer=tf.zeros_initializer,process_fn=None, save_interval=5000, print_interval=5000,
                    n_test_episodes=1000, alpha=0.0):
@@ -94,7 +89,7 @@ def train_and_test(metasets, name_of_exp, method, inner_method, outer_method, us
     print('copying {} into {}'.format(executing_file_path, exp_dir))
     copyfile(executing_file_path, os.path.join(exp_dir, executing_file_path.split('/')[-1]))
 
-    exs, boml_ho, saver = build(metasets, learn_lr, learn_alpha, learn_alpha_itr, learn_st, lr0,
+    exs, boml_ho, saver = build(metasets, learn_lr, learn_alpha, learn_alpha_itr, gamma, lr0,
                                 MBS, T, mlr0,mlr_decay, weights_initializer, process_fn,
                                 alpha, method, inner_method, outer_method, use_T,use_Warp, truncate_iter)
 
@@ -117,13 +112,13 @@ def build_and_test(metasets, exp_dir, method, inner_method, outer_method, use_T=
     mlr_decay = 1.e-5
     mlr0 = 0.001
     learn_lr = False
-    learn_st = False
+    gamma = 1.0
 
     ''' Problem Setup '''
     np.random.seed(seed)
     tf.set_random_seed(seed)
 
-    exs, boml_ho, saver = build(metasets, learn_lr, learn_alpha, learn_alpha_itr, learn_st, lr0,
+    exs, boml_ho, saver = build(metasets, learn_lr, learn_alpha, learn_alpha_itr, gamma, lr0,
                                  MBS, T, mlr0, mlr_decay, weights_initializer, process_fn,
                                  alpha, method, inner_method, outer_method, use_T,use_Warp, truncate_iter)
 
@@ -133,13 +128,11 @@ def build_and_test(metasets, exp_dir, method, inner_method, outer_method, use_T=
                       n_test_episodes, MBS, seed, T, iterations_to_test)
 
 
-def main():
+def test_meta_repr():
     print(args.__dict__)
 
-    metasets = map_dict[args.dataset]['data_loader'](std_num_classes=args.classes, examples_train=
-    args.examples_train, examples_test=args.examples_test)
-
-
+    metasets = map_dict[args.dataset](std_num_classes=args.classes,
+                                      examples_train=args.examples_train, examples_test=args.examples_test)
     weights_initializer = tf.contrib.layers.xavier_initializer() if args.xavier else tf.zeros_initializer
 
     if args.clip_value > 0.:
@@ -155,7 +148,7 @@ def main():
                        outer_method=args.outer_method, use_T=args.use_T, truncate_iter=args.truncate_iter,
                        logdir=logdir, seed=args.seed, use_Warp=args.use_Warp,
                        lr0=args.lr, learn_lr=args.learn_lr, learn_alpha=args.learn_alpha,
-                       learn_alpha_itr=args.learn_alpha_itr, learn_st=args.learn_st, mlr0=args.meta_lr,
+                       learn_alpha_itr=args.learn_alpha_itr, gamma=args.gamma, mlr0=args.meta_lr,
                        mlr_decay=args.meta_lr_decay_rate, T=args.T,
                        resume=args.resume, MBS=args.meta_batch_size, n_meta_iterations=args.n_meta_iterations,
                        weights_initializer=weights_initializer,
@@ -173,4 +166,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    test_meta_repr()
