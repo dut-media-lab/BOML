@@ -7,4 +7,3 @@ matplotlib
 Pillow
 scikit_learn
 tensorflow>=1.14.0,<=1.15.2
-python<3.8.*
