@@ -359,7 +359,7 @@ class BOMLOptimizer(object):
         outer_objective_optimizer="Adam",
         epsilon=1.0,
         momentum=0.5,
-        warp_labmda=1.0,
+        warp_lambda=1.0,
         tolerance=lambda _k: 0.1 * (0.9 ** _k),
     ):
         """
@@ -400,7 +400,7 @@ class BOMLOptimizer(object):
             self._outer_gradient, getattr(hyper_grads, "BOMLOuterGrad")
         ), "Wrong name for inner method,should be in list \n [Reverse, Simple, Forward, Implicit]"
         if self.param_dict['use_Warp']:
-            setattr(self.outergradient, "lambda", tf.cast(warp_labmda, tf.float32))
+            setattr(self.outergradient, "lambda", tf.cast(warp_lambda, tf.float32))
 
         if self.outer_method == "Darts" and (
             not hasattr(self.outergradient, "Epsilon")

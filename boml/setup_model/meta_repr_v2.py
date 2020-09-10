@@ -44,7 +44,12 @@ class BOMLNetMiniMetaReprV2(BOMLNet):
                 *self.moving_variances
             )
 
-            print(name, "MODEL CREATED")
+        boml.extension.remove_from_collection(
+            boml.extension.GraphKeys.METAPARAMETERS,
+            *self.moving_means,
+            *self.moving_variances
+        )
+        print(name, "MODEL CREATED")
 
     def _forward(self):
         def residual_block(x, n_filters):
