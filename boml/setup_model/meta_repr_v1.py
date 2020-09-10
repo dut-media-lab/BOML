@@ -75,12 +75,7 @@ class BOMLNetMetaReprV1(BOMLNet):
                 extension.GraphKeys.MODEL_VARIABLES, *self.moving_variances
             )
             print(name, "MODEL CREATED")
-        extension.remove_from_collection(
-            extension.GraphKeys.METAPARAMETERS, *self.moving_means
-        )
-        extension.remove_from_collection(
-            extension.GraphKeys.METAPARAMETERS, *self.moving_variances
-        )
+
 
     def create_outer_parameters(self):
 
