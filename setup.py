@@ -12,7 +12,7 @@ def get_install_requirements():
 
 setup(
     name="BOML",
-    version="0.1",
+    version="0.1.a1",
     packages=find_packages(),
     url="https://github.com/dut-media-lab/BOML",
     license="MIT",
