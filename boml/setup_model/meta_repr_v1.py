@@ -41,8 +41,8 @@ class BOMLNetMetaReprV1(BOMLNet):
         self.datatype = data_type
         self.batch_norm = norm
         self.max_pool = max_pool
-        self.stride = 2
-        self.no_stride = 1
+        self.stride = [1, 2, 2, 1]
+        self.no_stride = [1, 1, 1, 1]
         self.activation = activation
         self.bias_initializer = tf.zeros_initializer(tf.float32)
         self.conv_initializer = conv_initializer
