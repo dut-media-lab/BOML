@@ -210,8 +210,9 @@ class BOMLOptimizer(object):
         inner_objective_optimizer="SGD",
         outer_objective=None,
         learn_lr=False,
+        learn_st=False,
         alpha_init=0.0,
-        gamma=1.0,
+        s=1.0,t=1.0,
         learn_alpha=False,
         learn_alpha_itr=False,
         var_list=None,
@@ -230,11 +231,12 @@ class BOMLOptimizer(object):
         :param outer_objective: loss function for the outer optimization problem, which need to be claimed in BDA agorithm
         :param learn_lr: BOOLEAN type, which determines whether to define learning rate as an outer parameter
         :param alpha_init: initial value of ratio of inner objective to outer objective in BDA algorithm
-        :param gamma: coefficients multiplied by outer objectives in BDA algorithm, default to be 1.0
         :param learn_alpha: specify parameter for BDA algorithm to decide whether to initialize alpha as a hyper parameter
         :param learn_alpha_itr: parameter for BDA algorithm to specify whether to initialize alpha as a vector, of which
         every dimension's value is step-wise scale factor fot the optimization process
         :param learn_st: specify parameter for BDA algorithm to decide whether to initialize s and t as hyper parameters
+        :param s: coefficients multiplied by outer objectives in BA algorithm, default to be 1.0
+        :param t: coefficients multiplied by outer objectives in BA algorithm, default to be 1.0
         :param first_order: specific parameter to define whether to use implement first order MAML, default to be `FALSE`
         :param loss_func: specifying which type of loss function is used for the maml-based method, which should be
         consistent with the form to compute the inner objective
@@ -288,9 +290,17 @@ class BOMLOptimizer(object):
                     outer_objective is not None
                 ), "BDA must have upper-level loss functions passed to lower-level problems optimization process"
 
-                if "gamma" not in self._param_dict.keys():
-                    gamma = tf.constant(gamma, name="gamma")
-                    self._param_dict["gamma"] = gamma
+                if not (
+                        ("s" in self._param_dict.keys()) or ("t" in self._param_dict.keys())
+                ):
+                    if learn_st:
+                        s = extension.get_outerparameter("s", s)
+                        t = extension.get_outerparameter("t", t)
+                    else:
+                        s = tf.constant(s, name="s")
+                        t = tf.constant(t, name="t")
+                    self._param_dict["s"] = s
+                    self._param_dict["t"] = t
 
                 if "alpha" not in self._param_dict.keys():
                     if learn_alpha_itr:
