@@ -35,6 +35,7 @@ class BOMLNetMiniMetaInitV2(BOMLNet):
         self.datatype = data_type
         self.activation = activation
         self.batch_norm = batch_norm
+        self.stride = [1, 2, 2, 1]
         self.no_stride = [1, 1, 1, 1]
         self.conv_initializer = conv_initializer
         self.output_weight_initializer = output_weight_initializer
