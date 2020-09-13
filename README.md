@@ -1,5 +1,5 @@
 
-# BOML - A Bilevel Optimization Library in Python for Multi-Task and Meta Learning
+# BOML - A Bilevel Optimization Library in Python for Meta Learning
 ![PyPI version](https://badge.fury.io/py/boml.svg)
 ![Travis Status](https://travis-ci.com/dut-media-lab/BOML.svg?branch=master)
 ![codecov](https://codecov.io/gh/dut-media-lab/BOML/branch/master/graph/badge.svg)
@@ -60,6 +60,7 @@ For more detailed information of basic function and construction process, please
  - [Hyperparameter optimization with approximate gradient(HOAG)](https://arxiv.org/abs/1602.02355)
  - [Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks(MAML)](https://arxiv.org/abs/1703.03400)
  - [On First-Order Meta-Learning Algorithms(FOMAML)](https://arxiv.org/abs/1803.02999)
+ - [Meta-SGD: Learning to Learn Quickly for Few-Shot Learning(Meta-SGD)](https://arxiv.org/pdf/1707.09835.pdf)
  - [Bilevel Programming for Hyperparameter Optimization and Meta-Learning(RHG)](http://export.arxiv.org/pdf/1806.04910)
  - [Truncated Back-propagation for Bilevel Optimization(TG)](https://arxiv.org/pdf/1810.10667.pdf)
  - [Gradient-Based Meta-Learning with Learned Layerwise Metric and Subspace(MT-et)](http://proceedings.mlr.press/v80/lee18a/lee18a.pdf)
