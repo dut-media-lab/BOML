@@ -32,19 +32,19 @@ Here we illustrate the generic optimization routine and hierarchically built str
 </div>
 
 ## Running examples
-```
+```python
+
 from boml import utils
 # initialize the BOMLOptimizer, specify strategies for ll_problem() and ul_problem()
 boml_opt= boml.BOMLOptimizer('MetaInit', 'Simple', 'Simple')
 #load dataset
-dataset = boml.load_data.meta_omniglot(num_classes, (num_train, num_test))
+dataset = boml.load_data.meta_omniglot(num_classes, num_train, num_test)
 ex = boml.BOMLExperiment(dataset)
 # build network structure and initializer model parameters
 meta_learner = boml_opt.meta_learner(ex.x, dataset, 'V1')
 ex.model = boml_ho.base_learner(ex.x, meta_learner)
-# lower objectives
+# define lower objectives and upper-level subproblem
 loss_inner = utils.cross_entropy(ex.model.out, ex.y)
-# define lower-level subproblem
 inner_grad = boml_ho.ll_problem(loss_inner, lr, T, experiment=ex)
 # define upper objectives and upper-level subproblem
 loss_outer = utils.cross_entropy(ex.model.re_forward(ex.x_).out, ex.y_)
@@ -63,7 +63,7 @@ For more detailed information of basic function and construction process, please
  - [Meta-SGD: Learning to Learn Quickly for Few-Shot Learning(Meta-SGD)](https://arxiv.org/pdf/1707.09835.pdf)
  - [Bilevel Programming for Hyperparameter Optimization and Meta-Learning(RHG)](http://export.arxiv.org/pdf/1806.04910)
  - [Truncated Back-propagation for Bilevel Optimization(TG)](https://arxiv.org/pdf/1810.10667.pdf)
- - [Gradient-Based Meta-Learning with Learned Layerwise Metric and Subspace(MT-et)](http://proceedings.mlr.press/v80/lee18a/lee18a.pdf)
+ - [Gradient-Based Meta-Learning with Learned Layerwise Metric and Subspace(MT-net)](http://proceedings.mlr.press/v80/lee18a/lee18a.pdf)
  - [Meta-Learning with warped gradient Descent(WarpGrad))](https://arxiv.org/abs/1909.00025)
  - [DARTS: Differentiable Architecture Search(DARTS)](https://arxiv.org/pdf/1806.09055.pdf)
  - [A Generic First-Order Algorithmic Framework for Bi-Level Programming Beyond Lower-Level Singleton(BA)](https://arxiv.org/pdf/2006.04045.pdf)

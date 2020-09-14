@@ -17,6 +17,8 @@ Here we provide detailed instruction to quickly get down to your research and te
 ## Installation and requirements  <div2 id="a2"></div2>
 BOML implements various meta learning approaches based on [TensorFlow](https://www.tensorflow.org/install/pip), which is one of the most popular macheine learning platform. Besides, [Numpy](https://numpy.org/install/) and basical image processing modules are required for installation. <br>
 We also provide [requirements.txt](https://github.com/liuyaohua918/boml/requirements.txt) as reference for version control.
+BOML requires Python 3.5+ and TensorFlow 1.13+.
+
   ```
   1. Install from GitHub page：
 
@@ -26,11 +28,15 @@ We also provide [requirements.txt](https://github.com/liuyaohua918/boml/requirem
   
   or
   
-  pip install requirements.txt
+  pip install -r requirements.txt
 
   2. use pip instruction
 
   pip install boml
+  
+  or
+  
+  pip install --upgrade boml
   ```
  
 ## Quickly build your bilevel meta-learning model <div3 id="a3"></div3>
