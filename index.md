@@ -456,7 +456,7 @@ BOML requires Python 3.5+ and TensorFlow 1.13+.
       - BatchQueueMock():
           responsible for generates batches of taskes and feed them into corresponding placeholders.
       - cross_entropy(pred, label, method):
-        return loss function that matches different methods in [MetaRepr,`MetaRper`]
+        return loss function that matches different methods in [`MetaRepr`,`MetaInit`]
       - vectorize_all(var_list, name=None):
         Vectorize the variables in the list named var_list with the given name
       - remove_from_collectinon(key,*var_list):
