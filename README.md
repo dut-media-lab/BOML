@@ -43,7 +43,7 @@ ex = boml.BOMLExperiment(dataset)
 # build network structure and initializer model parameters
 meta_learner = boml_opt.meta_learner(ex.x, dataset, 'V1')
 ex.model = boml_ho.base_learner(ex.x, meta_learner)
-# define lower objectives and upper-level subproblem
+# define lower objectives and lower-level subproblem
 loss_inner = utils.cross_entropy(ex.model.out, ex.y)
 inner_grad = boml_ho.ll_problem(loss_inner, lr, T, experiment=ex)
 # define upper objectives and upper-level subproblem
