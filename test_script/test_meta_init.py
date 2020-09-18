@@ -7,7 +7,7 @@ os.environ["EXPERIMENTS_FOLDER"] = "../"
 import boml.extension
 
 import boml as boml
-from .script_helper import *
+from test_script.script_helper import *
 import numpy as np
 import inspect, time
 from shutil import copyfile
