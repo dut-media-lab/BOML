@@ -140,7 +140,7 @@ class BOMLNetMiniMetaInitV2(BOMLNet):
         return self.outer_param_dict
 
     def _forward(self):
-        if self.task_parameter is None:
+        if len(self.task_parameter) == 0:
             self.task_parameter = self.create_initial_parameter(
                 primary_outerparameter=self.outer_param_dict
             )
@@ -219,7 +219,7 @@ class BOMLNetOmniglotMetaInitV2(BOMLNet):
         name="Omniglot_ResNet",
         outer_param_dict=OrderedDict(),
         model_param_dict=OrderedDict(),
-        task_parameter=None,
+        task_parameter=OrderedDict(),
         activation=tf.nn.relu,
         var_collections=tf.GraphKeys.MODEL_VARIABLES,
         conv_initializer=tf.contrib.layers.xavier_initializer_conv2d(tf.float32),
@@ -358,7 +358,7 @@ class BOMLNetOmniglotMetaInitV2(BOMLNet):
         return self.outer_param_dict
 
     def _forward(self):
-        if self.task_parameter is None:
+        if len(self.task_parameter) == 0:
             self.task_parameter = self.create_initial_parameter(
                 primary_outerparameter=self.outer_param_dict
             )
