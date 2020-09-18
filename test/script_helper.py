@@ -10,8 +10,6 @@ import boml
 import boml.load_data as dl
 from boml.utils import feed_dicts
 
-DATASETS_FOLDER = "../omniglot_resized"
-
 parser = argparse.ArgumentParser()
 
 parser.add_argument(
