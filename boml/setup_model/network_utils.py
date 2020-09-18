@@ -17,19 +17,13 @@ def conv_block(boml_net, cweight, bweight=None):
     :param bweight: bias for covolutional filter
     """
     if boml_net.max_pool:
-        if bweight is not None:
-            conv_out = tf.add(
-                tf.nn.conv2d(boml_net.out, cweight, boml_net.no_stride, "SAME"), bweight
-            )
-        else:
-            conv_out = tf.nn.conv2d(boml_net.out, cweight, boml_net.no_stride, "SAME")
+        conv_out = tf.add(
+            tf.nn.conv2d(boml_net.out, cweight, boml_net.no_stride, "SAME"), bweight
+        )
     else:
-        if bweight is not None:
-            conv_out = tf.add(
-                tf.nn.conv2d(boml_net.out, cweight, boml_net.stride, "SAME"), bweight
-            )
-        else:
-            conv_out = tf.nn.conv2d(boml_net.out, cweight, boml_net.stride, "SAME")
+        conv_out = tf.add(
+            tf.nn.conv2d(boml_net.out, cweight, boml_net.stride, "SAME"), bweight
+        )
 
     if boml_net.batch_norm is not None:
         batch_out = boml_net.batch_norm(
