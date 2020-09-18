@@ -1,7 +1,6 @@
 from collections import OrderedDict
 
 import tensorflow as tf
-
 from boml.extension import GraphKeys
 from boml.setup_model.network import BOMLNet
 from boml.utils import as_tuple_or_list, remove_from_collection
@@ -12,7 +11,7 @@ class BOMLNetFeedForward(BOMLNet):
         self,
         _input,
         dims,
-        task_parameter=None,
+        task_parameter=OrderedDict(),
         name="BMLNetFeedForward",
         activation=tf.nn.relu,
         var_collections=tf.GraphKeys.MODEL_VARIABLES,
@@ -24,22 +23,19 @@ class BOMLNetFeedForward(BOMLNet):
         self.dims = as_tuple_or_list(dims)
         self.activation = activation
         self.data_type = data_type
+        self.task_parameter = task_parameter
         self.var_collections = var_collections
         self.output_weight_initializer = output_weight_initializer
         self.use_T = use_T
         super().__init__(
-            _input=_input,
-            name=name,
-            var_collections=var_collections,
-            task_parameter=task_parameter,
-            reuse=reuse,
+            _input=_input, name=name, var_collections=var_collections, reuse=reuse,
         )
         if not reuse:
             print(name, "MODEL CREATED")
 
     def _forward(self):
 
-        if not isinstance(self.task_parameter, dict):
+        if len(self.task_parameter) == 0:
             self.create_initial_parameter()
         self + tf.add(
             tf.matmul(self.out, self.task_parameter["fc_weight"]),
@@ -73,7 +69,7 @@ class BOMLNetFeedForward(BOMLNet):
             new_input if new_input is not None else self.layers[0],
             dims=self.dims,
             task_parameter=self.task_parameter
-            if self.task_parameter is not None
+            if len(task_parameter) == 0
             else task_parameter,
             name=self.name,
             activation=self.activation,

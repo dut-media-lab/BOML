@@ -20,7 +20,7 @@ class BOMLOptAdam(BOMLOpt, tf.train.AdamOptimizer):
         learning_rate=0.001,
         beta1=0.9,
         beta2=0.999,
-        epsilon=1e-5,
+        epsilon=1e-8,
         use_locking=False,
         name="Adam",
     ):

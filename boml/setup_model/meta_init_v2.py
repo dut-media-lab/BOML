@@ -12,7 +12,7 @@ class BOMLNetMiniMetaInitV2(BOMLNet):
         name="BOMLNetMiniMetaInitV2",
         outer_param_dict=OrderedDict(),
         model_param_dict=OrderedDict(),
-        task_parameter=None,
+        task_parameter=OrderedDict(),
         activation=tf.nn.relu,
         var_collections=tf.GraphKeys.MODEL_VARIABLES,
         outer_method="Simple",
@@ -51,12 +51,6 @@ class BOMLNetMiniMetaInitV2(BOMLNet):
             name=name,
             reuse=reuse,
         )
-        # variables from batch normalization
-        self.betas = self.filter_vars("beta")
-        # moving mean and variance (these variables should be used at inference time... so must save them)
-        self.moving_means = self.filter_vars("moving_mean")
-        self.moving_variances = self.filter_vars("moving_variance")
-
         # variables from batch normalization
         self.betas = self.filter_vars("beta")
         # moving mean and variance (these variables should be used at inference time... so must save them)
@@ -421,7 +415,7 @@ class BOMLNetOmniglotMetaInitV2(BOMLNet):
         )
         return network_utils.leaky_relu(out, 0.1)
 
-    def re_forward(self, new_input=None, task_parameter=None):
+    def re_forward(self, new_input=None, task_parameter=OrderedDict()):
         return BOMLNetOmniglotMetaInitV2(
             _input=new_input if new_input is not None else self.layers[0],
             dim_output=self.dims[-1],
@@ -430,7 +424,7 @@ class BOMLNetOmniglotMetaInitV2(BOMLNet):
             outer_param_dict=self.outer_param_dict,
             model_param_dict=self.model_param_dict,
             task_parameter=task_parameter
-            if task_parameter is not None
+            if len(task_parameter) == 0
             else self.task_parameter,
             var_collections=self.var_collections,
             outer_method=self.outer_method,

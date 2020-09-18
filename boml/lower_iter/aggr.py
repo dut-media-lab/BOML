@@ -28,7 +28,8 @@ class BOMLInnerGradAggr(BOMLInnerGradTrad):
         assert loss_inner is not None, "argument:inner_objective must be initialized"
         assert {
             "alpha",
-            "s", "t",
+            "s",
+            "t",
             "t_tensor",
         } <= param_dict.keys(), (
             "Necessary hyper_parameters must be initialized before calling minimize()"
@@ -105,14 +106,12 @@ class BOMLInnerGradAggr(BOMLInnerGradTrad):
         else:
             for _ in range(len(inner_grads)):
                 ll_part = (
-                        (1 - tf.norm(tf.matmul(alpha, t_tensor), ord=1))
-                        * t
-                        * inner_grads[_][0]
+                    (1 - tf.norm(tf.matmul(alpha, t_tensor), ord=1))
+                    * t
+                    * inner_grads[_][0]
                 )
                 ul_part = (
-                        tf.norm(tf.matmul(alpha, t_tensor), ord=1)
-                        * s
-                        * outer_grads[_][0]
+                    tf.norm(tf.matmul(alpha, t_tensor), ord=1) * s * outer_grads[_][0]
                 )
                 combine_grads.append((ll_part + ul_part, inner_grads[_][1]))
         return combine_grads

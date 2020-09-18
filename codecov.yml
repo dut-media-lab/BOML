@@ -30,11 +30,11 @@ coverage:
         paths: null
         
 ignore:
-  - "boml/extension.py"
-  - "boml/load_data/**/*"
+    # ignore the base calsses which will be automatically inherited.
   - "boml/optimizer/opt.py"
+  - "boml/setup_model/network.py"
   - "boml/upper_iter/outer_grad.py"
   - "boml/setup_model/network_utils.py"
-  - "boml/setup_model/network.py"
   - "test_script/script_helper.py"
-  
+  - "boml/load_data/**/*"
+  - "boml/extension.py"

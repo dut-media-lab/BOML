@@ -2,10 +2,6 @@
 
 [run]
 parallel=True
-omit= 
-    boml/load_data/*
-    boml/setup_model/network_utils.py
-    test_script/*
     
 [report]
 exclude_lines =
@@ -20,3 +16,8 @@ exclude_lines =
     __version__
     if verbose
 ignore_errors = True
+
+omit= 
+    boml/load_data/*
+    boml/setup_model/network_utils.py
+    test_script/*

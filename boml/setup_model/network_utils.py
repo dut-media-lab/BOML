@@ -9,20 +9,31 @@ import tensorflow as tf
 from tensorflow.contrib import layers
 
 
-def conv_block(boml_net, cweight, bweight):
+def conv_block(boml_net, cweight, bweight=None):
 
-    """ Perform, conv, batch norm, nonlinearity, and max pool """
+    """ Perform, conv, batch norm, nonlinearity, and max pool
+    :param boml_net: instance of BOMLNet
+    :param cweight: parameter of convolutional filter
+    :param bweight: bias for covolutional filter
+    """
     if boml_net.max_pool:
-        conv_out = tf.add(
-            tf.nn.conv2d(boml_net.out, cweight, boml_net.no_stride, "SAME"), bweight
-        )
+        if bweight is not None:
+            conv_out = tf.add(
+                tf.nn.conv2d(boml_net.out, cweight, boml_net.no_stride, "SAME"), bweight
+            )
+        else:
+            conv_out = tf.nn.conv2d(boml_net.out, cweight, boml_net.no_stride, "SAME")
     else:
-        conv_out = tf.add(
-            tf.nn.conv2d(boml_net.out, cweight, boml_net.stride, "SAME"), bweight
-        )
+        if bweight is not None:
+            conv_out = tf.add(
+                tf.nn.conv2d(boml_net.out, cweight, boml_net.stride, "SAME"), bweight
+            )
+        else:
+            conv_out = tf.nn.conv2d(boml_net.out, cweight, boml_net.stride, "SAME")
+
     if boml_net.batch_norm is not None:
         batch_out = boml_net.batch_norm(
-            conv_out,
+            inputs=conv_out,
             activation_fn=boml_net.activation,
             variables_collections=boml_net.var_collections,
         )
@@ -36,7 +47,11 @@ def conv_block(boml_net, cweight, bweight):
 
 
 def conv_block_t(boml_net, conv_weight, conv_bias, zweight):
-    """ Perform, conv, batch norm, nonlinearity, and max pool """
+    """ Perform, conv, batch norm, nonlinearity, and max pool
+    :param boml_net: instance of BOMLNet
+    :param convweight: parameter of convolutional filter
+    :param conv_bias: bias for covolutional filter
+    :param zweight: parameters of covolutional filter for t-layer"""
     if boml_net.max_pool:
         conv_out = tf.add(
             tf.nn.conv2d(boml_net.out, conv_weight, boml_net.no_stride, "SAME"),
@@ -64,7 +79,12 @@ def conv_block_t(boml_net, conv_weight, conv_bias, zweight):
 
 
 def conv_block_warp(boml_net, cweight, bweight, zweight, zbias):
-    """ Perform, conv, batch norm, nonlinearity, and max pool """
+    """ Perform, conv, batch norm, nonlinearity, and max pool
+    :param boml_net: instance of BOMLNet
+    :param convweight: parameter of convolutional filter
+    :param conv_bias: bias for covolutional filter
+    :param zweight: parameters of covolutional filter for warp-layer
+    :param zbias: bias of covolutional filter for warp-layer"""
     if boml_net.max_pool:
         conv_out = tf.add(
             tf.nn.conv2d(boml_net.out, cweight, boml_net.no_stride, "SAME"), bweight
@@ -202,13 +222,6 @@ def to_one_hot_enc(seq, dimension=None):
     _tmp = np.zeros((len(seq), da_max))
     _tmp[range(len(_tmp)), np.array(seq, dtype=int)] = 1
     return _tmp
-    #
-    # def create_and_set(_p):
-    #     _tmp = np.zeros(da_max)
-    #     _tmp[int(_p)] = 1
-    #     return _tmp
-    #
-    # return np.array([create_and_set(_v) for _v in seq])
 
 
 def flatten_list(lst):

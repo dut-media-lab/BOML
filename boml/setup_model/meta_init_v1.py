@@ -35,6 +35,7 @@ class BOMLNetMetaInitV1(BOMLNet):
         max_pool=False,
         reuse=False,
     ):
+        self.task_parameter = task_parameter
         self.kernel = kernel
         self.channels = channels
         self.dims = as_tuple_or_list(dim_output)
@@ -58,7 +59,6 @@ class BOMLNetMetaInitV1(BOMLNet):
             var_collections=var_collections,
             name=name,
             model_param_dict=model_param_dict,
-            task_parameter=task_parameter,
             reuse=reuse,
         )
 

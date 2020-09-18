@@ -20,7 +20,6 @@ class BOMLNet(object):
         _input,
         outer_param_dict=OrderedDict(),
         model_param_dict=OrderedDict(),
-        task_parameter=None,
         var_collections=None,
         name=None,
         reuse=False,
@@ -41,13 +40,9 @@ class BOMLNet(object):
                 print("Warning: no name and no variable scope given", sys.stderr)
         self.outer_param_dict = outer_param_dict
         self.model_param_dict = model_param_dict
-        self.task_parameter = task_parameter
         self.var_collections = var_collections
         self.name = name
         self.reuse = reuse
-        self._var_list_initial_values = []
-        self._var_init_placeholder = None
-        self._assign_int = []
         self._var_initializer_op = None
 
         self.layers = [_input]
@@ -91,14 +86,7 @@ class BOMLNet(object):
 
     @property
     def var_list(self):
-        if len(tf.get_collection(tf.GraphKeys.MODEL_VARIABLES, self.name)) == 0:
-            assert self.task_parameter is not None, (
-                "No Model Variables to optimize, "
-                "please double check your computational graph"
-            )
-            return list(self.task_parameter.values())
-        else:
-            return tf.get_collection(tf.GraphKeys.MODEL_VARIABLES, self.name)
+        return tf.get_collection(tf.GraphKeys.MODEL_VARIABLES, self.name)
 
     @property
     def out(self):

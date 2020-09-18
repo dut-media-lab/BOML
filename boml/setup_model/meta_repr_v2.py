@@ -16,19 +16,14 @@ class BOMLNetMiniMetaReprV2(BOMLNet):
         outer_param_dict=OrderedDict(),
         dim_output=-1,
         model_param_dict=OrderedDict(),
+        task_parameter=OrderedDict(),
         use_T=False,
         use_Warp=False,
         reuse=False,
         outer_method="Reverse",
     ):
         self.var_coll = boml.extension.METAPARAMETERS_COLLECTIONS
-        super().__init__(
-            _input=_input,
-            name=name,
-            outer_param_dict=outer_param_dict,
-            model_param_dict=model_param_dict,
-            reuse=reuse,
-        )
+        self.task_paramter = task_parameter
         self.outer_method = outer_method
         self.dim_output = dim_output
         self.use_T = use_T
@@ -36,6 +31,14 @@ class BOMLNetMiniMetaReprV2(BOMLNet):
         self.betas = self.filter_vars("beta")
         self.moving_means = self.filter_vars("moving_mean")
         self.moving_variances = self.filter_vars("moving_variance")
+
+        super().__init__(
+            _input=_input,
+            name=name,
+            outer_param_dict=outer_param_dict,
+            model_param_dict=model_param_dict,
+            reuse=reuse,
+        )
 
         if not reuse:
             boml.extension.remove_from_collection(
@@ -169,10 +172,13 @@ class BOMLNetOmniglotMetaReprV2(BOMLNet):
         self + tcl.conv2d(self.out, 512, 1, variables_collections=self.var_coll)
         self + tf.reshape(self.out, (-1, 512))
 
-    def re_forward(self, new_input=None):
+    def re_forward(self, new_input=None, task_parameter=OrderedDict()):
         return BOMLNetOmniglotMetaReprV2(
             new_input if new_input is not None else self.layers[0],
             model_param_dict=self.model_param_dict,
+            task_parameter=self.task_parameter
+            if len(task_parameter) == 0
+            else task_parameter,
             name=self.name,
             dim_output=self.dim_output,
             outer_param_dict=self.outer_param_dict,

@@ -34,6 +34,7 @@ class BOMLNetMetaReprV1(BOMLNet):
         max_pool=False,
         reuse=False,
     ):
+        self.task_parameter = task_parameter
         self.dim_output = dim_output
         self.kernel = kernel
         self.channels = channels
@@ -58,7 +59,6 @@ class BOMLNetMetaReprV1(BOMLNet):
             var_collections=var_collections,
             name=name,
             model_param_dict=model_param_dict,
-            task_parameter=task_parameter,
             reuse=reuse,
         )
 
@@ -87,9 +87,6 @@ class BOMLNetMetaReprV1(BOMLNet):
         for i in range(len(self.dim_hidden)):
             self.outer_param_dict["conv" + str(i)] = network_utils.get_conv_weight(
                 self, layer=i, initializer=self.conv_initializer
-            )
-            self.outer_param_dict["bias" + str(i)] = network_utils.get_bias_weight(
-                self, layer=i, initializer=self.bias_initializer
             )
 
         [
@@ -160,9 +157,7 @@ class BOMLNetMetaReprV1(BOMLNet):
                 )
             else:
                 self + network_utils.conv_block(
-                    self,
-                    self.outer_param_dict["conv" + str(i)],
-                    self.outer_param_dict["bias" + str(i)],
+                    self, self.outer_param_dict["conv" + str(i)],
                 )
         if self.flatten:
             flattened_shape = reduce(

@@ -212,7 +212,8 @@ class BOMLOptimizer(object):
         learn_lr=False,
         learn_st=False,
         alpha_init=0.0,
-        s=1.0,t=1.0,
+        s=1.0,
+        t=1.0,
         learn_alpha=False,
         learn_alpha_itr=False,
         var_list=None,
@@ -291,7 +292,7 @@ class BOMLOptimizer(object):
                 ), "BDA must have upper-level loss functions passed to lower-level problems optimization process"
 
                 if not (
-                        ("s" in self._param_dict.keys()) or ("t" in self._param_dict.keys())
+                    ("s" in self._param_dict.keys()) or ("t" in self._param_dict.keys())
                 ):
                     if learn_st:
                         s = extension.get_outerparameter("s", s)
@@ -400,16 +401,25 @@ class BOMLOptimizer(object):
         if self.oo_opt is None:
             if outer_objective_optimizer == "Momentum":
                 self.oo_opt = tf.train.MomentumOptimizer(
-                    learning_rate=self._meta_learning_rate, momentum=momentum
+                    learning_rate=self._meta_learning_rate,
+                    momentum=momentum,
+                    name=outer_objective_optimizer,
                 )
-            else:
-                self.oo_opt = getattr(
-                    boml_optimizer, "%s%s" % ("BOMLOpt", outer_objective_optimizer)
-                )(learning_rate=self._learning_rate,)
+            elif outer_objective_optimizer == "Adam":
+                self.oo_opt = tf.train.AdamOptimizer(
+                    learning_rate=self._meta_learning_rate,
+                    name=outer_objective_optimizer,
+                )
+            elif outer_objective_optimizer == "SGD":
+                self.oo_opt = tf.train.GradientDescentOptimizer(
+                    learning_rate=self._meta_learning_rate,
+                    name=outer_objective_optimizer,
+                )
+
         assert isinstance(
             self._outer_gradient, getattr(hyper_grads, "BOMLOuterGrad")
         ), "Wrong name for inner method,should be in list \n [Reverse, Simple, Forward, Implicit]"
-        if self.param_dict['use_Warp']:
+        if self.param_dict["use_Warp"]:
             setattr(self.outergradient, "lambda", tf.cast(warp_lambda, tf.float32))
 
         if self.outer_method == "Darts" and (
