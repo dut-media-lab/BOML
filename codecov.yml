@@ -35,6 +35,6 @@ ignore:
   - "boml/setup_model/network.py"
   - "boml/upper_iter/outer_grad.py"
   - "boml/setup_model/network_utils.py"
-  - "test/script_helper.py"
+  - "test_script/script_helper.py"
   - "boml/load_data/**/*"
   - "boml/extension.py"
