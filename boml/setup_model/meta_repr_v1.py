@@ -144,14 +144,12 @@ class BOMLNetMetaReprV1(BOMLNet):
                 self + network_utils.conv_block_t(
                     self,
                     self.outer_param_dict["conv" + str(i)],
-                    self.outer_param_dict["bias" + str(i)],
                     self.model_param_dict["conv" + str(i) + "_z"],
                 )
             elif self.use_Warp:
                 self + network_utils.conv_block_warp(
                     self,
                     self.outer_param_dict["conv" + str(i)],
-                    self.outer_param_dict["bias" + str(i)],
                     self.model_param_dict["conv" + str(i) + "_z"],
                     self.model_param_dict["bias" + str(i) + "_z"],
                 )
