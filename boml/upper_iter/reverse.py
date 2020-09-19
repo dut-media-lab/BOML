@@ -143,7 +143,7 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
             yield t, utils.merge_dicts(
                 *[
                     od.state_feed_dict(h)
-                    for od, h in zip(sorted(self._optimizer_dicts), his)
+                    for od, h in zip(sorted(self._inner_grads), his)
                 ]
             )
 

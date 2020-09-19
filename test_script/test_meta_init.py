@@ -2,7 +2,7 @@ import os
 import sys
 
 sys.path.append("../")
-os.environ["DATASETS_FOLDER"] = "../"
+os.environ["DATASETS_FOLDER"] = "../data/"
 os.environ["EXPERIMENTS_FOLDER"] = "../"
 import boml.extension
 
@@ -36,8 +36,8 @@ def build(
     method="MetaInit",
     inner_method="Simple",
     outer_method="Simple",
-    use_T=False,
-    use_Warp=False,
+    use_t=False,
+    use_warp=False,
     first_order=False,
 ):
 
@@ -54,8 +54,8 @@ def build(
         dataset=metasets,
         meta_model="V1",
         name="HyperRepr",
-        use_T=use_T,
-        use_Warp=use_Warp,
+        use_t=use_t,
+        use_warp=use_warp,
     )
 
     for k, ex in enumerate(exs):
@@ -113,8 +113,8 @@ def train_and_test(
     method,
     inner_method,
     outer_method,
-    use_T=False,
-    use_Warp=False,
+    use_t=False,
+    use_warp=False,
     first_order=False,
     reptile=False,
     logdir="logs/",
@@ -172,8 +172,8 @@ def train_and_test(
         method,
         inner_method,
         outer_method,
-        use_T,
-        use_Warp,
+        use_t,
+        use_warp,
         first_order,
     )
 
@@ -221,8 +221,8 @@ def build_and_test(
     method,
     inner_method,
     outer_method,
-    use_T=False,
-    use_Warp=False,
+    use_t=False,
+    use_warp=False,
     first_order=False,
     seed=None,
     lr0=0.04,
@@ -256,8 +256,8 @@ def build_and_test(
         method,
         inner_method,
         outer_method,
-        use_T,
-        use_Warp,
+        use_t,
+        use_warp,
         first_order,
     )
 
@@ -306,18 +306,18 @@ def test_meta_init():
             method=args.method,
             inner_method=args.inner_method,
             outer_method=args.outer_method,
-            use_T=args.use_T,
+            use_t=args.use_t,
             first_order=args.first_order,
             logdir=logdir,
             seed=args.seed,
-            use_Warp=args.use_Warp,
+            use_warp=args.use_warp,
             lr0=args.lr,
             learn_lr=args.learn_lr,
             mlr0=args.meta_lr,
             T=args.T,
             resume=args.resume,
             MBS=args.meta_batch_size,
-            n_meta_iterations=args.n_meta_iterations,
+            n_meta_iterations=args.meta_train_iterations,
             process_fn=process_fn,
             save_interval=args.save_interval,
             print_interval=args.print_interval,
@@ -331,8 +331,8 @@ def test_meta_init():
             method=args.method,
             inner_method=args.inner_method,
             outer_method=args.outer_method,
-            use_T=args.use_T,
-            use_Warp=args.use_Warp,
+            use_t=args.use_t,
+            use_warp=args.use_warp,
             first_order=args.first_order,
             seed=args.seed,
             lr0=args.lr,

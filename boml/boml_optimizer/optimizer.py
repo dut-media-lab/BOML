@@ -31,7 +31,8 @@ class BOMLOptimizer(object):
         the whole process of model construnction and back propagation.
 
         :param Method: define basic method for following training process, it should be included in ['MetaInit', 'MetaRepr'],
-         'MetaInit' type includes methods like 'MAML, FOMAML, TNet, WarpGrad'; 'MetaRepr' type includes methods like
+         'MetaInit' type includes meta-initialization-based methods like 'MAML, FOMAML, MT-net, WarpGrad';
+         'MetaRepr' type includes meta-feature-based methods like
          'BDA, RHG, Truncated, Implicit HG, DARTS';
         :param inner_method: method chosen for solving LLproblem, including ['Trad' ,'Simple', 'Aggr'], 'MetaRepr' type choose
         either 'Trad' for traditional optimization strategies or 'Aggr' for Gradient Aggragation optimization 'MetaInit' type
@@ -108,8 +109,8 @@ class BOMLOptimizer(object):
         dataset,
         meta_model="v1",
         name="Hyper_Net",
-        use_T=False,
-        use_Warp=False,
+        use_t=False,
+        use_warp=False,
         model_loss_func=utils.cross_entropy,
         outer_loss_func=utils.cross_entropy,
         **model_args
@@ -121,14 +122,14 @@ class BOMLOptimizer(object):
         :param meta_model: model chosen for neural network construction, 'v1' for C4L with fully connected layer,
         'v2' for Residual blocks with fully connected layer.
         :param name:  name for Meta model modules used for BMLNet initialization
-        :param use_T: whether to use T layer for C4L neural networks
+        :param use_t: whether to use T layer for C4L neural networks
         :param model_loss_func: forms of loss functions of task-specific layer corresponding to 'WarpGrad' method, default to be cross-entropy
         :param outer_loss_func: forms of loss functions of task-specific layer corresponding to 'WarpGrad' method, default to be cross-entropy
         :return: BMLNet object containing the dict of hyper parameters
         """
 
-        self.param_dict["use_T"] = use_T
-        self.param_dict["use_Warp"] = use_Warp
+        self.param_dict["use_t"] = use_t
+        self.param_dict["use_warp"] = use_warp
         self.param_dict["model_loss_func"] = model_loss_func
         self.param_dict["outer_loss_func"] = outer_loss_func
         self.data_set = dataset
@@ -142,8 +143,8 @@ class BOMLOptimizer(object):
             _input=_input,
             dim_output=dataset.train.dim_target,
             name=name,
-            use_T=use_T,
-            use_Warp=use_Warp,
+            use_t=use_t,
+            use_warp=use_warp,
             outer_method=self.outer_method,
             **model_args
         )
@@ -183,17 +184,16 @@ class BOMLOptimizer(object):
                 model_param_dict=meta_learner.model_param_dict,
                 dim_output=meta_learner.dims[-1],
                 name=name,
-                use_T=meta_learner.use_T,
+                use_t=meta_learner.use_t,
                 outer_method=self.outer_method,
-                use_Warp=meta_learner.use_Warp,
+                use_warp=meta_learner.use_warp,
             )
         elif self.method == "MetaRepr":
             base_learner = getattr(boml_networks, "BOMLNetFeedForward")(
                 _input=_input,
                 dims=self.data_set.train.dim_target,
                 output_weight_initializer=weights_initializer,
-                name=name,
-                use_T=meta_learner.use_T,
+                name=name
             )
         else:
             print(
@@ -419,7 +419,7 @@ class BOMLOptimizer(object):
         assert isinstance(
             self._outer_gradient, getattr(hyper_grads, "BOMLOuterGrad")
         ), "Wrong name for inner method,should be in list \n [Reverse, Simple, Forward, Implicit]"
-        if self.param_dict["use_Warp"]:
+        if self.param_dict["use_warp"]:
             setattr(self.outergradient, "lambda", tf.cast(warp_lambda, tf.float32))
 
         if self.outer_method == "Darts" and (
@@ -529,7 +529,7 @@ class BOMLOptimizer(object):
             )
             return utils.merge_dicts(_io_fd, _oo_fd)
 
-        ss.run(self._hyperit, _opt_fd())
+        ss.run(self._meta_iteration, _opt_fd())
 
 
     @property
@@ -589,9 +589,9 @@ class BOMLOptimizer(object):
         return self._param_dict
 
     @property
-    def _hyperit(self):
+    def _meta_iteration(self):
         """
-        iteration of minimization of upperobjective(s), assuming the hyper-gradients are already computed.
+        iteration of minimization of UL objective(s), assuming the hyper-gradients are already computed.
         """
         assert (
             self._fin_hts is not None

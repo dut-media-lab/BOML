@@ -24,8 +24,8 @@ class BOMLNetMiniMetaInitV2(BOMLNet):
         dim_resnet=[64, 96, 128, 256],
         kernel=3,
         reuse=False,
-        use_T=False,
-        use_Warp=False,
+        use_t=False,
+        use_warp=False,
     ):
         self.task_parameter = task_parameter
         self.dims = as_tuple_or_list(dim_output)
@@ -39,9 +39,9 @@ class BOMLNetMiniMetaInitV2(BOMLNet):
         self.no_stride = [1, 1, 1, 1]
         self.conv_initializer = conv_initializer
         self.output_weight_initializer = output_weight_initializer
-        self.use_T = use_T
+        self.use_t = use_t
         self.outer_method = outer_method
-        self.use_Warp = use_Warp
+        self.use_warp = use_warp
 
         super().__init__(
             _input=_input,
@@ -206,8 +206,8 @@ class BOMLNetMiniMetaInitV2(BOMLNet):
             var_collections=self.var_collections,
             output_weight_initializer=self.output_weight_initializer,
             reuse=True,
-            use_T=self.use_T,
-            use_Warp=self.use_Warp,
+            use_t=self.use_t,
+            use_warp=self.use_warp,
         )
 
 
@@ -233,8 +233,8 @@ class BOMLNetOmniglotMetaInitV2(BOMLNet):
         kernel=3,
         max_pool=False,
         reuse=False,
-        use_T=False,
-        use_Warp=False,
+        use_t=False,
+        use_warp=False,
     ):
         self.task_parameter = task_parameter
         self.kernel = kernel
@@ -250,9 +250,9 @@ class BOMLNetOmniglotMetaInitV2(BOMLNet):
         self.activation = activation
         self.conv_initializer = conv_initializer
         self.output_weight_initializer = output_weight_initializer
-        self.use_T = use_T
+        self.use_t = use_t
         self.outer_method = (outer_method,)
-        self.use_Warp = use_Warp
+        self.use_warp = use_warp
         super().__init__(
             _input=_input,
             outer_param_dict=outer_param_dict,
@@ -430,6 +430,6 @@ class BOMLNetOmniglotMetaInitV2(BOMLNet):
             outer_method=self.outer_method,
             output_weight_initializer=self.output_weight_initializer,
             reuse=True,
-            use_T=self.use_T,
-            use_Warp=self.use_Warp,
+            use_t=self.use_t,
+            use_warp=self.use_warp,
         )

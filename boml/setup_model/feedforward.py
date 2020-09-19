@@ -32,7 +32,6 @@ class BOMLNetFeedForward(BOMLNet):
         :param output_weight_initializer: function to initialize the weights of FeedForward network
         :param data_type: default to be tf.float32
         :param reuse: whether to reuse the created parameters in the named scope
-        :param use_T:
         """
         self.dims = as_tuple_or_list(dims)
         self.activation = activation

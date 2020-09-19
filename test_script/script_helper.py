@@ -73,8 +73,8 @@ parser.add_argument(
     help="number of tasks sampled per meta-update",
 )
 parser.add_argument(
-    "-nmi",
-    "--n_meta_iterations",
+    "-mti",
+    "--meta_train_iterations",
     type=int,
     default=50000,
     metavar="NUMBER",
@@ -249,7 +249,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "-u_T",
-    "--use_T",
+    "--use_t",
     type=bool,
     default=False,
     metavar="BOOLEAN",
@@ -257,7 +257,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "-u_W",
-    "--use_Warp",
+    "--use_warp",
     type=bool,
     default=False,
     metavar="BOOLEAN",

@@ -18,8 +18,8 @@ class BOMLNetMetaReprV1(BOMLNet):
         outer_param_dict=OrderedDict(),
         model_param_dict=OrderedDict(),
         task_parameter=None,
-        use_T=False,
-        use_Warp=False,
+        use_t=False,
+        use_warp=False,
         outer_method="Reverse",
         dim_output=-1,
         activation=tf.nn.relu,
@@ -48,8 +48,8 @@ class BOMLNetMetaReprV1(BOMLNet):
         self.bias_initializer = tf.zeros_initializer(tf.float32)
         self.conv_initializer = conv_initializer
         self.output_weight_initializer = output_weight_initializer
-        self.use_T = use_T
-        self.use_Warp = use_Warp
+        self.use_t = use_t
+        self.use_warp = use_warp
         self.outer_method = outer_method
         self.flatten = False if self.outer_method == "Implicit" else True
 
@@ -107,7 +107,7 @@ class BOMLNetMetaReprV1(BOMLNet):
     def create_model_parameters(
         self, var_collections=extension.GraphKeys.METAPARAMETERS
     ):
-        if self.use_T:
+        if self.use_t:
             # hyper parameters of transformation layer
             for i in range(len(self.dim_hidden)):
                 self.model_param_dict[
@@ -115,7 +115,7 @@ class BOMLNetMetaReprV1(BOMLNet):
                 ] = network_utils.get_identity(
                     self.dim_hidden[0], name="conv" + str(i) + "_z", conv=True
                 )
-        elif self.use_Warp:
+        elif self.use_warp:
             for i in range(len(self.dim_hidden)):
                 self.model_param_dict[
                     "conv" + str(i) + "_z"
@@ -143,14 +143,14 @@ class BOMLNetMetaReprV1(BOMLNet):
         """
 
         for i in range(len(self.dim_hidden)):
-            if self.use_T:
+            if self.use_t:
                 self + network_utils.conv_block_t(
                     self,
                     self.outer_param_dict["conv" + str(i)],
                     self.outer_param_dict["bias" + str(i)],
                     self.model_param_dict["conv" + str(i) + "_z"],
                 )
-            elif self.use_Warp:
+            elif self.use_warp:
                 self + network_utils.conv_block_warp(
                     self,
                     self.outer_param_dict["conv" + str(i)],
@@ -189,8 +189,8 @@ class BOMLNetMetaReprV1(BOMLNet):
             model_param_dict=self.model_param_dict,
             dim_output=self.dim_output,
             task_parameter=self.task_parameter,
-            use_Warp=self.use_Warp,
-            use_T=self.use_T,
+            use_warp=self.use_warp,
+            use_t=self.use_t,
             var_collections=self.var_collections,
             dim_hidden=self.dim_hidden,
             output_weight_initializer=self.output_weight_initializer,
@@ -206,9 +206,9 @@ def BOMLNetOmniglotMetaReprV1(
     model_param_dict=OrderedDict(),
     batch_norm=layers.batch_norm,
     name="BMLNetC4LOmniglot",
-    use_T=False,
+    use_t=False,
     dim_output=-1,
-    use_Warp=False,
+    use_warp=False,
     outer_method="Reverse",
     **model_args
 ):
@@ -220,8 +220,8 @@ def BOMLNetOmniglotMetaReprV1(
         dim_output=dim_output,
         outer_param_dict=outer_param_dict,
         norm=batch_norm,
-        use_T=use_T,
-        use_Warp=use_Warp,
+        use_t=use_t,
+        use_warp=use_warp,
         outer_method=outer_method,
         **model_args
     )
@@ -234,16 +234,16 @@ def BOMLNetMiniMetaReprV1(
     dim_output=-1,
     batch_norm=layers.batch_norm,
     name="BOMLNetC4LMini",
-    use_T=False,
-    use_Warp=False,
+    use_t=False,
+    use_warp=False,
     outer_method="Reverse",
     **model_args
 ):
     return BOMLNetMetaReprV1(
         _input=_input,
         name=name,
-        use_T=use_T,
-        use_Warp=use_Warp,
+        use_t=use_t,
+        use_warp=use_warp,
         dim_output=dim_output,
         outer_param_dict=outer_param_dict,
         model_param_dict=model_param_dict,

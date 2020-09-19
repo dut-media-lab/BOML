@@ -45,7 +45,7 @@ class BOMLOuterGradSimple(BOMLOuterGrad):
                 #doo_dhypers = tf.gradients(outer_objective, list(optimizer_dict.model_fast_weights.values()))
             else:
                 """
-            if param_dict["use_Warp"]:
+            if param_dict["use_warp"]:
                 doo_dhypers = [
                     self.warp_lambda * outer_param
                     for outer_param in inner_grad.outer_param_tensor

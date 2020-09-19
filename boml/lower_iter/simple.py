@@ -74,7 +74,7 @@ class BOMLInnerGradSimple(BOMLInnerGradTrad):
         outer_param_grad = []
         model_param_grad = []
         grads = tf.gradients(loss_inner, list(task_param.values()))
-        if param_dict["use_Warp"]:
+        if param_dict["use_warp"]:
             outer_param_loss = param_dict["outer_loss_func"](
                 pred=task_model.re_forward(param_dict["experiment"].x_).out,
                 label=param_dict["experiment"].y_,
@@ -118,7 +118,7 @@ class BOMLInnerGradSimple(BOMLInnerGradTrad):
                 pred=task_model.out, label=param_dict["experiment"].y, method="MetaInit"
             )
 
-            if param_dict["use_Warp"]:
+            if param_dict["use_warp"]:
                 outer_param_loss = param_dict["outer_loss_func"](
                     pred=task_model.re_forward(param_dict["experiment"].x_).out,
                     label=param_dict["experiment"].y_,

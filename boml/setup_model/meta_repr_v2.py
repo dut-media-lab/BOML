@@ -17,8 +17,8 @@ class BOMLNetMiniMetaReprV2(BOMLNet):
         dim_output=-1,
         model_param_dict=OrderedDict(),
         task_parameter=OrderedDict(),
-        use_T=False,
-        use_Warp=False,
+        use_t=False,
+        use_warp=False,
         reuse=False,
         outer_method="Reverse",
     ):
@@ -26,8 +26,8 @@ class BOMLNetMiniMetaReprV2(BOMLNet):
         self.task_paramter = task_parameter
         self.outer_method = outer_method
         self.dim_output = dim_output
-        self.use_T = use_T
-        self.use_Warp = use_Warp
+        self.use_t = use_t
+        self.use_warp = use_warp
 
         super().__init__(
             _input=_input,
@@ -95,7 +95,7 @@ class BOMLNetMiniMetaReprV2(BOMLNet):
             outer_param_dict=self.outer_param_dict,
             reuse=True,
             outer_method=self.outer_method,
-            use_T=self.use_T,
+            use_t=self.use_t,
         )
 
 
@@ -107,16 +107,16 @@ class BOMLNetOmniglotMetaReprV2(BOMLNet):
         outer_param_dict=OrderedDict(),
         dim_output=-1,
         model_param_dict=OrderedDict(),
-        use_T=False,
-        use_Warp=False,
+        use_t=False,
+        use_warp=False,
         reuse=False,
         outer_method="Reverse",
     ):
         self.var_coll = boml.extension.METAPARAMETERS_COLLECTIONS
         self.outer_method = outer_method
         self.dim_output = dim_output
-        self.use_T = use_T
-        self.use_Warp = use_Warp
+        self.use_t = use_t
+        self.use_warp = use_warp
         super().__init__(
             _input=_input,
             outer_param_dict=outer_param_dict,
@@ -181,6 +181,6 @@ class BOMLNetOmniglotMetaReprV2(BOMLNet):
             dim_output=self.dim_output,
             outer_param_dict=self.outer_param_dict,
             reuse=True,
-            use_T=self.use_T,
+            use_t=self.use_t,
             outer_method=self.outer_method,
         )

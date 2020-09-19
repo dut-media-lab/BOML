@@ -142,7 +142,7 @@ Core Modules
 	  - learning_rate(): returns defined inner learning rate
 	  - meta_learning_rate(): returns defined outer learning rate 
 	  - Method: return defined method type 
-	  - param_dict: return the dictionary that restores general parameters, like use_T,use_Warp, output shape of defined model, learn_lr, s, t, alpha, first_order.
+	  - param_dict: return the dictionary that restores general parameters, like use_t,use_warp, output shape of defined model, learn_lr, s, t, alpha, first_order.
    
    - Returns: an initialized instance of BOMLOptimizer
    

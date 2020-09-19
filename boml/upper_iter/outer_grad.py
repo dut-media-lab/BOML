@@ -12,7 +12,7 @@ RAISE_ERROR_ON_DETACHED = False
 
 class BOMLOuterGrad(object):
     def __init__(self, name):
-        self._optimizer_dicts = set()
+        self._inner_grads = set()
         self._inner_objectives = None
         self._hypergrad_dictionary = defaultdict(list)
         self._apply_updates = None
@@ -40,7 +40,7 @@ class BOMLOuterGrad(object):
         assert isinstance(
             boml_inner_grad, BOMLInnerGradTrad
         ), BOMLOuterGrad._ERROR_NOT_OPTIMIZER_DICT.format(boml_inner_grad)
-        self._optimizer_dicts.add(boml_inner_grad)
+        self._inner_grads.add(boml_inner_grad)
 
         if meta_param is None:  # get default outer parameters
             meta_param = boml.extension.meta_parameters(tf.get_variable_scope().name)
@@ -50,7 +50,7 @@ class BOMLOuterGrad(object):
     def initialization(self):
         if self._initialization is None:
             self._initialization = [
-                opt_dict.initialization for opt_dict in sorted(self._optimizer_dicts)
+                opt_dict.initialization for opt_dict in sorted(self._inner_grads)
             ]
         return self._initialization
 
@@ -58,13 +58,13 @@ class BOMLOuterGrad(object):
     def iteration(self):
         if self._iteration is None:
             self._iteration = [
-                opt_dict.iteration for opt_dict in sorted(self._optimizer_dicts)
+                opt_dict.iteration for opt_dict in sorted(self._inner_grads)
             ]
         return self._iteration
 
     @property
     def state(self):
-        for opt_dict in sorted(self._optimizer_dicts):
+        for opt_dict in sorted(self._inner_grads):
             for v in opt_dict.state:
                 yield v
 
@@ -73,7 +73,7 @@ class BOMLOuterGrad(object):
         if self._inner_objectives is None:
             self._inner_objectives = [
                 opt.objective if hasattr(opt, "objective") else tf.constant(False)
-                for opt in sorted(self._optimizer_dicts)
+                for opt in sorted(self._inner_grads)
             ]
         return self._inner_objectives
 
@@ -81,7 +81,7 @@ class BOMLOuterGrad(object):
     def apply_updates(self):
         if self._apply_updates is None:
             self._apply_updates = tf.group(
-                *[opt_dict.apply_updates for opt_dict in sorted(self._optimizer_dicts)]
+                *[opt_dict.apply_updates for opt_dict in sorted(self._inner_grads)]
             )
         return self._apply_updates
 

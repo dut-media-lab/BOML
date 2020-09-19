@@ -145,7 +145,7 @@ BOML requires Python 3.5+ and TensorFlow 1.13+.
           - learning_rate(): returns defined inner learning rate
           - meta_learning_rate(): returns defined outer learning rate 
           - Method: return defined method type 
-          - param_dict: return the dictionary that restores general parameters, like use_T,use_Warp, output shape of defined model, learn_lr, s, t, alpha, first_order.
+          - param_dict: return the dictionary that restores general parameters, like use_t,use_warp, output shape of defined model, learn_lr, s, t, alpha, first_order.
        - Returns: an initialized instance of BOMLOptimizer
 	   
   - Core Built-in functions of BOMLOptimizer: <div3 id="a32"></div3> 
@@ -158,8 +158,8 @@ BOML requires Python 3.5+ and TensorFlow 1.13+.
             dataset, 
             meta_model='V1', 
             name='Hyper_Net', 
-            use_T=False, 
-            use_Warp=False,
+            use_t=False, 
+            use_warp=False,
             **model_args
         )
         ```
@@ -169,8 +169,8 @@ BOML requires Python 3.5+ and TensorFlow 1.13+.
           - dataset: which dataset to use for training and testing. It should be initialized before being passed into the function
           - meta_model: model chosen for neural network construction, `V1` for C4L with fully connected layer,`V2` for Residual blocks with fully connected layer.
           - name: name for Meta model modules used for BOMLNet initialization
-          - use_T: whether to use T layer for C4L neural networks
-          - use_Warp: whether to use Warp layer for C4L neural networks
+          - use_t: whether to use T layer for C4L neural networks
+          - use_warp: whether to use Warp layer for C4L neural networks
           - model_args: optional arguments to set specific parameters of neural networks.
   
     2. BOMLOptimizer.base_learner:

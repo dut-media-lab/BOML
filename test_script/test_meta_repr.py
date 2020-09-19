@@ -2,7 +2,7 @@ import sys
 import inspect, os
 
 sys.path.append("../")
-os.environ["DATASETS_FOLDER"] = "../"
+os.environ["DATASETS_FOLDER"] = "../data/"
 os.environ["EXPERIMENTS_FOLDER"] = "../"
 import boml.extension
 from test_script.script_helper import *
@@ -44,8 +44,8 @@ def build(
     method=None,
     inner_method=None,
     outer_method=None,
-    use_T=False,
-    use_Warp=True,
+    use_t=False,
+    use_warp=True,
     truncate_iter=-1,
 ):
     exs = [dl.BOMLExperiment(metasets) for _ in range(MBS)]
@@ -62,8 +62,8 @@ def build(
         dataset=metasets,
         meta_model="V1",
         name=method,
-        use_T=use_T,
-        use_Warp=use_Warp,
+        use_t=use_t,
+        use_warp=use_warp,
     )
 
     for k, ex in enumerate(exs):
@@ -140,8 +140,8 @@ def train_and_test(
     method,
     inner_method,
     outer_method,
-    use_T=False,
-    use_Warp=False,
+    use_t=False,
+    use_warp=False,
     truncate_iter=-1,
     logdir="logs/",
     seed=None,
@@ -198,8 +198,8 @@ def train_and_test(
         method,
         inner_method,
         outer_method,
-        use_T,
-        use_Warp,
+        use_t,
+        use_warp,
         truncate_iter,
     )
 
@@ -247,8 +247,8 @@ def build_and_test(
     method,
     inner_method,
     outer_method,
-    use_T=False,
-    use_Warp=False,
+    use_t=False,
+    use_warp=False,
     truncate_iter=-1,
     seed=None,
     lr0=0.04,
@@ -291,8 +291,8 @@ def build_and_test(
         method,
         inner_method,
         outer_method,
-        use_T,
-        use_Warp,
+        use_t,
+        use_warp,
         truncate_iter,
     )
 
@@ -346,11 +346,11 @@ def test_meta_repr():
             method=args.method,
             inner_method=args.inner_method,
             outer_method=args.outer_method,
-            use_T=args.use_T,
+            use_t=args.use_t,
             truncate_iter=args.truncate_iter,
             logdir=logdir,
             seed=args.seed,
-            use_Warp=args.use_Warp,
+            use_warp=args.use_warp,
             lr0=args.lr,
             learn_lr=args.learn_lr,
             learn_alpha=args.learn_alpha,
@@ -361,7 +361,7 @@ def test_meta_repr():
             T=args.T,
             resume=args.resume,
             MBS=args.meta_batch_size,
-            n_meta_iterations=args.n_meta_iterations,
+            n_meta_iterations=args.meta_train_iterations,
             weights_initializer=weights_initializer,
             process_fn=process_fn,
             save_interval=args.save_interval,
@@ -377,8 +377,8 @@ def test_meta_repr():
             method=args.method,
             inner_method=args.inner_method,
             outer_method=args.outer_method,
-            use_T=args.use_T,
-            use_Warp=args.use_Warp,
+            use_t=args.use_t,
+            use_warp=args.use_warp,
             truncate_iter=args.truncate_iter,
             seed=args.seed,
             lr0=args.lr,

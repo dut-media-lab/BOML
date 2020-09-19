@@ -20,8 +20,8 @@ class BOMLNetMetaInitV1(BOMLNet):
         outer_param_dict=OrderedDict(),
         model_param_dict=None,
         task_parameter=None,
-        use_T=False,
-        use_Warp=False,
+        use_t=False,
+        use_warp=False,
         outer_method="Simple",
         activation=tf.nn.relu,
         var_collections=tf.GraphKeys.MODEL_VARIABLES,
@@ -50,8 +50,8 @@ class BOMLNetMetaInitV1(BOMLNet):
         self.conv_initializer = conv_initializer
         self.output_weight_initializer = output_weight_initializer
         self.outer_method = outer_method
-        self.use_T = use_T
-        self.use_Warp = use_Warp
+        self.use_t = use_t
+        self.use_warp = use_warp
 
         super().__init__(
             _input=_input,
@@ -119,7 +119,7 @@ class BOMLNetMetaInitV1(BOMLNet):
         return self.outer_param_dict
 
     def create_model_parameters(self, var_collections=GraphKeys.METAPARAMETERS):
-        if self.use_T:
+        if self.use_t:
             # hyper parameters of transformation layer
             for i in range(len(self.dim_hidden)):
                 self.model_param_dict[
@@ -132,7 +132,7 @@ class BOMLNetMetaInitV1(BOMLNet):
             ] = network_utils.get_identity(
                 self.dims[-1], name="w" + str(len(self.dim_hidden)) + "_z", conv=False
             )
-        elif self.use_Warp:
+        elif self.use_warp:
             for i in range(len(self.dim_hidden)):
                 self.model_param_dict[
                     "conv" + str(i) + "_z"
@@ -157,14 +157,14 @@ class BOMLNetMetaInitV1(BOMLNet):
             )
 
         for i in range(len(self.dim_hidden)):
-            if self.use_T:
+            if self.use_t:
                 self + network_utils.conv_block_t(
                     self,
                     self.task_parameter["conv" + str(i)],
                     self.task_parameter["bias" + str(i)],
                     self.model_param_dict["conv" + str(i) + "_z"],
                 )
-            elif self.use_Warp:
+            elif self.use_warp:
                 self + network_utils.conv_block_warp(
                     self,
                     self.task_parameter["conv" + str(i)],
@@ -198,7 +198,7 @@ class BOMLNetMetaInitV1(BOMLNet):
                 self.task_parameter["bias" + str(len(self.dim_hidden))],
             )
 
-        if self.use_T:
+        if self.use_t:
             self + tf.matmul(
                 self.out, self.model_param_dict["w" + str(len(self.dim_hidden)) + "_z"]
             )
@@ -214,8 +214,8 @@ class BOMLNetMetaInitV1(BOMLNet):
             task_parameter=self.task_parameter
             if len(task_parameter.keys()) == 0
             else task_parameter,
-            use_T=self.use_T,
-            use_Warp=self.use_Warp,
+            use_t=self.use_t,
+            use_warp=self.use_warp,
             outer_method=self.outer_method,
             var_collections=self.var_collections,
             dim_hidden=self.dim_hidden,
@@ -233,8 +233,8 @@ def BOMLNetOmniglotMetaInitV1(
     batch_norm=layers.batch_norm,
     name="BOMLNetOmniglotMetaInitV1",
     outer_method="Simple",
-    use_T=False,
-    use_Warp=False,
+    use_t=False,
+    use_warp=False,
     **model_args
 ):
     return BOMLNetMetaInitV1(
@@ -245,8 +245,8 @@ def BOMLNetOmniglotMetaInitV1(
         outer_method=outer_method,
         outer_param_dict=outer_param_dict,
         norm=batch_norm,
-        use_T=use_T,
-        use_Warp=use_Warp,
+        use_t=use_t,
+        use_warp=use_warp,
         **model_args
     )
 
@@ -259,16 +259,16 @@ def BOMLNetMiniMetaInitV1(
     batch_norm=layers.batch_norm,
     name="BOMLNetMetaInitV1",
     outer_method="Simple",
-    use_T=False,
-    use_Warp=False,
+    use_t=False,
+    use_warp=False,
     **model_args
 ):
     return BOMLNetMetaInitV1(
         _input=_input,
         name=name,
         dim_output=dim_output,
-        use_T=use_T,
-        use_Warp=use_Warp,
+        use_t=use_t,
+        use_warp=use_warp,
         outer_param_dict=outer_param_dict,
         model_param_dict=model_param_dict,
         outer_method=outer_method,

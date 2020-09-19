@@ -13,10 +13,10 @@ def test_setup_model():
     _input_1 = tf.placeholder(tf.float32, (None, 28, 28, 1))
     _input_2 = tf.placeholder(tf.float32, (None, 84, 84, 3))
     boml_meta_repr_v1_t = boml.BOMLNetMiniMetaReprV1(
-        _input_2, use_T=True, use_Warp=True
+        _input_2, use_t=True, use_warp=True
     )
     boml_meta_repr_v1_warp = boml.BOMLNetMiniMetaReprV1(
-        _input_2, use_T=True, use_Warp=False, name="warp_test"
+        _input_2, use_t=True, use_warp=False, name="warp_test"
     )
     boml_meta_init_v1_mini = boml.BOMLNetMiniMetaInitV1(_input_2, dim_output=5)
     boml_meta_init_v2_omniglot = boml.BOMLNetOmniglotMetaInitV2(_input_1, dim_output=5)
