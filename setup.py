@@ -3,6 +3,8 @@ from os import path
 
 current_directory = path.abspath(path.dirname(__file__))
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
 def get_install_requirements():
     requirements_path = path.join(current_directory, "requirements.txt")
@@ -11,24 +13,27 @@ def get_install_requirements():
 
 
 setup(
-    name="BOML",
-    version="0.1.a3",
+    name="boml",
+    version="0.1.2a1",
     packages=find_packages(),
+    long_description=long_description,
     url="https://github.com/dut-media-lab/BOML",
     license="MIT",
     keywords=[
     "meta-learning",
     "bilevel-optimization",
-    "few-shot-lerning"，
+    "few-shot-lerning",
     "python",
-    "Deep learning"]
+    "Deep learning"],
     install_requires=get_install_requirements(),
     classifiers=[
-    "Programmming Language :: Python :: 3",
-    "Programmming Language :: Python :: 3.5",
-    "Programmming Language :: Python :: 3.6",
-    "Programmming Language :: Python :: 3.7",
-    ]
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    ],
+    python_requires='>=3.5,<3.8',
     author="Yaohua Liu, Risheng Liu",
     author_email="liuyaohua@mail.dlut.edu.cn",
     description="A Bilevel Optimizer Library in Python for Meta Learning",
