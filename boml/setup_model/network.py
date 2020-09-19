@@ -12,7 +12,7 @@ from boml.utils import remove_from_collection
 class BOMLNet(object):
     # definitely deprecated!
     """
-    Base object for models
+    Base object for building neural networks
     """
 
     def __init__(
@@ -58,10 +58,7 @@ class BOMLNet(object):
 
     def _variable_scope(self, reuse):
         """
-        May override default variable scope context, but pay attention since it looks like
-        initializer and default initializer form contrib.layers do not work well together (I think this is because
-        functions in contrib.layers usually specify an initializer....
-
+        May override default variable scope context.
         :param reuse:
         :return:
         """
@@ -86,13 +83,24 @@ class BOMLNet(object):
 
     @property
     def var_list(self):
+        """
+        :return: list that contains the variables created in the current scope
+        """
         return tf.get_collection(tf.GraphKeys.MODEL_VARIABLES, self.name)
 
     @property
     def out(self):
+        """
+        :return: the current output of the BOMLNet
+        """
         return self[-1]
 
     def create_initial_parameter(self, primary_outerparameter=None):
+        """
+        :param primary_outerparameter: the primary outerparameters used to
+        create the task-specific parameters
+        :return: dictionary to keep the created task parameters
+        """
         assert primary_outerparameter is not None, (
             "Primary hyperparameters "
             "must be provided for initialization of slot variables"
@@ -138,9 +146,6 @@ class BOMLNet(object):
             self._var_initializer_op = tf.variables_initializer(self.var_list)
         ss.run(self._var_initializer_op)
 
-    def _variables_to_save(self):
-        return self.var_list
-
     def _forward(self):
         """
         _forward() uses defined convolutional neural networks with initial input
@@ -150,27 +155,8 @@ class BOMLNet(object):
 
     def re_forward(self, new_input):
         """
-        reuses defined convolutional with new input and update the output results
+        reuses defined convolutional networks with new input and update the output results
         :param new_input: new input with same shape as the old one
-        :return:
+        :return: updated instance of BOMLNet
         """
         raise NotImplemented()
-
-    @property
-    def tf_saver(self):
-        if not self._tf_saver:
-            self._tf_saver = tf.train.Saver(
-                var_list=self._variables_to_save(), max_to_keep=1
-            )
-        return self._tf_saver
-
-    def save(self, file_path, session=None, global_step=None):
-        # TODO change this method! save the class (or at least the attributes you can save
-        self.tf_saver.save(
-            session or tf.get_default_session(), file_path, global_step=global_step
-        )
-
-    def restore(self, file_path, session=None, global_step=None):
-        if global_step:
-            file_path += "-" + str(global_step)
-        self.tf_saver.restore(session or tf.get_default_session(), file_path)

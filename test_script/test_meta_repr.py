@@ -316,7 +316,7 @@ def build_and_test(
     )
 
 
-def main():
+def test_meta_repr():
     print(args.__dict__)
 
     metasets = map_dict[args.dataset]["data_loader"](
@@ -396,4 +396,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    test_meta_repr()

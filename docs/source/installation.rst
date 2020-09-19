@@ -14,8 +14,10 @@ We also provide `requirements.txt <https://github.com/dut-media-lab/BOML/require
 	git clone https://github.com/dut-media-lab/BOML.git
 
 	python setup.py install 
+	
+	or
 
-	pip install requirements.txt
+	pip install -r requirements.txt
 
 	2. use pip instruction
 

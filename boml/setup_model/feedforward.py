@@ -18,15 +18,28 @@ class BOMLNetFeedForward(BOMLNet):
         output_weight_initializer=tf.contrib.layers.xavier_initializer(tf.float32),
         data_type=tf.float32,
         reuse=False,
-        use_T=False,
     ):
+        """
+
+        :param _input: original input for the FeedForward network,
+        which is also output of the convolutional neural networks
+        :param dims: the dimension of the final output
+        :param task_parameter: dictionary to store the task-specific parameters
+        :param name: name for the task-specific network
+        :param activation: activation function, default to be tf.nn.relu
+        :param var_collections: collections to manage the parameters of
+         base-learner in the computational graph
+        :param output_weight_initializer: function to initialize the weights of FeedForward network
+        :param data_type: default to be tf.float32
+        :param reuse: whether to reuse the created parameters in the named scope
+        :param use_T:
+        """
         self.dims = as_tuple_or_list(dims)
         self.activation = activation
         self.data_type = data_type
         self.task_parameter = task_parameter
         self.var_collections = var_collections
         self.output_weight_initializer = output_weight_initializer
-        self.use_T = use_T
         super().__init__(
             _input=_input, name=name, var_collections=var_collections, reuse=reuse,
         )
@@ -77,5 +90,4 @@ class BOMLNetFeedForward(BOMLNet):
             var_collections=self.var_collections,
             output_weight_initializer=self.output_weight_initializer,
             reuse=True,
-            use_T=self.use_T,
         )

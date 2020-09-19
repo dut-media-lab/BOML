@@ -46,7 +46,7 @@ BOML is a modularized optimization library that unifies several ML algorithms in
 
 **Optimization Routine**
 
-The figure below illustrates the general optimization routine by organized modules in BOML.
+The figure below illustrates the general optimization process  by organized modules in BOML.
 
 .. image:: _static/img/optimization_routine.png
 	:alt: Bilevel Optimization Routine

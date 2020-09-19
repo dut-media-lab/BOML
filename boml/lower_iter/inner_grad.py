@@ -15,6 +15,11 @@ GRADIENT_NONE_MESSAGE = (
 
 class BOMLInnerGradTrad(object):
     def __init__(self, update_op, dynamics, objective):
+        """
+        :param update_op: the tf operation to perform updates
+        :param dynamics: the iterative formats of dynamical system
+        :param objective: Lower-Level objective
+        """
         self._updates_op = update_op
         self._dynamics = dynamics
         self._iteration = None
@@ -27,13 +32,22 @@ class BOMLInnerGradTrad(object):
 
     @staticmethod
     def compute_gradients(
-        boml_pot,
+        boml_opt,
         loss_inner,
         loss_outer=None,
         param_dict=OrderedDict(),
         var_list=None,
         **inner_kargs
     ):
+        """
+        :param boml_opt: instance of modified optimizers in the `optimizer` module
+        :param loss_inner: Lower-Level objectives
+        :param loss_outer: Upper-Level objectives
+        :param param_dict: dictionary of general parameters for different algorithms
+        :param var_list: the list of parameters in the base-learner
+        :param inner_kargs: optional arguments for tensorflow optimizers, like global_step, gate_gradients
+        :return: initialized instance of inner_grad for UL optimization
+        """
 
         minimize_kargs = {
             inner_arg: inner_kargs[inner_arg]
@@ -41,7 +55,7 @@ class BOMLInnerGradTrad(object):
         }
 
         assert loss_inner is not None, "argument:inner_objective must be initialized"
-        update_op, dynamics = boml_pot.minimize(
+        update_op, dynamics = boml_opt.minimize(
             loss_inner=loss_inner, var_list=var_list, *minimize_kargs
         )
 

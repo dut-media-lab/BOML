@@ -5,9 +5,9 @@ import tensorflow as tf
 
 from boml import utils
 
-Hyper_Optim_Method = ["MAML", "FOMAML", "MSGD", "MTNet"]
-Bilevel_Optim_Method = ["Reverse", "Truncated", "Forward", "Reverse", "Implicit"]
-METHOD_COLLECTIONS = [Hyper_Optim_Method, Bilevel_Optim_Method]
+Meta_Repr_Method = ["MAML", "FOMAML", "Meta-SGD", "MT-net"]
+Meta_Init_Method = ["Reverse", "Truncated", "DARTS", "BDA", "Implicit"]
+METHOD_COLLECTIONS = [Meta_Repr_Method, Meta_Init_Method]
 
 
 class GraphKeys(tf.GraphKeys):
@@ -144,13 +144,12 @@ def get_outerparameter(
         return tf.convert_to_tensor(_tmp_lst.tolist(), name=name)
 
 
-def hyperparameters(scope=None):
-    """
-    List of variables in the collection HYPERPARAMETERS.
+def get_global_step(name="GlobalStep", init=0):
+    import tensorflow as tf
 
-    Hyperparameters constructed with `get_outerparameter` are in this collection by default.
-
-    :param scope: (str) an optional scope.
-    :return: A list of tensors (usually variables)
-    """
-    return tf.get_collection(GraphKeys.HYPERPARAMETERS, scope=scope)
+    return tf.get_variable(
+        name,
+        initializer=init,
+        trainable=False,
+        collections=[tf.GraphKeys.GLOBAL_STEP, tf.GraphKeys.GLOBAL_VARIABLES],
+    )

@@ -107,10 +107,16 @@ def conv_block_warp(boml_net, cweight, bweight, zweight, zbias):
         return batch_out
 
 
-def get_conv_weight(boml_net, layer, initializer):
-    if layer == 0:
+def get_conv_weight(boml_net, i, initializer):
+    """
+    :param boml_net: instance of BOMLNet
+    :param i: int32, the i-th layer to be defined
+    :param initializer: function to initialize the weights of convolutional filter
+    :return: created convolutional weights
+    """
+    if i == 0:
         return tf.get_variable(
-            "conv" + str(layer),
+            "conv" + str(i),
             [
                 boml_net.kernel,
                 boml_net.kernel,
@@ -122,19 +128,40 @@ def get_conv_weight(boml_net, layer, initializer):
         )
     else:
         return tf.get_variable(
-            "conv" + str(layer),
+            "conv" + str(i),
             [
                 boml_net.kernel,
                 boml_net.kernel,
-                boml_net.dim_hidden[layer - 1],
-                boml_net.dim_hidden[layer],
+                boml_net.dim_hidden[i - 1],
+                boml_net.dim_hidden[i],
             ],
             initializer=initializer,
             dtype=boml_net.datatype,
         )
 
 
+def get_bias_weight(boml_net, i, initializer):
+    """
+    :param boml_net: instance of BOMLNet
+    :param i: int32, i-th layer to be defined
+    :param initializer: function to initialize the bias
+    :return: created convolutional bias
+    """
+    return tf.get_variable(
+        "bias" + str(i),
+        [boml_net.dim_hidden[i]],
+        initializer=initializer,
+        dtype=boml_net.datatype,
+    )
+
+
 def get_warp_weight(boml_net, layer, initializer):
+    """
+    :param boml_net: instance of BOMLNet
+    :param layer: int32, i-th layer to be defined
+    :param initializer: function to initializer the weights of convolutional filter
+    :return: created convolutional parameters of Warp-Layer
+    """
     return tf.get_variable(
         "conv" + str(layer) + "_z",
         [
@@ -149,6 +176,12 @@ def get_warp_weight(boml_net, layer, initializer):
 
 
 def get_warp_bias(boml_net, layer, initializer):
+    """
+    :param boml_net: instance of BOMLNet
+    :param layer: int32, i-th layer to be defined
+    :param initializer: function to initializer the weights of convolutional filter
+    :return: created bias of convolutional filter
+    """
     return tf.get_variable(
         "bias" + str(layer) + "_z",
         [boml_net.dim_hidden[layer]],
@@ -157,16 +190,13 @@ def get_warp_bias(boml_net, layer, initializer):
     )
 
 
-def get_bias_weight(boml_net, layer, initializer):
-    return tf.get_variable(
-        "bias" + str(layer),
-        [boml_net.dim_hidden[layer]],
-        initializer=initializer,
-        dtype=boml_net.datatype,
-    )
-
-
 def get_identity(dim, name, conv=True):
+    """
+    :param dim: dimension of the identity matrix
+    :param name: name for the variable
+    :param conv: BOOLEAN, define variables as matrix or vector
+    :return: created parameters of identity for T-layer
+    """
     return (
         tf.Variable(tf.eye(dim, batch_shape=[1, 1]), name=name)
         if conv
@@ -204,6 +234,12 @@ def as_tuple_or_list(obj):
 
 
 def maybe_get(obj, i):
+    """
+
+    :param obj: object
+    :param i: the index
+    :return: the i-th item if the `obj` instantiates the __getitem__ function
+    """
     return obj[i] if hasattr(obj, "__getitem__") else obj
 
 
@@ -321,12 +357,4 @@ def leaky_relu(x, alpha, name=None):
         return tf.nn.relu(x) - alpha * tf.nn.relu(-x)
 
 
-def get_global_step(name="GlobalStep", init=0):
-    import tensorflow as tf
 
-    return tf.get_variable(
-        name,
-        initializer=init,
-        trainable=False,
-        collections=[tf.GraphKeys.GLOBAL_STEP, tf.GraphKeys.GLOBAL_VARIABLES],
-    )

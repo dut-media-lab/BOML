@@ -4,13 +4,14 @@
 [![Build Status](https://travis-ci.com/dut-media-lab/BOML.svg?branch=master)](https://travis-ci.com/dut-media-lab/BOML)
 [![codecov](https://codecov.io/gh/dut-media-lab/BOML/branch/master/graph/badge.svg)](https://codecov.io/gh/dut-media-lab/BOML)
 [![Documentation Status](https://readthedocs.org/projects/boml/badge/?version=latest)](https://boml.readthedocs.io/en/latest/?badge=latest)
-![license](https://img.shields.io/badge/license-MIT-000000.svg)
 ![Language](https://img.shields.io/github/languages/top/dut-media-lab/boml?logoColor=green)
+![Python version](https://img.shields.io/pypi/pyversions/boml)
+![license](https://img.shields.io/badge/license-MIT-000000.svg)
 ![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)
 
 BOML is a modularized optimization library that unifies several ML algorithms into a common bilevel optimization framework. It provides interfaces to implement popular bilevel optimization algorithms, so that you could quickly build your own meta learning neural network and test its performance.
 
-ReadMe.md file contains brief introduction to implement meta-initialization-based and meta-feature-based methods in few-shot learning field. Except for algorithms which have been proposed, various combinations of lower leve and upper level strategies are available. Moreover, it's flexible to build your own networks or use structures with attached documentation.
+ReadMe.md file contains brief introduction to implement meta-initialization-based and meta-feature-based methods in few-shot learning field. Except for algorithms which have been proposed, various combinations of lower level and upper level strategies are available. 
 
 ## Meta Learning 
 
@@ -20,31 +21,31 @@ We present a general bilevel optimization paradigm to unify different types of m
 
 <div align=center>
   
-![Bilevel Optimization Model](https://github.com/dut-media-lab/BOML/blob/master/figures/p1.png )
+![Bilevel Optimization Model](https://github.com/dut-media-lab/BOML/blob/master/figures/p1.png)
 </div>
 
 ## Generic Optimization Routine
-Here we illustrate the generic optimization routine and hierarchically built strategies in the figure, which could be quikcly implemented in the following example.<br>
+Here we illustrate the generic optimization process and hierarchically built strategies in the figure, which could be quikcly implemented in the following example.<br>
 
 <div align=center>
   
-![Hierarchically built strategies](https://github.com/dut-media-lab/BOML/blob/master/figures/p2.png)
+![Optimization Routine](https://github.com/dut-media-lab/BOML/blob/master/figures/p2.png)
 </div>
 
 ## Running examples
 ```python
-
 from boml import utils
 # initialize the BOMLOptimizer, specify strategies for ll_problem() and ul_problem()
 boml_opt= boml.BOMLOptimizer('MetaInit', 'Simple', 'Simple')
 #load dataset
-dataset = boml.load_data.meta_omniglot(num_classes, num_train, num_test)
+dataset = boml.load_data.meta_omniglot(num_classes, (num_train, num_test))
 ex = boml.BOMLExperiment(dataset)
 # build network structure and initializer model parameters
 meta_learner = boml_opt.meta_learner(ex.x, dataset, 'V1')
 ex.model = boml_ho.base_learner(ex.x, meta_learner)
-# define lower objectives and lower-level subproblem
+# lower objectives
 loss_inner = utils.cross_entropy(ex.model.out, ex.y)
+# define lower-level subproblem
 inner_grad = boml_ho.ll_problem(loss_inner, lr, T, experiment=ex)
 # define upper objectives and upper-level subproblem
 loss_outer = utils.cross_entropy(ex.model.re_forward(ex.x_).out, ex.y_)
@@ -54,16 +55,17 @@ boml_ho.ul_problem(loss_outer, args.mlr, inner_grad,
 boml_ho.aggregate_all()
 ```
 ## Documentation 
-For more detailed information of basic function and construction process, please refer to our [Help Documentation](https://boml.readthedocs.io/en/latest/) or [Github Page](https://dut-media-lab.github.io/BOML/). Scripts in the directory named test_script are useful for constructing general training process.
+For more detailed information of basic function and construction process, please refer to our [Help Documentation](https://dut-media-lab.github.io/BOML/). Scripts in the directory named test_script are useful for constructing general training process.
+
+Here we give recommended settings for specific hyper paremeters to quickly test performance of popular algorithms.
 
 ## Related Methods 
  - [Hyperparameter optimization with approximate gradient(HOAG)](https://arxiv.org/abs/1602.02355)
  - [Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks(MAML)](https://arxiv.org/abs/1703.03400)
  - [On First-Order Meta-Learning Algorithms(FOMAML)](https://arxiv.org/abs/1803.02999)
- - [Meta-SGD: Learning to Learn Quickly for Few-Shot Learning(Meta-SGD)](https://arxiv.org/pdf/1707.09835.pdf)
  - [Bilevel Programming for Hyperparameter Optimization and Meta-Learning(RHG)](http://export.arxiv.org/pdf/1806.04910)
  - [Truncated Back-propagation for Bilevel Optimization(TG)](https://arxiv.org/pdf/1810.10667.pdf)
- - [Gradient-Based Meta-Learning with Learned Layerwise Metric and Subspace(MT-net)](http://proceedings.mlr.press/v80/lee18a/lee18a.pdf)
+ - [Gradient-Based Meta-Learning with Learned Layerwise Metric and Subspace(MT-et)](http://proceedings.mlr.press/v80/lee18a/lee18a.pdf)
  - [Meta-Learning with warped gradient Descent(WarpGrad))](https://arxiv.org/abs/1909.00025)
  - [DARTS: Differentiable Architecture Search(DARTS)](https://arxiv.org/pdf/1806.09055.pdf)
  - [A Generic First-Order Algorithmic Framework for Bi-Level Programming Beyond Lower-Level Singleton(BA)](https://arxiv.org/pdf/2006.04045.pdf)

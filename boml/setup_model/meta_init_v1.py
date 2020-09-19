@@ -77,10 +77,10 @@ class BOMLNetMetaInitV1(BOMLNet):
     def create_outer_parameters(self, var_collections=GraphKeys.METAPARAMETERS):
         for i in range(len(self.dim_hidden)):
             self.outer_param_dict["conv" + str(i)] = network_utils.get_conv_weight(
-                self, layer=i, initializer=self.conv_initializer
+                self, i=i, initializer=self.conv_initializer
             )
             self.outer_param_dict["bias" + str(i)] = network_utils.get_bias_weight(
-                self, layer=i, initializer=self.bias_initializer
+                self, i=i, initializer=self.bias_initializer
             )
         if self.max_pool:
             self.outer_param_dict["w" + str(len(self.dim_hidden))] = tf.get_variable(
@@ -137,12 +137,12 @@ class BOMLNetMetaInitV1(BOMLNet):
                 self.model_param_dict[
                     "conv" + str(i) + "_z"
                 ] = network_utils.get_warp_weight(
-                    self, layer=i, initializer=self.conv_initializer
+                    self, i, self.conv_initializer
                 )
                 self.model_param_dict[
                     "bias" + str(i) + "_z"
                 ] = network_utils.get_warp_bias(
-                    self, layer=i, initializer=self.bias_initializer
+                    self, i, self.bias_initializer
                 )
         [
             tf.add_to_collections(var_collections, model_param)

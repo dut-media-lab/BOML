@@ -1,6 +1,6 @@
 from __future__ import absolute_import, print_function, division
 
-from collections import OrderedDict, deque
+from collections import OrderedDict
 
 import numpy as np
 
@@ -40,8 +40,8 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
         optimizaiton dynamics, requires much less (GPU) memory and is more flexible, allowing
         to set a termination condition to the parameters optimizaiton routine.
 
-        :param inner_grad: OptimzerDict object resulting from the inner objective optimization.
-        :param outer_objective: A loss function for the outer parameters (scalar tensor)
+        :param inner_grad: BOMLInnerGrad object resulting from the LL objective optimization.
+        :param outer_objective: A loss function for the outer parameters
         :param meta_param: Optional list of outer parameters to consider. If not provided will get all variables in the
                             hyperparameter collection in the current scope.
         :param param_dict: dictionary to store necessary parameters

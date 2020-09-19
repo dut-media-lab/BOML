@@ -8,7 +8,7 @@ import boml as boml
 import tensorflow as tf
 
 
-def main():
+def test_setup_model():
     # def test_meta_init_v2():
     _input_1 = tf.placeholder(tf.float32, (None, 28, 28, 1))
     _input_2 = tf.placeholder(tf.float32, (None, 84, 84, 3))
@@ -40,4 +40,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    test_setup_model()

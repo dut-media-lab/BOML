@@ -4,6 +4,9 @@ import tensorflow as tf
 
 
 class BOMLOpt(tf.train.Optimizer):
+    """
+    mirror of the tf.train.Optimizer.
+    """
     def minimize(
         self,
         loss_inner,
@@ -15,13 +18,8 @@ class BOMLOpt(tf.train.Optimizer):
         name=None,
         grad_loss=None,
     ):
-        """
-        Returns an `OptimizerDict` object relative to this minimization. See tf.train.Optimizer.minimize.
-
-        `OptimizerDict` objects notably contain a field `apply_updates` for the training step and
-        and a field `dynamics` for the optimization dynamics. The `dynamics` a list of
-        var_and_dynamics where var are both variables in `var_list` and also
-        additional state (auxiliary) variables, as needed.
+        """ The `dynamics` contains a list of var_and_dynamics where var are both variables in `var_list` and also
+        additional state (auxiliary) variables to be used in the process of back-propagation.
         """
         update_op, dynamics = super(BOMLOpt, self).minimize(
             loss_inner,

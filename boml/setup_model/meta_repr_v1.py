@@ -86,11 +86,11 @@ class BOMLNetMetaReprV1(BOMLNet):
 
         for i in range(len(self.dim_hidden)):
             self.outer_param_dict["conv" + str(i)] = network_utils.get_conv_weight(
-                self, layer=i, initializer=self.conv_initializer
+                self, i=i, initializer=self.conv_initializer
             )
 
             self.outer_param_dict["bias" + str(i)] = network_utils.get_bias_weight(
-                self, layer=i, initializer=self.bias_initializer
+                self, i=i, initializer=self.bias_initializer
             )
         [
             tf.add_to_collections(extension.GraphKeys.METAPARAMETERS, hyper)
@@ -120,12 +120,12 @@ class BOMLNetMetaReprV1(BOMLNet):
                 self.model_param_dict[
                     "conv" + str(i) + "_z"
                 ] = network_utils.get_warp_weight(
-                    self, layer=i, initializer=self.conv_initializer
+                    self, i, self.conv_initializer
                 )
                 self.model_param_dict[
                     "bias" + str(i) + "_z"
                 ] = network_utils.get_warp_bias(
-                    self, layer=i, initializer=self.bias_initializer
+                    self, i, self.bias_initializer
                 )
         [
             tf.add_to_collections(var_collections, model_param)
@@ -147,21 +147,22 @@ class BOMLNetMetaReprV1(BOMLNet):
                 self + network_utils.conv_block_t(
                     self,
                     self.outer_param_dict["conv" + str(i)],
-                    self.outer_param_dict['bias' + str(i)],
-                    self.model_param_dict["conv" + str(i) + "_z"]
+                    self.outer_param_dict["bias" + str(i)],
+                    self.model_param_dict["conv" + str(i) + "_z"],
                 )
             elif self.use_Warp:
                 self + network_utils.conv_block_warp(
                     self,
                     self.outer_param_dict["conv" + str(i)],
-                    self.outer_param_dict['bias' + str(i)],
+                    self.outer_param_dict["bias" + str(i)],
                     self.model_param_dict["conv" + str(i) + "_z"],
-                    self.model_param_dict["bias" + str(i) + "_z"]
+                    self.model_param_dict["bias" + str(i) + "_z"],
                 )
             else:
                 self + network_utils.conv_block(
-                    self, self.outer_param_dict["conv" + str(i)],
-                    self.outer_param_dict['bias' + str(i)]
+                    self,
+                    self.outer_param_dict["conv" + str(i)],
+                    self.outer_param_dict["bias" + str(i)],
                 )
         if self.flatten:
             flattened_shape = reduce(

@@ -12,11 +12,23 @@ def get_install_requirements():
 
 setup(
     name="BOML",
-    version="0.1.a1",
+    version="0.1.a3",
     packages=find_packages(),
     url="https://github.com/dut-media-lab/BOML",
     license="MIT",
+    keywords=[
+    "meta-learning",
+    "bilevel-optimization",
+    "few-shot-lerning"，
+    "python",
+    "Deep learning"]
     install_requires=get_install_requirements(),
+    classifiers=[
+    "Programmming Language :: Python :: 3",
+    "Programmming Language :: Python :: 3.5",
+    "Programmming Language :: Python :: 3.6",
+    "Programmming Language :: Python :: 3.7",
+    ]
     author="Yaohua Liu, Risheng Liu",
     author_email="liuyaohua@mail.dlut.edu.cn",
     description="A Bilevel Optimizer Library in Python for Meta Learning",

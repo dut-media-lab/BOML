@@ -23,21 +23,29 @@ class BOMLInnerGradSimple(BOMLInnerGradTrad):
 
     @staticmethod
     def compute_gradients(
-        boml_pot,
+        boml_opt,
         loss_inner,
         loss_outer=None,
         param_dict=OrderedDict(),
         var_list=None,
         **inner_kargs
     ):
-
+        """
+        :param boml_opt: instance of modified optimizers in the `optimizer` module
+        :param loss_inner: Lower-Level objectives
+        :param loss_outer: Upper-Level objectives
+        :param param_dict: dictionary of general parameters for different algorithms
+        :param var_list: the list of parameters in the base-learner
+        :param inner_kargs: optional arguments for tensorflow optimizers, like global_step, gate_gradients
+        :return: initialized instance of inner_grad for UL optimization
+        """
         minimize_kargs = {
             inner_arg: inner_kargs[inner_arg]
             for inner_arg in set(inner_kargs.keys()) - set(param_dict.keys())
         }
 
         assert loss_inner is not None, "argument:inner_objective must be initialized"
-        update_op, dynamics = boml_pot.minimize(loss_inner, var_list, *minimize_kargs)
+        update_op, dynamics = boml_opt.minimize(loss_inner, var_list, *minimize_kargs)
         fast_param, outer_grad, model_grad = BOMLInnerGradSimple.bml_inner_grad_trad(
             loss_inner=loss_inner, param_dict=param_dict, var_list=var_list
         )
@@ -53,7 +61,13 @@ class BOMLInnerGradSimple(BOMLInnerGradTrad):
 
     @staticmethod
     def bml_inner_grad_trad(loss_inner, param_dict=OrderedDict(), var_list=[]):
+        """
 
+        :param loss_inner: LL objectives
+        :param param_dict: dictionary of general parameters for different algorithms
+        :param var_list: the list of parameters in the base-learner
+        :return:
+        """
         assert len(var_list) > 0, "no task_specific variables to optimizer"
         task_model = param_dict["experiment"].model
         task_param = task_model.task_parameter

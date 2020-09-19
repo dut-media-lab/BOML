@@ -337,7 +337,7 @@ class BOMLOptimizer(object):
         self._param_dict["T"] = T
 
         inner_grad = self._inner_gradient.compute_gradients(
-            boml_pot=self.io_opt,
+            boml_opt=self.io_opt,
             loss_inner=inner_objective,
             loss_outer=outer_objective,
             param_dict=self._param_dict,
@@ -445,75 +445,6 @@ class BOMLOptimizer(object):
 
         return self
 
-    def minimize(
-        self,
-        inner_objective,
-        learning_rate,
-        meta_learning_rate,
-        T,
-        inner_objective_optimizer="SGD",
-        outer_objective=None,
-        learn_lr=False,
-        alpha_init=0.0,
-        gamma=1.0,
-        learn_alpha=False,
-        learn_st=False,
-        learn_alpha_itr=False,
-        var_list=None,
-        init_dynamics_dict=None,
-        first_order=False,
-        loss_func=utils.cross_entropy,
-        momentum=0.5,
-        beta1=0.0,
-        beta2=0.999,
-        experiment=None,
-        meta_param=None,
-        outer_objective_optimizer="Adam",
-        epsilon=1.0,
-        tolerance=lambda _k: 0.1 * (0.9 ** _k),
-        global_step=None,
-        **inner_kargs
-    ):
-        """
-        calling once 'inner_problem', 'outer_problem' and 'aggregate_all', and optionally set an initial dynamics.
-        For more complex uses (like inner problems batching) use the methods separately. This can be used only when
-        a single problem setting are expected for your problem definition.
-        Returns method `BOMLOptimizer.run`, that runs one hyperiteration.
-        """
-        inner_grad = self.ll_problem(
-            inner_objective=inner_objective,
-            learning_rate=learning_rate,
-            inner_objective_optimizer=inner_objective_optimizer,
-            experiment=experiment,
-            outer_objective=outer_objective,
-            T=T,
-            gamma=gamma,
-            first_order=first_order,
-            learn_lr=learn_lr,
-            learn_alpha=learn_alpha,
-            learn_st=learn_st,
-            learn_alpha_itr=learn_alpha_itr,
-            var_list=var_list,
-            alpha_init=alpha_init,
-            momentum=momentum,
-            beta2=beta2,
-            beta1=beta1,
-            loss_func=loss_func,
-            init_dynamics_dict=init_dynamics_dict,
-            **inner_kargs
-        )
-        self.ul_problem(
-            outer_objective=outer_objective,
-            meta_learning_rate=meta_learning_rate,
-            inner_grad=inner_grad,
-            outer_objective_optimizer=outer_objective_optimizer,
-            meta_param=meta_param,
-            global_step=global_step,
-            tolerance=tolerance,
-            momentum=momentum,
-            epsilon=epsilon,
-        )
-
     def aggregate_all(self, aggregation_fn=None, gradient_clip=None):
         """
         To be called when no more dynamics or problems will be added, computes the updates
@@ -527,7 +458,6 @@ class BOMLOptimizer(object):
         :return: the run method of this object.
         """
         if self._fin_hts is None:
-            # in this way also far.optimizer can be used
             _maybe_first_arg = lambda _v: _v[0] if isinstance(_v, tuple) else _v
 
             def maybe_first_arg(_v):
@@ -560,15 +490,14 @@ class BOMLOptimizer(object):
         session=None,
     ):
         """
-        Run an hyper-iteration (i.e. train the model(s) and compute hypergradients) and updates the upper parameters.
+        Run a whole iteration and updates the parameters of meta-learner.
 
-        :param inner_objective_feed_dicts: an optional feed dictionary for the inner problem. Can be a function of
+        :param inner_objective_feed_dicts: feed dictionary for the Lower-Level problem. Can be a function of
                                             step, which accounts for, e.g. stochastic gradient descent.
-        :param outer_objective_feed_dicts: an optional feed dictionary for the upper-level optimization problem
-                                            (passed to the evaluation of upper objective). Can be a function of
+        :param outer_objective_feed_dicts: feed dictionary for the Upper-Level optimization problem. Can be a function of
                                             hyper-iterations steps (i.e. global variable), which may account for, e.g.
                                             stochastic evaluation of upper objective.
-        :param initializer_feed_dict:  an optional feed dictionary for the initialization of inner problems variables.
+        :param initializer_feed_dict:  an optional feed dictionary for the initialization of LL problem variables.
                                             Can be a function of hyper-iterations steps (i.e. global variable),
                                             which may account for, e.g. stochastic initialization.
         :param session: optional session
@@ -584,7 +513,6 @@ class BOMLOptimizer(object):
         ss = session or tf.get_default_session()
 
         def _opt_fd():
-            # e.g. hyper-learning rate is a placeholder
             _io_fd = (
                 utils.maybe_call(
                     inner_objective_feed_dicts, utils.maybe_eval(self._global_step)
@@ -602,6 +530,7 @@ class BOMLOptimizer(object):
             return utils.merge_dicts(_io_fd, _oo_fd)
 
         ss.run(self._hyperit, _opt_fd())
+
 
     @property
     def meta_model(self):

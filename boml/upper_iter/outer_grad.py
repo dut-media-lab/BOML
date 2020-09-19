@@ -5,7 +5,7 @@ from collections import defaultdict, OrderedDict
 import tensorflow as tf
 
 import boml.extension
-from boml.lower_iter import BOMLInnerGradTrad, BOMLInnerGradAggr, BOMLInnerGradSimple
+from boml.lower_iter import BOMLInnerGradTrad
 
 RAISE_ERROR_ON_DETACHED = False
 
@@ -22,12 +22,8 @@ class BOMLOuterGrad(object):
         self._state = None
         self._name = name
 
-    _ERROR_NOT_OPTIMIZER_DICT = """
-    Looks like {} is not an `OptimizerDict`. Use optimizers in py_bml.optimizers for obtaining an OptimizerDict.
-    """
-
     _ERROR_HYPER_DETACHED = """
-    Hyperparameter {} is detached from this optimization dynamics.
+    `The outer parameter` is detached from this optimization dynamics.
     """
 
     def compute_gradients(self, outer_objective, boml_inner_grad, meta_param=None):
@@ -42,7 +38,7 @@ class BOMLOuterGrad(object):
         :return: list of outer parameters involved in the computation
         """
         assert isinstance(
-            boml_inner_grad, (BOMLInnerGradAggr, BOMLInnerGradSimple, BOMLInnerGradTrad)
+            boml_inner_grad, BOMLInnerGradTrad
         ), BOMLOuterGrad._ERROR_NOT_OPTIMIZER_DICT.format(boml_inner_grad)
         self._optimizer_dicts.add(boml_inner_grad)
 

@@ -21,14 +21,6 @@ class BOMLOptSGD(BOMLOpt, tf.train.GradientDescentOptimizer):
         super(BOMLOptSGD, self).__init__(learning_rate, use_locking, name)
 
     def apply_gradients(self, grads_and_vars, global_step=None, name=None):
-        """
-
-        :param grads_and_vars:
-        :param global_step:
-        :param name:
-        :return: gradient descent step :apply_updates; \n and corresponding dynamics
-        """
-        # grads_and_vars=self.soft_thresholding(grads_and_vars);
         update_op = super(BOMLOptSGD, self).apply_gradients(
             grads_and_vars, global_step, name
         )

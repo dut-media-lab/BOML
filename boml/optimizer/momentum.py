@@ -6,8 +6,6 @@ import tensorflow as tf
 
 from boml.optimizer.opt import BOMLOpt
 
-# import numpy as np
-
 GRADIENT_NONE_MESSAGE = (
     "WARNING: the gradient w.r.t.the tf.Variable\n {}\n is None;\n "
     "Check the computational graph of the inner objective, and be sure you\n"
@@ -31,7 +29,6 @@ class BOMLOptMomentum(BOMLOpt, tf.train.MomentumOptimizer):
         )
 
     def apply_gradients(self, grads_and_vars, global_step=None, name=None):
-        # filter_hypers
 
         update_op = super(BOMLOptMomentum, self).apply_gradients(
             grads_and_vars, global_step, name

@@ -281,7 +281,7 @@ def build_and_test(
     )
 
 
-def main():
+def test_meta_init():
     print(args.__dict__)
     metasets = map_dict[args.dataset]["data_loader"](
         std_num_classes=args.classes,
@@ -345,4 +345,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    test_meta_init()

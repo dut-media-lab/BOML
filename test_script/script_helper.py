@@ -1,13 +1,13 @@
-import argparse
-import pickle
-from threading import Thread
-import os
-
-import tensorflow as tf
-import numpy as np
 import time
 import boml
 import boml.load_data as dl
+import argparse
+import pickle
+import os
+import tensorflow as tf
+import numpy as np
+from threading import Thread
+
 from boml.utils import feed_dicts
 
 parser = argparse.ArgumentParser()
@@ -203,6 +203,26 @@ parser.add_argument(
     metavar="NUMBER",
     help="factor for controlling the ratio of gradients",
 )
+
+parser.add_argument(
+    "-bs",
+    "--bda_s",
+    type=float,
+    default=1.0,
+    metavar="NUMBER",
+    help="factor for controlling the ratio of UL objective",
+)
+
+
+parser.add_argument(
+    "-bt",
+    "--bda_t",
+    type=float,
+    default=1.0,
+    metavar="NUMBER",
+    help="factor for controlling the ratio of LL objective",
+)
+
 parser.add_argument(
     "-md",
     "--method",
@@ -233,7 +253,7 @@ parser.add_argument(
     type=bool,
     default=False,
     metavar="BOOLEAN",
-    help="whether use T-Net",
+    help="whether to use T-Net",
 )
 parser.add_argument(
     "-u_W",
@@ -241,7 +261,7 @@ parser.add_argument(
     type=bool,
     default=False,
     metavar="BOOLEAN",
-    help="whether use Warp layer to implement Warp-MAML",
+    help="whether to use Warp layer to implement WarpGrad",
 )
 parser.add_argument(
     "-fo",
@@ -367,10 +387,8 @@ exp_string = (
     + "mbs"
     + str(args.T)
     + "T"
-    + str(args.clip_value)
-    + "clip"
-    + str(args.alpha)
-    + "alpha"
+    + str(args.method)
+    + "Method"
     + str(args.inner_method)
     + "inner_method"
     + str(args.outer_method)
