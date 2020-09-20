@@ -1,3 +1,7 @@
+"""
+The base class in upper_iter to encapsulate the UL optimization strategies.
+BOMLOptimizer conducts the UL calculation with strategies in upper_iter that calls lower iter during the back propagation process in turn.
+"""
 from __future__ import absolute_import, print_function, division
 
 from collections import defaultdict, OrderedDict
@@ -39,7 +43,7 @@ class BOMLOuterGrad(object):
         """
         assert isinstance(
             boml_inner_grad, BOMLInnerGradTrad
-        ), BOMLOuterGrad._ERROR_NOT_OPTIMIZER_DICT.format(boml_inner_grad)
+        ), "Illegal instance for BOMLInnerGradTrad"
         self._inner_grads.add(boml_inner_grad)
 
         if meta_param is None:  # get default outer parameters

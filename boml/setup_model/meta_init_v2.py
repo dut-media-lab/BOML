@@ -1,3 +1,6 @@
+"""
+The base class in setup_model to encapsulate Residual Block for meta-initialization-based methods.
+"""
 from boml.extension import remove_from_collection
 from boml.setup_model import network_utils
 from boml.setup_model.network import *
@@ -224,7 +227,7 @@ class BOMLNetOmniglotMetaInitV2(BOMLNet):
         var_collections=tf.GraphKeys.MODEL_VARIABLES,
         conv_initializer=tf.contrib.layers.xavier_initializer_conv2d(tf.float32),
         outer_method="Simple",
-        output_weight_initializer=tf.zeros_initializer(tf.float32),
+        output_weight_initializer=tf.zeros_initializer,
         batch_norm=True,
         data_type=tf.float32,
         channels=1,

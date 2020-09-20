@@ -1,3 +1,6 @@
+"""
+The base class in setup_model to encapsulate Residual Block for meta-feature-based methods.
+"""
 from collections import OrderedDict
 
 import tensorflow as tf

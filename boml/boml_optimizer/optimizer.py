@@ -1,3 +1,8 @@
+"""
+BOML first instantiates BOMLOptimizer to store necessary parameters
+ of model configuration and help manage the procedures.
+
+"""
 from collections import defaultdict, OrderedDict
 
 import numpy as np
@@ -122,7 +127,8 @@ class BOMLOptimizer(object):
         :param meta_model: model chosen for neural network construction, 'v1' for C4L with fully connected layer,
         'v2' for Residual blocks with fully connected layer.
         :param name:  name for Meta model modules used for BMLNet initialization
-        :param use_t: whether to use T layer for C4L neural networks
+        :param use_t: whether to use T Layer for C4L neural networks
+        :param use_warp: whether to use Warp Layer for C4L neural networks
         :param model_loss_func: forms of loss functions of task-specific layer corresponding to 'WarpGrad' method, default to be cross-entropy
         :param outer_loss_func: forms of loss functions of task-specific layer corresponding to 'WarpGrad' method, default to be cross-entropy
         :return: BMLNet object containing the dict of hyper parameters
@@ -193,7 +199,7 @@ class BOMLOptimizer(object):
                 _input=_input,
                 dims=self.data_set.train.dim_target,
                 output_weight_initializer=weights_initializer,
-                name=name
+                name=name,
             )
         else:
             print(
@@ -207,6 +213,7 @@ class BOMLOptimizer(object):
         inner_objective,
         learning_rate,
         T,
+        var_list=None,
         inner_objective_optimizer="SGD",
         outer_objective=None,
         learn_lr=False,
@@ -216,7 +223,6 @@ class BOMLOptimizer(object):
         t=1.0,
         learn_alpha=False,
         learn_alpha_itr=False,
-        var_list=None,
         first_order=False,
         loss_func=utils.cross_entropy,
         momentum=0.5,
@@ -382,13 +388,13 @@ class BOMLOptimizer(object):
         :param meta_learning_rate: step size for outer loop optimization
         :param inner_grad: Returned value of py_bml.BMLHOptimizer.LLProblem()
         :param meta_param: optional list of outer parameters and model parameters
+        :param mlr_decay: the rate to decay the meta learning rate according the global_step
         :param outer_objective_optimizer: Optimizer type for the outer parameters,
         should be in list ['SGD','Momentum','Adam']
         :param epsilon: Float, cofffecients to be used in DARTS algorithm
         :param momentum: specific parameters to be used to initialize 'Momentum' algorithm
+        :param warp_lambda: specific parameter of the loss function for model parameters of Warp-Layer in `WarpGrad` strategy
         :param tolerance: specific function template for Implicit HG Algorithm
-        :param global_step: optional global step. By default tries to use the last variable
-        in the collection GLOBAL_STEP
         :return: itself
         """
         if self._meta_learning_rate is None:
@@ -530,7 +536,6 @@ class BOMLOptimizer(object):
             return utils.merge_dicts(_io_fd, _oo_fd)
 
         ss.run(self._meta_iteration, _opt_fd())
-
 
     @property
     def meta_model(self):

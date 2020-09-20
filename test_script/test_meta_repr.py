@@ -77,10 +77,10 @@ def build(
         )
 
         ex.errors["training"] = boml.utils.cross_entropy(
-            pred=ex.model.out, label=ex.y, method=method
+            pred=ex.model.out, label=ex.y
         )
         ex.errors["validation"] = boml.utils.cross_entropy(
-            label=ex.y_, pred=ex.model.re_forward(repr_out_val).out, method=method
+            label=ex.y_, pred=ex.model.re_forward(repr_out_val).out
         )
         ex.scores["accuracy"] = tf.reduce_mean(
             tf.cast(

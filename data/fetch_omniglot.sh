@@ -11,11 +11,7 @@ set -e
 mkdir tmp
 trap 'rm -r tmp' EXIT
 
-if [ ! -d data ]; then
-    mkdir data
-fi
-
-if [ ! -d data/omniglot ]; then
+if [ ! -d /omniglot ]; then
     mkdir tmp/omniglot
     for name in images_background images_evaluation; do
         echo "Fetching omniglot/$name ..."
@@ -25,5 +21,5 @@ if [ ! -d data/omniglot ]; then
         rm "tmp/$name.zip"
         mv tmp/$name/* tmp/omniglot
     done
-    mv tmp/omniglot data/omniglot
+    mv tmp/omniglot /omniglot
 fi

@@ -1,3 +1,6 @@
+"""
+Subclass of BOMLOuterGrad to implement the UL optimization strategy for `Meta-Initialization-Based` method .
+"""
 from collections import OrderedDict
 
 import tensorflow as tf
@@ -39,12 +42,7 @@ class BOMLOuterGradSimple(BOMLOuterGrad):
         )
 
         with tf.variable_scope(outer_objective.op.name):
-            """
-            if len(meta_param) == len(list(optimizer_dict.state)):
-                doo_dhypers = tf.gradients(outer_objective,list(optimizer_dict.state))
-                #doo_dhypers = tf.gradients(outer_objective, list(optimizer_dict.model_fast_weights.values()))
-            else:
-                """
+
             if param_dict["use_warp"]:
                 doo_dhypers = [
                     self.warp_lambda * outer_param

@@ -1,3 +1,6 @@
+"""
+The base class in lower_iter to encapsulate the modified Momentum optimizer based on `tf.train.GradientDescentOptimizer`.
+"""
 from __future__ import print_function, absolute_import, division
 
 from collections import OrderedDict

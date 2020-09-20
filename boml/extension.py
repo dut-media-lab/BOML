@@ -1,3 +1,6 @@
+"""
+Contains some utility functions to create and manager parameters of different computation modules .
+"""
 import sys
 
 import numpy as np
@@ -5,8 +8,8 @@ import tensorflow as tf
 
 from boml import utils
 
-Meta_Repr_Method = ["MAML", "FOMAML", "Meta-SGD", "MT-net"]
-Meta_Init_Method = ["Reverse", "Truncated", "DARTS", "BDA", "Implicit"]
+Meta_Repr_Method = ["MAML", "FOMAML", "Meta-SGD", "MT-net", "WarpGrad"]
+Meta_Init_Method = ["RHG", "TRHG", "DARTS", "BDA", "Implicit"]
 METHOD_COLLECTIONS = [Meta_Repr_Method, Meta_Init_Method]
 
 
@@ -145,8 +148,6 @@ def get_outerparameter(
 
 
 def get_global_step(name="GlobalStep", init=0):
-    import tensorflow as tf
-
     return tf.get_variable(
         name,
         initializer=init,

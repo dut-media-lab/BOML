@@ -1,3 +1,6 @@
+"""
+Subclass of BOMLOuterGrad to implement the UL optimization strategy for `Implicit` method .
+"""
 from __future__ import absolute_import, print_function, division
 
 from collections import OrderedDict
@@ -51,10 +54,12 @@ class BOMLOuterGradImplicit(BOMLOuterGrad):
         with tf.variable_scope(outer_objective.op.name):
             g1 = utils.vectorize_all(
                 tf.gradients(outer_objective, state)
-            )  # Lower Level gradient of UL objective  w.r.t task parameters
+            )
+            # Lower Level gradient of UL objective  w.r.t task parameters
             grads_inner_obj_vec = utils.vectorize_all(
                 tf.gradients(inner_grad.objective, state)
-            )  #  Lower Level gradient of LL objective  w.r.t task parameters
+            )
+            #  Lower Level gradient of LL objective  w.r.t task parameters
 
             q = self._create_q(g1)
             obj = tf.norm(

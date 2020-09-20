@@ -1,3 +1,8 @@
+"""
+The base class in lower_iter to encapsulate the LL optimization strategies.BOMLOptimizer chooses
+built-in or extended strategies in lower iter and returns iterative formats of the dynamical
+system.
+"""
 from __future__ import print_function, absolute_import, division
 
 from collections import OrderedDict

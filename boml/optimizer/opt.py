@@ -1,3 +1,7 @@
+"""
+The base class in optimizer to encapsulate the modified optimizer based on conventional gradient descent optimizers.  To adapt to the
+nested gradient computation of dynamical systems in lower iter and lower iter, BOML integrates modified optimizers (such as SGD with momentum) in optimizer.
+"""
 from __future__ import print_function, absolute_import, division
 
 import tensorflow as tf
@@ -7,6 +11,7 @@ class BOMLOpt(tf.train.Optimizer):
     """
     mirror of the tf.train.Optimizer.
     """
+
     def minimize(
         self,
         loss_inner,

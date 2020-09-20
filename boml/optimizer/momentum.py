@@ -1,9 +1,11 @@
+"""
+The base class in lower_iter to encapsulate the modified Momentum optimizer based on `tf.train.MomentumOptimizer`.
+"""
 from __future__ import print_function, absolute_import, division
 
 from collections import OrderedDict
 
 import tensorflow as tf
-
 from boml.optimizer.opt import BOMLOpt
 
 GRADIENT_NONE_MESSAGE = (

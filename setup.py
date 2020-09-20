@@ -14,7 +14,7 @@ def get_install_requirements():
 
 setup(
     name="boml",
-    version="0.1.2a1",
+    version="0.1.2",
     packages=find_packages(),
     long_description=long_description,
     url="https://github.com/dut-media-lab/BOML",

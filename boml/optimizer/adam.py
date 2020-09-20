@@ -1,3 +1,7 @@
+"""
+The base class in lower_iter to encapsulate the modified Adam optimizer based on `tf.train.AdamOptimizer`.
+"""
+
 from __future__ import print_function, absolute_import, division
 
 from collections import OrderedDict

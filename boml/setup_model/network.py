@@ -1,3 +1,7 @@
+"""
+The base class in setup_model to encapsulate BOMLNet based on conventional gradient descent optimizers.  setup_model
+defines network structure and initializes network parameters of meta-learner and base-learner on the basis of the data formats returned by load data.
+"""
 import sys
 from collections import OrderedDict
 

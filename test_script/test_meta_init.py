@@ -63,7 +63,7 @@ def build(
             _input=ex.x, meta_learner=meta_model, name="Task_Net_%s" % k
         )
         ex.errors["training"] = boml.utils.cross_entropy(
-            pred=ex.model.out, label=ex.y, method=method
+            pred=ex.model.out, label=ex.y
         )
         ex.scores["accuracy"] = boml.utils.classification_acc(
             pred=ex.model.out, label=ex.y
@@ -82,7 +82,7 @@ def build(
             first_order=first_order,
         )
         ex.errors["validation"] = boml.utils.cross_entropy(
-            pred=ex.model.re_forward(ex.x_).out, label=ex.y_, method=method
+            pred=ex.model.re_forward(ex.x_).out, label=ex.y_
         )
         boml_ho.ul_problem(
             outer_objective=ex.errors["validation"],

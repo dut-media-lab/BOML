@@ -1,3 +1,6 @@
+"""
+The base class in setup_model to encapsulate the fully-connected layer.
+"""
 from collections import OrderedDict
 
 import tensorflow as tf
@@ -65,7 +68,7 @@ class BOMLNetFeedForward(BOMLNet):
         self.task_parameter["fc_bias"] = tf.get_variable(
             "fc_bias",
             [self.dims[-1]],
-            initializer=tf.zeros_initializer,
+            initializer=tf.zeros_initializer(tf.float32),
             dtype=self.data_type,
         )
         [

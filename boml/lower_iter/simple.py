@@ -1,3 +1,6 @@
+"""
+Subclass of BOMLInnerGradTrad to implement the LL optimization strategy for `Meta-Feature-Based`methods.
+"""
 from collections import OrderedDict
 
 import tensorflow as tf
@@ -77,13 +80,11 @@ class BOMLInnerGradSimple(BOMLInnerGradTrad):
         if param_dict["use_warp"]:
             outer_param_loss = param_dict["outer_loss_func"](
                 pred=task_model.re_forward(param_dict["experiment"].x_).out,
-                label=param_dict["experiment"].y_,
-                method="MetaInit",
+                label=param_dict["experiment"].y_
             )
             model_param_loss = param_dict["model_loss_func"](
                 pred=task_model.re_forward(param_dict["experiment"].x_).out,
-                label=param_dict["experiment"].y_,
-                method="MetaInit",
+                label=param_dict["experiment"].y_
             )
             outer_param_grad = tf.gradients(outer_param_loss, list(var_list))
             model_param_grad = tf.gradients(
@@ -115,19 +116,17 @@ class BOMLInnerGradSimple(BOMLInnerGradTrad):
             task_param = task_model.task_parameter
 
             iter_loss = param_dict["loss_func"](
-                pred=task_model.out, label=param_dict["experiment"].y, method="MetaInit"
+                pred=task_model.out, label=param_dict["experiment"].y
             )
 
             if param_dict["use_warp"]:
                 outer_param_loss = param_dict["outer_loss_func"](
                     pred=task_model.re_forward(param_dict["experiment"].x_).out,
                     label=param_dict["experiment"].y_,
-                    method="MetaInit",
                 )
                 model_param_loss = param_dict["model_loss_func"](
                     pred=task_model.re_forward(param_dict["experiment"].x_).out,
                     label=param_dict["experiment"].y_,
-                    method="MetaInit",
                 )
                 outer_param_grad = add_list(
                     outer_param_grad, tf.gradients(outer_param_loss, list(var_list))

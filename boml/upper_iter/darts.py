@@ -1,3 +1,6 @@
+"""
+Subclass of BOMLOuterGrad to implement the UL optimization strategy for `DARTS` method .
+"""
 from __future__ import absolute_import, print_function, division
 
 from collections import OrderedDict
@@ -114,7 +117,6 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
                 loss_func(
                     pred=model.re_forward(task_parameter=left_diff_0).out,
                     label=ex.y,
-                    method="MetaRepr",
                 ),
                 xs=meta_param,
             )
@@ -122,7 +124,6 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
                 loss_func(
                     pred=model.re_forward(task_parameter=right_diff_0).out,
                     label=ex.y,
-                    method="MetaRepr",
                 ),
                 xs=meta_param,
             )

@@ -1,5 +1,5 @@
 """
-Simple container for useful quantities for a supervised learning experiment, where data is managed
+Simple container for useful quantities for a supervised learning BOMLExperiment, where data is managed
 with feed dictionary
 """
 import tensorflow as tf

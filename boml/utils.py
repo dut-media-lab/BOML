@@ -1,3 +1,6 @@
+"""
+Contains some utility functions to run your training model and evaluate the performance.
+"""
 from __future__ import absolute_import, print_function, division
 
 import sys
@@ -84,6 +87,23 @@ def add_list(lst1, lst2):
     return [ls1 + ls2 for ls1, ls2 in zip(lst1, lst2)]
 
 
+
+
+def mean_std_ci(measures, mul=1.0, tex=False):
+    """
+    Computes mean, standard deviation and 95% half-confidence interval for a list of measures.
+
+    :param measures: list
+    :param mul: optional multiplication coefficient (e.g. for percentage)
+    :param tex: if True returns mean +- half_conf_interval for latex
+    :return: a list or a string in latex
+    """
+    half_int = lambda _m: 1.96 * np.std(_m) / np.sqrt(len(_m) - 1)
+    measures = np.array(measures) * mul
+    ms = np.mean(measures), np.std(measures), half_int(measures)
+    return ms if not tex else r"${:.2f} \pm {:.2f}$".format(ms[0], ms[2])
+
+
 def maybe_call(obj, *args, **kwargs):
     """
     Calls obj with args and kwargs and return its result if obj is callable, otherwise returns obj.
@@ -122,16 +142,16 @@ def solve_int_or_generator(int_or_generator):
     return range(int_or_generator) if isinteger(int_or_generator) else int_or_generator
 
 
-def cross_entropy(pred, label, method="MetaInit"):
+def cross_entropy(pred, label):
+    """
 
-    # Note - with tf version <=0.12, this loss has incorrect 2nd derivatives
-    assert method in ("MetaInit", "MetaRepr"), "Wrong value for argument method"
-    if method == "MetaInit":
-        return tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=label)
-    elif method == "MetaRepr":
-        return tf.reduce_mean(
-            tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=label)
-        )
+    :param pred: output of the neural networks
+    :param label: the true label paired with the input
+    :return:
+    """
+    return tf.reduce_mean(
+        tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=label)
+    )
 
 
 def classification_acc(pred, label):
@@ -147,7 +167,7 @@ def set_gpu():
     return gpu_config
 
 
-def get_rand_state(rand):
+def get_rand_state(rand=0):
     """
     Utility methods for getting a `RandomState` object.
 
@@ -179,10 +199,21 @@ def val_or_zero(a, b):
 
 
 def isinteger(num):
+    """
+    Judge whether the num is integer
+    :param num:
+    :return: BOOLEAN
+    """
     return isinstance(num, (int, np.int_, np.int8, np.int16, np.int32, np.int64))
 
 
 def feed_dicts(dat_lst, exs):
+    """
+    Generate the feed_dicts for boml_optimizer.run() with lists of
+    :param dat_lst:
+    :param exs:
+    :return:
+    """
     dat_lst = boml.utils.as_list(dat_lst)
     train_fd = boml.utils.merge_dicts(
         *[
@@ -197,4 +228,17 @@ def feed_dicts(dat_lst, exs):
         ]
     )
 
+    return train_fd, valid_fd
+
+
+def feed_dict(data_batch, ex):
+    """
+    Generate the feed_dicts for boml_optimizer.run() with data_batch and the instance of BOMLExperiment
+    :param data_batch: each batch of data for exery iteration
+    :param ex: instance of BOMLExperiment
+    :return:
+    """
+    data_batch = data_batch[0]
+    train_fd = {ex.x: data_batch.train.data, ex.y: data_batch.train.target}
+    valid_fd = {ex.x_: data_batch.test.data, ex.y_: data_batch.test.target}
     return train_fd, valid_fd

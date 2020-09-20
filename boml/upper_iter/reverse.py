@@ -1,3 +1,6 @@
+"""
+Subclass of BOMLOuterGrad to implement the UL optimization strategy for most of the `Meta-Feature-Based` methods.
+"""
 from __future__ import absolute_import, print_function, division
 
 from collections import OrderedDict, deque

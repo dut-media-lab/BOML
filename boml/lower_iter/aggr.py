@@ -1,3 +1,6 @@
+"""
+Subclass of BOMLInnerGradTrad to implement the LL optimization strategy for `Bilevel Aggregation` strategy.
+"""
 from collections import OrderedDict
 
 import tensorflow as tf

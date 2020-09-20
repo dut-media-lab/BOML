@@ -7,9 +7,7 @@ import os
 import tensorflow as tf
 import numpy as np
 from threading import Thread
-
-from boml.utils import feed_dicts
-
+from boml import utils
 parser = argparse.ArgumentParser()
 
 parser.add_argument(
@@ -21,7 +19,6 @@ parser.add_argument(
     help="mode, can be train or test",
 )
 
-# Dataset/method options
 parser.add_argument(
     "-d",
     "--dataset",
@@ -463,7 +460,7 @@ def meta_train(
     with sess.as_default():
         inner_losses = []
         for meta_it in range(resume_itr, n_meta_iterations):
-            tr_fd, v_fd = feed_dicts(train_batches.get_all_batches()[0], exs)
+            tr_fd, v_fd = utils.feed_dicts(train_batches.get_all_batches()[0], exs)
             pybml_ho.run(tr_fd, v_fd)
 
             duration = time.time() - start_time
@@ -778,6 +775,9 @@ class BatchQueueMock:
             )
         ]
 
+    def get_single_batch(self):
+        return [d for d in self.metadataset.generate(self.n_batches, 1, self.rand)]
+
 
 def save_obj(file_path, obj):
     with open(file_path, "wb") as handle:
@@ -794,7 +794,7 @@ def load_obj(file_path):
 
 
 def just_train_on_dataset(dat, exs, pybml_ho, sess, T):
-    train_fd, valid_fd = feed_dicts(dat, exs)
+    train_fd, valid_fd = utils.feed_dicts(dat, exs)
     # print('train_feed:', train_fd)  # DEBUG
     sess.run(pybml_ho.outergradient.initialization)
     tr_acc, v_acc = [], []
@@ -831,7 +831,7 @@ def accuracy_on(batch_queue, exs, pybml_ho, sess, T):
 
 
 def just_train_on_dataset_up_to_T(dat, exs, pybml_ho, sess, T):
-    train_fd, valid_fd = feed_dicts(dat, exs)
+    train_fd, valid_fd = utils.feed_dicts(dat, exs)
     # print('train_feed:', train_fd)  # DEBUG
     sess.run(pybml_ho.outergradient.initialization)
     tr_acc, v_acc = [[] for _ in range(T)], [[] for _ in range(T)]
@@ -865,6 +865,11 @@ def accuracy_on_up_to_T(batch_queue, exs, pybml_ho, sess, T):
         [v_acc[T].extend(r) for T, r in enumerate(result[1])]
 
     return tr_acc, v_acc
+
+
+def get_default_session():
+
+    return tf.get_default_session()
 
 
 def get_rand_state(rand):

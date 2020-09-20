@@ -11,12 +11,12 @@
 5. [Authors and Liscense](#a5)
 
 ## Introduction <div1 id="a1"></div1>
-BOML is a bilevel optimization library in Python for meta learning. Before reading the documentation, you could refer to [View on GitHub](https://github.com/liuyaohua918/boml/edit/master/README.md) for a brief introduction about meta learning and BOML. <br>
+BOML is a bilevel optimization library in Python for meta learning. Before reading the documentation, you could refer to [View on GitHub](https://github.com/dut-media-lab/BOML) for a brief introduction about meta learning and BOML. <br>
 Here we provide detailed instruction to quickly get down to your research and test performance of popular algorithms and new ideas.
 
 ## Installation and requirements  <div2 id="a2"></div2>
 BOML implements various meta learning approaches based on [TensorFlow](https://www.tensorflow.org/install/pip), which is one of the most popular macheine learning platform. Besides, [Numpy](https://numpy.org/install/) and basical image processing modules are required for installation. <br>
-We also provide [requirements.txt](https://github.com/liuyaohua918/boml/requirements.txt) as reference for version control.
+We also provide [requirements.txt](https://github.com/dut-media-lab/BOML/blob/master/requirements.txt) as reference for version control.
 BOML requires Python 3.5+ and TensorFlow 1.13+.
 
   ```
@@ -305,7 +305,7 @@ BOML requires Python 3.5+ and TensorFlow 1.13+.
     ```
 		from boml import utils
 		from test_script.script_helper import *
-		dataset = boml.load_data.meta_omniglot(std_num_classes=args.num_classes,
+		dataset = boml.load_data.meta_omniglot(std_num_classes=args.classes,
 											   examples_train=args.examples_train,
 											   examples_test=args.examples_test)
 		ex = boml.BOMLExperiment(dataset)
@@ -329,7 +329,7 @@ BOML requires Python 3.5+ and TensorFlow 1.13+.
         with utils.get_default_session():
             for itr in range(args.meta_train_iterations):
                 train_batch = BatchQueueMock(dataset.train, 1,args.meta_batch_size，utils.get_rand_state())
-                tr_fd, v_fd = feed_dicts(train_batch)
+                tr_fd, v_fd = feed_dicts(train_batch, ex)
                 boml_ho.run(tr_fd, v_fd)
     ``` 
     

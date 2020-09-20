@@ -1,5 +1,5 @@
 """
-Contains some misc utility functions
+Contains some utility functions to build the neural network structures.
 """
 
 from functools import reduce
@@ -355,6 +355,3 @@ def leaky_relu(x, alpha, name=None):
 
     with tf.name_scope(name, "leaky_relu_{}".format(alpha)):
         return tf.nn.relu(x) - alpha * tf.nn.relu(-x)
-
-
-

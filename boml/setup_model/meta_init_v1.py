@@ -1,3 +1,6 @@
+"""
+The base class in setup_model to encapsulate C4L neural network.
+"""
 from collections import OrderedDict
 
 import numpy as np
@@ -136,14 +139,10 @@ class BOMLNetMetaInitV1(BOMLNet):
             for i in range(len(self.dim_hidden)):
                 self.model_param_dict[
                     "conv" + str(i) + "_z"
-                ] = network_utils.get_warp_weight(
-                    self, i, self.conv_initializer
-                )
+                ] = network_utils.get_warp_weight(self, i, self.conv_initializer)
                 self.model_param_dict[
                     "bias" + str(i) + "_z"
-                ] = network_utils.get_warp_bias(
-                    self, i, self.bias_initializer
-                )
+                ] = network_utils.get_warp_bias(self, i, self.bias_initializer)
         [
             tf.add_to_collections(var_collections, model_param)
             for model_param in self.model_param_dict.values()

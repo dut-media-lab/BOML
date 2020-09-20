@@ -44,7 +44,7 @@ else:
     print(
         "Environment variable DATASETS_FOLDER not found. Variables HELP_WIN and HELP_UBUNTU contain info."
     )
-    DATA_FOLDER = os.getcwd()
+    DATA_FOLDER = os.path.join(os.getcwd(), "data")
     _COMMON_BEGIN = (
         "You can set environment variable DATASETS_FOLDER to"
         "specify root folder in which you store various datasets. \n"
