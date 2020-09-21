@@ -7,16 +7,13 @@ dataset = boml.load_data.meta_omniglot(
     examples_test=args.examples_test,
 )
 ex = boml.BOMLExperiment(dataset)
-print("experiment built!")
 # build network structure and define hyperparameters
 boml_ho = boml.BOMLOptimizer(
     method="MetaInit", inner_method="Simple", outer_method="Simple"
 )
 meta_learner = boml_ho.meta_learner(_input=ex.x, dataset=dataset, meta_model="V1")
-print("meta learner built!")
 ex.model = boml_ho.base_learner(_input=ex.x, meta_learner=meta_learner)
 # define LL objectives and LL calculation process
-print("base learner built!")
 loss_inner = utils.cross_entropy(pred=ex.model.out, label=ex.y)
 accuracy = utils.classification_acc(pred=ex.model.out, label=ex.y)
 inner_grad = boml_ho.ll_problem(
@@ -36,7 +33,7 @@ boml_ho.ul_problem(
 )
 # aggregate all the defined operations
 boml_ho.aggregate_all()
-# meta training step
+# meta training iteration
 with tf.Session() as sess:
     tf.global_variables_initializer().run(session=sess)
     for itr in range(args.meta_train_iterations):
@@ -45,7 +42,7 @@ with tf.Session() as sess:
             dataset.train, 1, args.meta_batch_size, utils.get_rand_state(1)
         )
         tr_fd, v_fd = utils.feed_dict(train_batch.get_single_batch(), ex)
+        # meta training step
         boml_ho.run(tr_fd, v_fd)
-        print("finish one meta-iteration ")
         if itr % 100 == 0:
             print(sess.run(loss_inner, utils.merge_dicts(tr_fd, v_fd)))

@@ -32,32 +32,63 @@ Here we illustrate the generic optimization process and hierarchically built str
 ![Optimization Routine](https://github.com/dut-media-lab/BOML/blob/master/figures/p2.png)
 </div>
 
-## Running examples
-```python
-from boml import utils
-# initialize the BOMLOptimizer, specify strategies for ll_problem() and ul_problem()
-boml_opt= boml.BOMLOptimizer('MetaInit', 'Simple', 'Simple')
-#load dataset
-dataset = boml.load_data.meta_omniglot(num_classes, (num_train, num_test))
-ex = boml.BOMLExperiment(dataset)
-# build network structure and initializer model parameters
-meta_learner = boml_opt.meta_learner(ex.x, dataset, 'V1')
-ex.model = boml_ho.base_learner(ex.x, meta_learner)
-# lower objectives
-loss_inner = utils.cross_entropy(ex.model.out, ex.y)
-# define lower-level subproblem
-inner_grad = boml_ho.ll_problem(loss_inner, lr, T, experiment=ex)
-# define upper objectives and upper-level subproblem
-loss_outer = utils.cross_entropy(ex.model.re_forward(ex.x_).out, ex.y_)
-boml_ho.ul_problem(loss_outer, args.mlr, inner_grad,
-                    meta_param=boml.extension.metaparameters())
-# aggregate all the defined operations
-boml_ho.aggregate_all()
-```
 ## Documentation 
 For more detailed information of basic function and construction process, please refer to our [Help Documentation](https://dut-media-lab.github.io/BOML/). Scripts in the directory named test_script are useful for constructing general training process.
 
 Here we give recommended settings for specific hyper paremeters to quickly test performance of popular algorithms.
+
+## Running examples
+```python
+from boml import utils
+from test_script.script_helper import *
+
+dataset = boml.load_data.meta_omniglot(
+    std_num_classes=args.classes,
+    examples_train=args.examples_train,
+    examples_test=args.examples_test,
+)
+ex = boml.BOMLExperiment(dataset)
+# build network structure and define hyperparameters
+boml_ho = boml.BOMLOptimizer(
+    method="MetaInit", inner_method="Simple", outer_method="Simple"
+)
+meta_learner = boml_ho.meta_learner(_input=ex.x, dataset=dataset, meta_model="V1")
+ex.model = boml_ho.base_learner(_input=ex.x, meta_learner=meta_learner)
+# define LL objectives and LL calculation process
+loss_inner = utils.cross_entropy(pred=ex.model.out, label=ex.y)
+accuracy = utils.classification_acc(pred=ex.model.out, label=ex.y)
+inner_grad = boml_ho.ll_problem(
+    inner_objective=loss_inner,
+    learning_rate=args.lr,
+    T=args.T,
+    experiment=ex,
+    var_list=ex.model.var_list,
+)
+# define UL objectives and UL calculation process
+loss_outer = utils.cross_entropy(pred=ex.model.re_forward(ex.x_).out, label=ex.y_)
+boml_ho.ul_problem(
+    outer_objective=loss_outer,
+    meta_learning_rate=args.meta_lr,
+    inner_grad=inner_grad,
+    meta_param=tf.get_collection(boml.extension.GraphKeys.METAPARAMETERS),
+)
+# aggregate all the defined operations
+boml_ho.aggregate_all()
+# meta training iteration
+with tf.Session() as sess:
+    tf.global_variables_initializer().run(session=sess)
+    for itr in range(args.meta_train_iterations):
+        # generate the feed_dict for calling run() everytime
+        train_batch = BatchQueueMock(
+            dataset.train, 1, args.meta_batch_size, utils.get_rand_state(1)
+        )
+        tr_fd, v_fd = utils.feed_dict(train_batch.get_single_batch(), ex)
+        # meta training step
+        boml_ho.run(tr_fd, v_fd)
+        if itr % 100 == 0:
+            print(sess.run(loss_inner, utils.merge_dicts(tr_fd, v_fd)))
+
+```
 
 ## Related Methods 
  - [Hyperparameter optimization with approximate gradient(HOAG)](https://arxiv.org/abs/1602.02355)
@@ -70,6 +101,7 @@ Here we give recommended settings for specific hyper paremeters to quickly test 
  - [Meta-Learning with warped gradient Descent(WarpGrad))](https://arxiv.org/abs/1909.00025)
  - [DARTS: Differentiable Architecture Search(DARTS)](https://arxiv.org/pdf/1806.09055.pdf)
  - [A Generic First-Order Algorithmic Framework for Bi-Level Programming Beyond Lower-Level Singleton(BA)](https://arxiv.org/pdf/2006.04045.pdf)
+
 
 
 ## License
