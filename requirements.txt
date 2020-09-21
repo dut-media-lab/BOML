@@ -6,4 +6,5 @@ intervaltree
 matplotlib
 Pillow
 scikit_learn
+gast
 tensorflow >=1.13.*,<=1.15.*
