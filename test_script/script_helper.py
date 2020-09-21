@@ -887,3 +887,31 @@ def get_rand_state(rand):
         return np.random.RandomState(rand)
     else:
         raise ValueError("parameter rand {} has wrong type".format(rand))
+
+
+def mean_std_ci(measures, mul=1.0, tex=False):
+    """
+    Computes mean, standard deviation and 95% half-confidence interval for a list of measures.
+
+    :param measures: list
+    :param mul: optional multiplication coefficient (e.g. for percentage)
+    :param tex: if True returns mean +- half_conf_interval for latex
+    :return: a list or a string in latex
+    """
+    half_int = lambda _m: 1.96 * np.std(_m) / np.sqrt(len(_m) - 1)
+    measures = np.array(measures) * mul
+    ms = np.mean(measures), np.std(measures), half_int(measures)
+    return ms if not tex else r"${:.2f} \pm {:.2f}$".format(ms[0], ms[2])
+
+
+def feed_dict(data_batch, ex):
+    """
+    Generate the feed_dicts for boml_optimizer.run() with data_batch and the instance of BOMLExperiment
+    :param data_batch: each batch of data for exery iteration
+    :param ex: instance of BOMLExperiment
+    :return:
+    """
+    data_batch = data_batch[0]
+    train_fd = {ex.x: data_batch.train.data, ex.y: data_batch.train.target}
+    valid_fd = {ex.x_: data_batch.test.data, ex.y_: data_batch.test.target}
+    return train_fd, valid_fd
