@@ -35,7 +35,8 @@
             
   <div class="section" id="simple-running-example">
 <h1>Simple Running Example<a class="headerlink" href="#simple-running-example" title="Permalink to this headline">¶</a></h1>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>from boml import utils
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># start from laoding data</span>
+from boml import utils
 from test_script.script_helper import *
 
 <span class="nv">dataset</span> <span class="o">=</span> boml.load_data.meta_omniglot<span class="o">(</span>
@@ -73,7 +74,7 @@ boml_ho.ul_problem<span class="o">(</span>
 <span class="o">)</span>
 <span class="c1"># aggregate all the defined operations</span>
 boml_ho.aggregate_all<span class="o">()</span>
-<span class="c1"># meta training step</span>
+<span class="c1"># Meta training step</span>
 with tf.Session<span class="o">()</span> as sess:
         tf.global_variables_initializer<span class="o">()</span>.run<span class="o">(</span><span class="nv">session</span><span class="o">=</span>sess<span class="o">)</span>
         <span class="k">for</span> itr in range<span class="o">(</span>args.meta_train_iterations<span class="o">)</span>:

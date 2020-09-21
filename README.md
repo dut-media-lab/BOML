@@ -89,7 +89,7 @@ boml_ho.ul_problem(
 # Only need to be called once after all the tasks are ready
 boml_ho.aggregate_all()
 ```
-### meta training iteration
+### Meta training iteration
 ```python
 with tf.Session() as sess:
     tf.global_variables_initializer().run(session=sess)

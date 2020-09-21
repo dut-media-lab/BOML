@@ -4,6 +4,7 @@ Simple Running Example
 
 ::
 
+	# start from laoding data
 	from boml import utils
 	from test_script.script_helper import *
 
@@ -42,7 +43,7 @@ Simple Running Example
 	)
 	# aggregate all the defined operations
 	boml_ho.aggregate_all()
-	# meta training step
+	# Meta training step
 	with tf.Session() as sess:
 		tf.global_variables_initializer().run(session=sess)
 		for itr in range(args.meta_train_iterations):
