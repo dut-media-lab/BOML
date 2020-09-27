@@ -306,10 +306,10 @@ def build_and_test(
     )
 
 
-def test_meta_repr():
+def test_meta_feat():
     print(args.__dict__)
 
-    metasets = map_dict[args.dataset]["data_loader"](
+    metasets = map_dict[args.dataset](
         std_num_classes=args.classes,
         examples_train=args.examples_train,
         examples_test=args.examples_test,
@@ -384,4 +384,4 @@ def test_meta_repr():
 
 
 if __name__ == "__main__":
-    test_meta_repr()
+    test_meta_feat()

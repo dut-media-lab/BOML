@@ -1,33 +1,32 @@
 """
-The base class in setup_model to encapsulate C4L neural network.
+The base class in setup_model to encapsulate C4L neural network for meta-feature-based methods.
 """
 from collections import OrderedDict
+from functools import reduce
 
 import numpy as np
 import tensorflow as tf
 from tensorflow.contrib.layers.python import layers
 
-from boml.extension import GraphKeys
+from boml import extension
 from boml.setup_model import network_utils
 from boml.setup_model.network import BOMLNet
-from boml.setup_model.network_utils import as_tuple_or_list
-from boml.utils import remove_from_collection
 
 
-class BOMLNetMetaInitV1(BOMLNet):
+class BOMLNetMetaFeatV1(BOMLNet):
     def __init__(
         self,
         _input,
-        dim_output,
-        name="BOMLNetMetaInitV1",
+        name="BMLNetC4LMetaFeat",
         outer_param_dict=OrderedDict(),
-        model_param_dict=None,
+        model_param_dict=OrderedDict(),
         task_parameter=None,
         use_t=False,
         use_warp=False,
-        outer_method="Simple",
+        outer_method="Reverse",
+        dim_output=-1,
         activation=tf.nn.relu,
-        var_collections=tf.GraphKeys.MODEL_VARIABLES,
+        var_collections=extension.METAPARAMETERS_COLLECTIONS,
         conv_initializer=tf.contrib.layers.xavier_initializer_conv2d(tf.float32),
         output_weight_initializer=tf.contrib.layers.xavier_initializer(tf.float32),
         norm=layers.batch_norm,
@@ -61,9 +60,9 @@ class BOMLNetMetaInitV1(BOMLNet):
         :param reuse: Boolean, whether to reuse the parameters
         """
         self.task_parameter = task_parameter
+        self.dim_output = dim_output
         self.kernel = kernel
         self.channels = channels
-        self.dims = as_tuple_or_list(dim_output)
         self.dim_hidden = dim_hidden
         self.datatype = data_type
         self.batch_norm = norm
@@ -74,11 +73,12 @@ class BOMLNetMetaInitV1(BOMLNet):
         self.bias_initializer = tf.zeros_initializer(tf.float32)
         self.conv_initializer = conv_initializer
         self.output_weight_initializer = output_weight_initializer
-        self.outer_method = outer_method
         self.use_t = use_t
         self.use_warp = use_warp
+        self.outer_method = outer_method
+        self.flatten = False if self.outer_method == "Implicit" else True
 
-        super().__init__(
+        super(BOMLNetMetaFeatV1, self).__init__(
             _input=_input,
             outer_param_dict=outer_param_dict,
             var_collections=var_collections,
@@ -87,19 +87,27 @@ class BOMLNetMetaInitV1(BOMLNet):
             reuse=reuse,
         )
 
-        # variables from batch normalization
         self.betas = self.filter_vars("beta")
-        # moving mean and variance (these variables should be used at inference time... so must save them)
+
         self.moving_means = self.filter_vars("moving_mean")
         self.moving_variances = self.filter_vars("moving_variance")
 
-        if not reuse:  # these calls might print a warning... it's not a problem..
-            remove_from_collection(GraphKeys.MODEL_VARIABLES, *self.betas)
-            remove_from_collection(GraphKeys.MODEL_VARIABLES, *self.moving_means)
-            remove_from_collection(GraphKeys.MODEL_VARIABLES, *self.moving_variances)
+        if not reuse:
+            extension.remove_from_collection(
+                extension.GraphKeys.MODEL_VARIABLES, *self.moving_means
+            )
+            extension.remove_from_collection(
+                extension.GraphKeys.MODEL_VARIABLES, *self.moving_variances
+            )
             print(name, "MODEL CREATED")
+        extension.remove_from_collection(
+            extension.GraphKeys.METAPARAMETERS, *self.moving_means
+        )
+        extension.remove_from_collection(
+            extension.GraphKeys.METAPARAMETERS, *self.moving_variances
+        )
 
-    def create_outer_parameters(self, var_collections=GraphKeys.METAPARAMETERS):
+    def create_outer_parameters(self):
         """
         :param var_collections: name of collections to store the created variables.
         :return: dictionary to index the created variables.
@@ -108,35 +116,12 @@ class BOMLNetMetaInitV1(BOMLNet):
             self.outer_param_dict["conv" + str(i)] = network_utils.get_conv_weight(
                 self, i=i, initializer=self.conv_initializer
             )
+
             self.outer_param_dict["bias" + str(i)] = network_utils.get_bias_weight(
                 self, i=i, initializer=self.bias_initializer
             )
-        if self.max_pool:
-            self.outer_param_dict["w" + str(len(self.dim_hidden))] = tf.get_variable(
-                "w" + str(len(self.dim_hidden)),
-                [self.dim_hidden[-1] * 5 * 5, self.dims[-1]],
-                initializer=self.output_weight_initializer,
-            )
-            self.outer_param_dict["bias" + str(len(self.dim_hidden))] = tf.get_variable(
-                "bias" + str(len(self.dim_hidden)),
-                [self.dims[-1]],
-                initializer=self.bias_initializer,
-                dtype=self.datatype,
-            )
-        else:
-            self.outer_param_dict["w" + str(len(self.dim_hidden))] = tf.get_variable(
-                "w" + str(len(self.dim_hidden)),
-                [self.dim_hidden[-1], self.dims[-1]],
-                initializer=tf.random_normal_initializer,
-            )
-            self.outer_param_dict["bias" + str(len(self.dim_hidden))] = tf.get_variable(
-                "bias" + str(len(self.dim_hidden)),
-                [self.dims[-1]],
-                initializer=self.bias_initializer,
-                dtype=self.datatype,
-            )
         [
-            tf.add_to_collections(var_collections, hyper)
+            tf.add_to_collections(extension.GraphKeys.METAPARAMETERS, hyper)
             for hyper in self.outer_param_dict.values()
         ]
 
@@ -147,7 +132,13 @@ class BOMLNetMetaInitV1(BOMLNet):
 
         return self.outer_param_dict
 
-    def create_model_parameters(self, var_collections=GraphKeys.METAPARAMETERS):
+    def create_model_parameters(
+        self, var_collections=extension.GraphKeys.METAPARAMETERS
+    ):
+        """
+        :param var_collections: name of collections to store the created variables.
+        :return: dictionary to index the created variables.
+        """
         if self.use_t:
             # hyper parameters of transformation layer
             for i in range(len(self.dim_hidden)):
@@ -156,11 +147,6 @@ class BOMLNetMetaInitV1(BOMLNet):
                 ] = network_utils.get_identity(
                     self.dim_hidden[0], name="conv" + str(i) + "_z", conv=True
                 )
-            self.model_param_dict[
-                "w" + str(len(self.dim_hidden)) + "_z"
-            ] = network_utils.get_identity(
-                self.dims[-1], name="w" + str(len(self.dim_hidden)) + "_z", conv=False
-            )
         elif self.use_warp:
             for i in range(len(self.dim_hidden)):
                 self.model_param_dict[
@@ -173,6 +159,7 @@ class BOMLNetMetaInitV1(BOMLNet):
             tf.add_to_collections(var_collections, model_param)
             for model_param in self.model_param_dict.values()
         ]
+
         return self.model_param_dict
 
     def _forward(self):
@@ -180,136 +167,121 @@ class BOMLNetMetaInitV1(BOMLNet):
         _forward() uses defined convolutional neural networks with initial input
         :return:
         """
-        if self.task_parameter is None:
-            self.task_parameter = self.create_initial_parameter(
-                primary_outerparameter=self.outer_param_dict
-            )
-
         for i in range(len(self.dim_hidden)):
             if self.use_t:
                 self + network_utils.conv_block_t(
                     self,
-                    self.task_parameter["conv" + str(i)],
-                    self.task_parameter["bias" + str(i)],
+                    self.outer_param_dict["conv" + str(i)],
+                    self.outer_param_dict["bias" + str(i)],
                     self.model_param_dict["conv" + str(i) + "_z"],
                 )
             elif self.use_warp:
                 self + network_utils.conv_block_warp(
                     self,
-                    self.task_parameter["conv" + str(i)],
-                    self.task_parameter["bias" + str(i)],
+                    self.outer_param_dict["conv" + str(i)],
+                    self.outer_param_dict["bias" + str(i)],
                     self.model_param_dict["conv" + str(i) + "_z"],
                     self.model_param_dict["bias" + str(i) + "_z"],
                 )
             else:
                 self + network_utils.conv_block(
                     self,
-                    self.task_parameter["conv" + str(i)],
-                    self.task_parameter["bias" + str(i)],
+                    self.outer_param_dict["conv" + str(i)],
+                    self.outer_param_dict["bias" + str(i)],
                 )
-
-        if self.max_pool:
-            self + tf.reshape(
-                self.out, [-1, np.prod([int(dim) for dim in self.out.get_shape()[1:]])]
+        if self.flatten:
+            flattened_shape = reduce(
+                lambda a, v: a * v, self.layers[-1].get_shape().as_list()[1:]
             )
-            self + tf.add(
-                tf.matmul(
-                    self.out, self.task_parameter["w" + str(len(self.dim_hidden))]
-                ),
-                self.task_parameter["bias" + str(len(self.dim_hidden))],
+            self + tf.reshape(
+                self.out, shape=(-1, flattened_shape), name="representation"
             )
         else:
-            self + tf.add(
-                tf.matmul(
-                    tf.reduce_mean(self.out, [1, 2]),
-                    self.task_parameter["w" + str(len(self.dim_hidden))],
-                ),
-                self.task_parameter["bias" + str(len(self.dim_hidden))],
-            )
+            if self.max_pool:
+                self + tf.reshape(
+                    self.out,
+                    [-1, np.prod([int(dim) for dim in self.out.get_shape()[1:]])],
+                )
+            else:
+                self + tf.reduce_mean(self.out, [1, 2])
 
-        if self.use_t:
-            self + tf.matmul(
-                self.out, self.model_param_dict["w" + str(len(self.dim_hidden)) + "_z"]
-            )
-
-    def re_forward(self, new_input=None, task_parameter=OrderedDict()):
+    def re_forward(self, new_input):
         """
         reuses defined convolutional networks with new input and update the output results
         :param new_input: new input with same shape as the old one
         :param task_parameter: the dictionary of task-specific
         :return: updated instance of BOMLNet
         """
-        return BOMLNetMetaInitV1(
+        return BOMLNetMetaFeatV1(
             _input=new_input if new_input is not None else self.layers[0],
-            dim_output=self.dims[-1],
             name=self.name,
             activation=self.activation,
             outer_param_dict=self.outer_param_dict,
             model_param_dict=self.model_param_dict,
-            task_parameter=self.task_parameter
-            if len(task_parameter.keys()) == 0
-            else task_parameter,
-            use_t=self.use_t,
+            dim_output=self.dim_output,
+            task_parameter=self.task_parameter,
             use_warp=self.use_warp,
-            outer_method=self.outer_method,
+            use_t=self.use_t,
             var_collections=self.var_collections,
             dim_hidden=self.dim_hidden,
             output_weight_initializer=self.output_weight_initializer,
             max_pool=self.max_pool,
             reuse=True,
+            outer_method=self.outer_method,
         )
 
 
-def BOMLNetOmniglotMetaInitV1(
+def BOMLNetOmniglotMetaFeatV1(
     _input,
-    dim_output,
     outer_param_dict=OrderedDict(),
     model_param_dict=OrderedDict(),
     batch_norm=layers.batch_norm,
-    name="BOMLNetOmniglotMetaInitV1",
-    outer_method="Simple",
+    name="BMLNetC4LOmniglot",
     use_t=False,
+    dim_output=-1,
     use_warp=False,
+    outer_method="Reverse",
     **model_args
 ):
-    return BOMLNetMetaInitV1(
+
+    return BOMLNetMetaFeatV1(
         _input=_input,
         name=name,
-        dim_output=dim_output,
         model_param_dict=model_param_dict,
-        outer_method=outer_method,
+        dim_output=dim_output,
         outer_param_dict=outer_param_dict,
         norm=batch_norm,
         use_t=use_t,
         use_warp=use_warp,
+        outer_method=outer_method,
         **model_args
     )
 
 
-def BOMLNetMiniMetaInitV1(
+def BOMLNetMiniMetaFeatV1(
     _input,
-    dim_output,
     outer_param_dict=OrderedDict(),
     model_param_dict=OrderedDict(),
+    dim_output=-1,
     batch_norm=layers.batch_norm,
-    name="BOMLNetMetaInitV1",
-    outer_method="Simple",
+    name="BOMLNetC4LMini",
     use_t=False,
     use_warp=False,
+    outer_method="Reverse",
     **model_args
 ):
-    return BOMLNetMetaInitV1(
+    return BOMLNetMetaFeatV1(
         _input=_input,
         name=name,
-        dim_output=dim_output,
         use_t=use_t,
         use_warp=use_warp,
+        dim_output=dim_output,
         outer_param_dict=outer_param_dict,
         model_param_dict=model_param_dict,
-        outer_method=outer_method,
         norm=batch_norm,
         channels=3,
         dim_hidden=[32, 32, 32, 32],
         max_pool=True,
+        outer_method=outer_method,
         **model_args
     )

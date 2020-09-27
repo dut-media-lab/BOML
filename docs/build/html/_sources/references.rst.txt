@@ -3,7 +3,7 @@ Related Papers
 
 * `Hyperparameter optimization with approximate gradient(HOAG) <https://arxiv.org/abs/1602.02355>`_
 * `Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks(MAML) <https://arxiv.org/abs/1703.03400>`_
-* `On First-Order Meta-Learning Algorithms(FOMAML) <https://arxiv.org/abs/1803.02999>`_
+* `On First-Order Meta-Learning Algorithms(FMAML) <https://arxiv.org/abs/1703.03400>`_
 * `Meta-SGD: Learning to Learn Quickly for Few-Shot Learning(Meta-SGD) <https://arxiv.org/pdf/2006.04045.pdf>`_
 * `Bilevel Programming for Hyperparameter Optimization and Meta-Learning(RHG) <http://export.arxiv.org/pdf/1806.04910>`_
 * `Truncated Back-propagation for Bilevel Optimization(TG) <https://arxiv.org/pdf/1810.10667.pdf>`_

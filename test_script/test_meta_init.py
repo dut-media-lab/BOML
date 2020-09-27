@@ -13,14 +13,8 @@ import inspect, time
 from shutil import copyfile
 
 map_dict = {
-    "omniglot": {
-        "data_loader": boml.meta_omniglot,
-        "model": boml.BOMLNetOmniglotMetaInitV1,
-    },
-    "miniimagenet": {
-        "data_loader": boml.meta_mini_imagenet,
-        "model": boml.BOMLNetMiniMetaInitV1,
-    },
+    "omniglot": boml.meta_omniglot,
+    "miniimagenet": boml.meta_mini_imagenet,
 }
 
 
@@ -280,7 +274,7 @@ def build_and_test(
 
 def test_meta_init():
     print(args.__dict__)
-    metasets = map_dict[args.dataset]["data_loader"](
+    metasets = map_dict[args.dataset](
         std_num_classes=args.classes,
         examples_train=args.examples_train,
         examples_test=args.examples_test,

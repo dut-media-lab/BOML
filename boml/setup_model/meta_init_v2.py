@@ -167,6 +167,10 @@ class BOMLNetMiniMetaInitV2(BOMLNet):
         return self.outer_param_dict
 
     def _forward(self):
+        """
+        _forward() uses defined convolutional neural networks with initial input
+        :return:
+        """
         if len(self.task_parameter) == 0:
             self.task_parameter = self.create_initial_parameter(
                 primary_outerparameter=self.outer_param_dict
@@ -389,6 +393,10 @@ class BOMLNetOmniglotMetaInitV2(BOMLNet):
         return self.outer_param_dict
 
     def _forward(self):
+        """
+        _forward() uses defined convolutional neural networks with initial input
+        :return:
+        """
         if len(self.task_parameter) == 0:
             self.task_parameter = self.create_initial_parameter(
                 primary_outerparameter=self.outer_param_dict
@@ -417,6 +425,11 @@ class BOMLNetOmniglotMetaInitV2(BOMLNet):
         )
 
     def residual_block(self, x, i):
+        """
+        :param x: input for the i-th block
+        :param i: i-th block
+        :return: the output of the j-th conv block in the i-th residual block
+        """
         skipc = tf.nn.conv2d(
             x, self.task_parameter["res" + str(i + 1) + "id"], self.no_stride, "SAME"
         )
@@ -428,6 +441,12 @@ class BOMLNetOmniglotMetaInitV2(BOMLNet):
         return tf.nn.max_pool(add, [1, 2, 2, 1], [1, 2, 2, 1], "SAME")
 
     def conv_block(self, xx, i, j):
+        """
+        :param xx:  input for the i-th block
+        :param i: i-th block
+        :param j: the j-th convolution block
+        :return: the ouput of the i-th conv block in the
+        """
         out = tf.add(
             tf.nn.conv2d(
                 xx,
@@ -447,6 +466,12 @@ class BOMLNetOmniglotMetaInitV2(BOMLNet):
         return network_utils.leaky_relu(out, 0.1)
 
     def re_forward(self, new_input=None, task_parameter=OrderedDict()):
+        """
+        reuses defined convolutional networks with new input and update the output results
+        :param new_input: new input with same shape as the old one
+        :param task_parameter: the dictionary of task-specific
+        :return: updated instance of BOMLNet
+        """
         return BOMLNetOmniglotMetaInitV2(
             _input=new_input if new_input is not None else self.layers[0],
             dim_output=self.dims[-1],

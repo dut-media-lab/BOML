@@ -16,7 +16,7 @@ from boml.setup_model.meta_init_v1 import (
     BOMLNetOmniglotMetaInitV1,
     BOMLNetMiniMetaInitV1,
 )
-from boml.setup_model.meta_repr_v1 import (
+from boml.setup_model.meta_feat_v1 import (
     BOMLNetMetaFeatV1,
     BOMLNetMiniMetaFeatV1,
     BOMLNetOmniglotMetaFeatV1,
@@ -25,7 +25,7 @@ from boml.setup_model.meta_init_v2 import (
     BOMLNetOmniglotMetaInitV2,
     BOMLNetMiniMetaInitV2,
 )
-from boml.setup_model.meta_repr_v2 import (
+from boml.setup_model.meta_feat_v2 import (
     BOMLNetOmniglotMetaFeatV2,
     BOMLNetMiniMetaFeatV2,
 )

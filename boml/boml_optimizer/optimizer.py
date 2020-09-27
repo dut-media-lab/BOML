@@ -474,7 +474,7 @@ class BOMLOptimizer(object):
                 *[
                     maybe_first_arg(
                         opt.apply_gradients(
-                            self.outergradient.hgrads_hvars(
+                            self.outergradient.outer_grads_and_vars(
                                 meta_param=hll,
                                 aggregation_fn=aggregation_fn,
                                 gradient_clip=gradient_clip,

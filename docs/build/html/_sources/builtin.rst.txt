@@ -15,8 +15,8 @@ Core Builtin Functions
 			dataset, 
 			meta_model='V1', 
 			name='Hyper_Net', 
-			use_T=False, 
-			use_Warp=False,
+			use_t=False, 
+			use_warp=False,
 			**model_args
 		)
 	
@@ -28,8 +28,8 @@ Core Builtin Functions
 	  - dataset: which dataset to use for training and testing. It should be initialized before being passed into the function
 	  - meta_model: model chosen for neural network construction, `V1` for C4L with fully connected layer,`V2` for Residual blocks with fully connected layer.
 	  - name: name for Meta model modules used for BOMLNet initialization
-	  - use_T: whether to use T layer for C4L neural networks
-	  - use_Warp: whether to use Warp layer for C4L neural networks
+	  - use_t: whether to use T layer for C4L neural networks
+	  - use_warp: whether to use Warp layer for C4L neural networks
 	  - model_args: optional arguments to set specific parameters of neural networks.
 
 2. BOMLOptimizer.base_learner:

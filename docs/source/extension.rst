@@ -204,7 +204,8 @@ Extensible Modules
 				The method gets and returns the default tensorflow session
 				
 
-- Utility Modules:
+- Core Utility Modules:
+	More utility functions with full description could be found in the files of which the names end with 'utils'. 
 
 	- get_default_session():
 
@@ -229,4 +230,5 @@ Extensible Modules
 	- set_gpu():
 
 	The method sets primary parameters of GPU configuration.
+	
 

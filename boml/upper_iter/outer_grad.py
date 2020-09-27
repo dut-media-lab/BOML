@@ -113,7 +113,7 @@ class BOMLOuterGrad(object):
         """
         raise NotImplementedError()
 
-    def hgrads_hvars(self, meta_param=None, aggregation_fn=None, gradient_clip=None):
+    def outer_grads_and_vars(self, meta_param=None, aggregation_fn=None, gradient_clip=None):
         """
         Method for getting outergradient and outer parameters as required by apply_gradient methods from tensorflow
         optimizers.
