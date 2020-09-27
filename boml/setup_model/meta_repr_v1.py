@@ -13,11 +13,11 @@ from boml.setup_model import network_utils
 from boml.setup_model.network import BOMLNet
 
 
-class BOMLNetMetaReprV1(BOMLNet):
+class BOMLNetMetaFeatV1(BOMLNet):
     def __init__(
         self,
         _input,
-        name="BMLNetC4LMetaRepr",
+        name="BMLNetC4LMetaFeat",
         outer_param_dict=OrderedDict(),
         model_param_dict=OrderedDict(),
         task_parameter=None,
@@ -37,6 +37,28 @@ class BOMLNetMetaReprV1(BOMLNet):
         max_pool=False,
         reuse=False,
     ):
+        """
+        :param _input: original input
+        :param dim_output: dimension of output
+        :param name: scope of meta-learner
+        :param outer_param_dict: dictionary of outer parameters
+        :param model_param_dict:dictonary of model parameters for specific algorithms such t-layer or warp-layer
+        :param task_parameter: dictionary of task-specific parameters or temporary values of task-specific parameters
+        :param use_t: Boolean, whether to use t-layer for neural network construction
+        :param use_warp: Boolean, whether to use warp-layer for neural network construction
+        :param outer_method: the name of outer method
+        :param activation: form of activation function
+        :param var_collections: collection to store variables
+        :param conv_initializer: initializer for convolution blocks
+        :param output_weight_initializer: initializer for the fully-connected layer
+        :param norm: form of normalization function
+        :param data_type: default to be tf.float32
+        :param channels: number of channels
+        :param dim_hidden: lists to specify the dimension of hidden layer
+        :param kernel: size of the kernel
+        :param max_pool: Boolean, whether to use max_pool
+        :param reuse: Boolean, whether to reuse the parameters
+        """
         self.task_parameter = task_parameter
         self.dim_output = dim_output
         self.kernel = kernel
@@ -56,7 +78,7 @@ class BOMLNetMetaReprV1(BOMLNet):
         self.outer_method = outer_method
         self.flatten = False if self.outer_method == "Implicit" else True
 
-        super(BOMLNetMetaReprV1, self).__init__(
+        super(BOMLNetMetaFeatV1, self).__init__(
             _input=_input,
             outer_param_dict=outer_param_dict,
             var_collections=var_collections,
@@ -86,7 +108,10 @@ class BOMLNetMetaReprV1(BOMLNet):
         )
 
     def create_outer_parameters(self):
-
+        """
+        :param var_collections: name of collections to store the created variables.
+        :return: dictionary to index the created variables.
+        """
         for i in range(len(self.dim_hidden)):
             self.outer_param_dict["conv" + str(i)] = network_utils.get_conv_weight(
                 self, i=i, initializer=self.conv_initializer
@@ -134,12 +159,6 @@ class BOMLNetMetaReprV1(BOMLNet):
         return self.model_param_dict
 
     def _forward(self):
-        """
-        for i in range(4):
-            self.conv_layer(filters=self.dim_hidden[i],stride=self.stride, max_pool=self.max_pool)
-        flattened_shape = reduce(lambda a, v: a * v, self.layers[-1].get_shape().as_list()[1:])
-        self + tf.reshape(self.out, shape=(-1, flattened_shape), name='representation')
-        """
 
         for i in range(len(self.dim_hidden)):
             if self.use_t:
@@ -180,7 +199,7 @@ class BOMLNetMetaReprV1(BOMLNet):
                 self + tf.reduce_mean(self.out, [1, 2])
 
     def re_forward(self, new_input):
-        return BOMLNetMetaReprV1(
+        return BOMLNetMetaFeatV1(
             _input=new_input if new_input is not None else self.layers[0],
             name=self.name,
             activation=self.activation,
@@ -199,7 +218,7 @@ class BOMLNetMetaReprV1(BOMLNet):
         )
 
 
-def BOMLNetOmniglotMetaReprV1(
+def BOMLNetOmniglotMetaFeatV1(
     _input,
     outer_param_dict=OrderedDict(),
     model_param_dict=OrderedDict(),
@@ -212,7 +231,7 @@ def BOMLNetOmniglotMetaReprV1(
     **model_args
 ):
 
-    return BOMLNetMetaReprV1(
+    return BOMLNetMetaFeatV1(
         _input=_input,
         name=name,
         model_param_dict=model_param_dict,
@@ -226,7 +245,7 @@ def BOMLNetOmniglotMetaReprV1(
     )
 
 
-def BOMLNetMiniMetaReprV1(
+def BOMLNetMiniMetaFeatV1(
     _input,
     outer_param_dict=OrderedDict(),
     model_param_dict=OrderedDict(),
@@ -238,7 +257,7 @@ def BOMLNetMiniMetaReprV1(
     outer_method="Reverse",
     **model_args
 ):
-    return BOMLNetMetaReprV1(
+    return BOMLNetMetaFeatV1(
         _input=_input,
         name=name,
         use_t=use_t,

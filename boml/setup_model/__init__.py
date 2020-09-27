@@ -10,11 +10,11 @@ from boml.setup_model.meta_init_v2 import (
     BOMLNetOmniglotMetaInitV2,
 )
 from boml.setup_model.meta_repr_v2 import (
-    BOMLNetMiniMetaReprV2,
-    BOMLNetOmniglotMetaReprV2,
+    BOMLNetMiniMetaFeatV2,
+    BOMLNetOmniglotMetaFeatV2,
 )
 from boml.setup_model.meta_repr_v1 import (
-    BOMLNetMetaReprV1,
-    BOMLNetMiniMetaReprV1,
-    BOMLNetOmniglotMetaReprV1,
+    BOMLNetMetaFeatV1,
+    BOMLNetMiniMetaFeatV1,
+    BOMLNetOmniglotMetaFeatV1,
 )

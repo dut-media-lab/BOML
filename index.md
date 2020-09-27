@@ -70,7 +70,7 @@ BOML requires Python 3.5+ and TensorFlow 1.13+.
         boml.load_data manages different datasets and generate batches of tasks for training and testing.
 
        - Args：<br>
-            - folder: str, root folder name. Use os module to modify the path to the datasets<br>
+            - folder: str, root folder name. Use os module to modify the path to the datasets. For example, os.environ["DATASETS_FOLDER"] = "../data/"<br>
             - std_num_classes: int, number of classes for N-way classification<br>
             - examples_train: int, number of examples to be picked in each generated per classes for training (eg .1 shot, examples_train=1)<br>
             - examples_test: int, number of examples to be picked in each generated per classes for testing
@@ -94,7 +94,7 @@ BOML requires Python 3.5+ and TensorFlow 1.13+.
         boml.BOMLExperiment manages inputs, outputs and task-specific parameters.
        - Args:
           - dataset: initialized instance of load_data<br>
-          - dtype: default tf.float32<br>
+          - dtype: default to be float32<br>
        - Attributes:<br>
           - x: input placeholder of input for your defined lower level problem<br>
           - y: label placeholder of output for yourdefined lower level problem<br>
@@ -127,16 +127,16 @@ BOML requires Python 3.5+ and TensorFlow 1.13+.
         ```
         BOMLOptimizer is the main class in `boml`, which takes responsibility for the whole process of model construnction and back propagation. 
        - Args:
-          - Method: str, define basic method for following training process, it should be included in [`MetaInit`, `MetaRepr`], `MetaInit` type includes methods like `MAML`, `FOMAML`, `MT-net`, `WarpGrad`; `MetaRepr` type includes methods like `BDA`, `RHG`, `TRHG`, `HOAG`, `DARTS`;<br>
-          - inner_method: method chosen for solving LLproblem, including [`Trad` ,`Simple`, `Aggr`], MetaRepr type choose either `Trad` for traditional optimization strategies or `Aggr` for Gradient Aggragation optimization. 'MetaInit' type should choose `Simple`, and set specific parameters for detailed method choices like FOMAML or MT-net.<br>
-          - outer_method: str, method chosen for solving LLproblem, including [`Reverse` ,`Simple`, `DARTS`, `Implcit`], `MetaInit` type should choose `Simple`, and set specific parameters for detailed method choices like `FOMAML`
-          - truncate_iter: str, specific parameter for `Truncated Gradient(TG)` method, defining number of iterations to truncate in the Back propagation process<br>
+          - Method: str, define basic method for following training process, it should be included in [`MetaInit`, `MetaFeat`], `MetaInit` type includes methods like `MAML`, `FOMAML`, `MT-net`, `WarpGrad`; `MetaFeat` type includes methods like `BDA`, `RHG`, `TRHG`, `HOAG`, `DARTS`;<br>
+          - inner_method: method chosen for solving LLproblem, including [`Trad` ,`Simple`, `Aggr`], MetaInit type choose either `Trad` for traditional optimization strategies or `Aggr` for Gradient Aggragation optimization. 'MetaInit' type should choose `Simple`, and set specific parameters for detailed method choices like FOMAML or MT-net.<br>
+          - outer_method: str, method chosen for solving LLproblem, including [`Reverse` ,`Simple`, `DARTS`, `Implcit`], `MetaFeat` type should choose `Simple`, and set specific parameters for detailed method choices like `FMAML`
+          - truncate_iter: str, specific parameter for `Truncated Gradient(TRHG)` method, defining number of iterations to truncate in the Back propagation process<br>
           - experiments: list of BOMLExperiment objects that has already been initialized <br>
         - Usage:
         ```
         ex = boml.BOMLExperiment(boml.meta_omniglot(5,1,15))
         boml_ho = boml.BOMLOptimizer(
-            Method='MetaRper', 
+            Method='MetaInit', 
             inner_method='Simple', 
             outer_method='Simple',
             experiments=ex)
@@ -188,7 +188,7 @@ BOML requires Python 3.5+ and TensorFlow 1.13+.
           - _input: orginal input for neural network construction of task-specific module;
           - meta_learner: returned value of meta_learner function, which is a instance of BOMLNet or its child classes
           - name: name for Base model modules used for BOMLNet initialization
-          - weights_initializer: initializer function for task_specific network, called by 'MetaRepr' method
+          - weights_initializer: initializer function for task_specific network, called by 'MetaInit' method
        - Returns: task-specific model part
 
     3. BOMLOptimizer.ll_problem:
@@ -236,7 +236,7 @@ BOML requires Python 3.5+ and TensorFlow 1.13+.
           - loss_func: specifying which type of loss function is used for the maml-based method, which should be consistent with the form to compute the inner objective
           - momentum: specific parameter for Optimizer.BOMLOptMomentum to set initial value of momentum
           - regularization: whether to add regularization terms in the inner objective 
-          - experiment: instance of BOMLExperiment to use in the Lower Level Problem, especifially needed in the `MetaRper` type of method.
+          - experiment: instance of BOMLExperiment to use in the Lower Level Problem, especifially needed in the `MetaFeat` type of method.
           - var_list: optional list of variables (of the inner optimization problem)
           - inner_kargs: optional arguments to pass to `boml.boml_optimizer.BOMLOptimizer.compute_gradients`
        - Returns: task-specific model part
@@ -318,7 +318,7 @@ BOML requires Python 3.5+ and TensorFlow 1.13+.
 
       ```
 
-    #### Build network structure and define hyperparameters
+    #### Build network structure and define parameters for meta-learner and base-learner
     ```python
     boml_ho = boml.BOMLOptimizer(
         method="MetaInit", inner_method="Simple", outer_method="Simple"
@@ -380,12 +380,12 @@ BOML requires Python 3.5+ and TensorFlow 1.13+.
             - re_forward(new_input): 
                 reuses defined convolutional with new input and update the output results 
             - create_outer_parameters(): 
-              this method creates parameters of upper level problems, and adds them to define collections called `METAPARAMETERS`
+              this method creates parameters of upper level problems, and adds them to defined collections named `METAPARAMETERS`
                 - Args: 
                   - var_collections: collections to restore meta parameters created in the so called scope 
                 - Returns: dictionary that indexes the outer parameters 
             - create_model_parameters(): 
-                this method creates model parameters of upper level problems like `T layer` or `Warp layer` , and adds them to define collections called `METAPARAMETERS`
+                this method creates model parameters of upper level problems like `t-layer` or `Warp-layer` , and adds them to define collections called `METAPARAMETERS`
        - Utility functions:
             - get_conv_weight(boml_net, layer, initializer):
                 - Args:
@@ -465,15 +465,14 @@ BOML requires Python 3.5+ and TensorFlow 1.13+.
               - param_dict: dictionary of parameters passed by `boml.boml_optimizer.BOMLOptimizer`
               - train_batches: mini batches of data, needed when Reptile Algorithm are implemented
               - session: Optional session (otherwise will take the default session)
-              - experiments: list of instances of `Experiment`, needed when Reptile Algorithm are implemented
+              - experiments: list of instances of `BOMLExperiment`, needed when Reptile Algorithm are implemented
               - callback: callback funciton for the forward optimization
        - Utility functions:
-         - hgrads_hvars(hyper_list=None, aggregation_fn=None, gradient_clip=None):
+         - outer_grads_and_vars(meta_param=None, aggregation_fn=None, gradient_clip=None):
                 Method for getting outergradient and outer parameters as required by apply_gradient methods from tensorflow optimizer.
                 - Args：
                   - meta_param: Optional list of outer parameters to consider. If not provided will get all variables in the hyperparameter collection in the current scope.
-                  - aggregation_fn: Optional operation to aggregate multiple hypergradients (for the same hyperparameter),
-                                      by default reduce_mean
+                  - aggregation_fn: Optional operation to aggregate multiple outer gradients (for the same parameter of meta-learner), by default reduce_mean
                   - gradient_clip: Optional operation like clipping to be applied.
          - initialization():
                  Returns groups of operation that initializes the variables in the computational graph
@@ -499,8 +498,8 @@ BOML requires Python 3.5+ and TensorFlow 1.13+.
         gets and returns the default tensorflow session
       - BatchQueueMock():
           responsible for generates batches of taskes and feed them into corresponding placeholders.
-      - cross_entropy(pred, label, method):
-        return loss function that matches different methods in [`MetaRepr`,`MetaInit`]
+      - cross_entropy(pred, label):
+        return loss function that matches different methods in [ `MetaFeat`, `MetaInit` ]
       - vectorize_all(var_list, name=None):
         Vectorize the variables in the list named var_list with the given name
       - remove_from_collectinon(key,*var_list):

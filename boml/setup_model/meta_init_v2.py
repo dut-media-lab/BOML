@@ -30,6 +30,26 @@ class BOMLNetMiniMetaInitV2(BOMLNet):
         use_t=False,
         use_warp=False,
     ):
+        """
+        :param _input: original input
+        :param dim_output: dimension of output
+        :param name: scope of meta-learner
+        :param outer_param_dict: dictionary of outer parameters
+        :param model_param_dict:dictonary of model parameters for specific algorithms such t-layer or warp-layer
+        :param task_parameter: dictionary of task-specific parameters or temporary values of task-specific parameters
+        :param use_t: Boolean, whether to use t-layer for neural network construction
+        :param use_warp: Boolean, whether to use warp-layer for neural network construction
+        :param outer_method: the name of outer method
+        :param activation: form of activation function
+        :param var_collections: collection to store variables
+        :param conv_initializer: initializer for convolution blocks
+        :param output_weight_initializer: initializer for the fully-connected layer
+        :param data_type: default to be tf.float32
+        :param channels: number of channels
+        :param dim_resnet: lists to specify the dimension of residual block
+        :param kernel: size of the kernel
+        :param reuse: Boolean, whether to reuse the parameters
+        """
         self.task_parameter = task_parameter
         self.dims = as_tuple_or_list(dim_output)
         self.kernel = kernel
@@ -67,6 +87,10 @@ class BOMLNetMiniMetaInitV2(BOMLNet):
         print(name, "MiniImagenet_MODEL CREATED")
 
     def create_outer_parameters(self, var_collections=GraphKeys.METAPARAMETERS):
+        """
+        :param var_collections: name of collections to store the created variables.
+        :return: dictionary to index the created variables.
+        """
         for i in range(len(self.dim_resnet)):
             self.outer_param_dict["res" + str(i + 1) + "id"] = tf.get_variable(
                 name="res" + str(i + 1) + "id",
@@ -278,6 +302,10 @@ class BOMLNetOmniglotMetaInitV2(BOMLNet):
             print(name, "MODEL CREATED")
 
     def create_outer_parameters(self, var_collections=GraphKeys.METAPARAMETERS):
+        """
+        :param var_collections: name of collections to store the created variables.
+        :return: dictionary to index the created variables.
+        """
         for i in range(len(self.dim_resnet)):
             self.outer_param_dict["res" + str(i + 1) + "id"] = tf.get_variable(
                 name="res" + str(i + 1) + "id",

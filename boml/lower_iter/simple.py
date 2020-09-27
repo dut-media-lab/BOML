@@ -19,6 +19,15 @@ class BOMLInnerGradSimple(BOMLInnerGradTrad):
         outer_param_tensor=[],
         model_param_tensor=[],
     ):
+        """
+
+        :param update_op: the operation to perform gradient-based optimization
+        :param dynamics: the iterative formats of dynamical system
+        :param objective: inner objectives
+        :param inner_param_tensor: tensor of inner parameters for BP
+        :param outer_param_tensor: tensor of outer parameters for BP
+        :param model_param_tensor: tensor of model parameters ,such as t-layer or Warp-layer
+        """
         self._inner_param_fast_tensor = inner_param_tensor
         self._outer_param_tensor = outer_param_tensor
         self._model_param_tensor = model_param_tensor

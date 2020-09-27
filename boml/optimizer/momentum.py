@@ -17,6 +17,21 @@ GRADIENT_NONE_MESSAGE = (
 
 
 class BOMLOptMomentum(BOMLOpt, tf.train.MomentumOptimizer):
+    """Optimizer that implements the Momentum algorithm.
+
+    Computes (if `use_nesterov = False`):
+
+    ```
+    accumulation = momentum * accumulation + gradient
+    variable -= learning_rate * accumulation
+    ```
+
+    Note that in the dense version of this algorithm, `accumulation` is updated
+    and applied regardless of a gradient's value, whereas the sparse version (when
+    the gradient is an `IndexedSlices`, typically because of `tf.gather` or an
+    embedding) only updates variable slices and corresponding `accumulation` terms
+    when that part of the variable was used in the forward pass.
+    """
     def __init__(
         self,
         learning_rate,
@@ -25,13 +40,54 @@ class BOMLOptMomentum(BOMLOpt, tf.train.MomentumOptimizer):
         name="Momentum",
         use_nesterov=False,
     ):
+        """Construct a new Momentum optimizer.
+
+          Args:
+            learning_rate: A `Tensor` or a floating point value.  The learning rate.
+            momentum: A `Tensor` or a floating point value.  The momentum.
+            use_locking: If `True` use locks for update operations.
+            name: Optional name prefix for the operations created when applying
+              gradients.  Defaults to "Momentum".
+            use_nesterov: If `True` use Nesterov Momentum.
+              See [Sutskever et al., 2013](
+              http://jmlr.org/proceedings/papers/v28/sutskever13.pdf).
+              This implementation always computes gradients at the value of the
+              variable(s) passed to the optimizer. Using Nesterov Momentum makes the
+              variable(s) track the values called `theta_t + mu*v_t` in the paper.
+              This implementation is an approximation of the original formula, valid
+              for high values of momentum. It will compute the "adjusted gradient"
+              in NAG by assuming that the new gradient will be estimated by the
+              current average gradient plus the product of momentum and the change
+              in the average gradient.
+        """
         assert use_nesterov is False, "Nesterov momentum not implemented yet..."
         super(BOMLOptMomentum, self).__init__(
             learning_rate, momentum, use_locking, name, use_nesterov
         )
 
     def apply_gradients(self, grads_and_vars, global_step=None, name=None):
+        """Apply gradients to variables.
 
+        This is the second part of `minimize()`. It returns an `Operation` that
+        applies gradients.
+
+        Args:
+          grads_and_vars: List of (gradient, variable) pairs as returned by
+            `compute_gradients()`.
+          global_step: Optional `Variable` to increment by one after the
+            variables have been updated.
+          name: Optional name for the returned operation.  Default to the
+            name passed to the `Optimizer` constructor.
+
+        Returns:
+          An `Operation` that applies the specified gradients. If `global_step`
+          was not None, that operation also increments `global_step`.
+
+        Raises:
+          TypeError: If `grads_and_vars` is malformed.
+          ValueError: If none of the variables have gradients.
+          RuntimeError: If you should use `_distributed_apply()` instead.
+        """
         update_op = super(BOMLOptMomentum, self).apply_gradients(
             grads_and_vars, global_step, name
         )

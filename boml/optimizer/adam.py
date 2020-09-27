@@ -28,11 +28,84 @@ class BOMLOptAdam(BOMLOpt, tf.train.AdamOptimizer):
         use_locking=False,
         name="Adam",
     ):
+        r"""Construct a new Adam optimizer.
+
+        Initialization:
+
+        $$m_0 := 0 \text{(Initialize initial 1st moment vector)}$$
+        $$v_0 := 0 \text{(Initialize initial 2nd moment vector)}$$
+        $$t := 0 \text{(Initialize timestep)}$$
+
+        The update rule for `variable` with gradient `g` uses an optimization
+        described at the end of section 2 of the paper:
+
+        $$t := t + 1$$
+        $$lr_t := \text{learning\_rate} * \sqrt{1 - beta_2^t} / (1 - beta_1^t)$$
+
+        $$m_t := beta_1 * m_{t-1} + (1 - beta_1) * g$$
+        $$v_t := beta_2 * v_{t-1} + (1 - beta_2) * g * g$$
+        $$variable := variable - lr_t * m_t / (\sqrt{v_t} + \epsilon)$$
+
+        The default value of 1e-8 for epsilon might not be a good default in
+        general. For example, when training an Inception network on ImageNet a
+        current good choice is 1.0 or 0.1. Note that since AdamOptimizer uses the
+        formulation just before Section 2.1 of the Kingma and Ba paper rather than
+        the formulation in Algorithm 1, the "epsilon" referred to here is "epsilon
+        hat" in the paper.
+
+        The sparse implementation of this algorithm (used when the gradient is an
+        IndexedSlices object, typically because of `tf.gather` or an embedding
+        lookup in the forward pass) does apply momentum to variable slices even if
+        they were not used in the forward pass (meaning they have a gradient equal
+        to zero). Momentum decay (beta1) is also applied to the entire momentum
+        accumulator. This means that the sparse behavior is equivalent to the dense
+        behavior (in contrast to some momentum implementations which ignore momentum
+        unless a variable slice was actually used).
+
+        Args:
+          learning_rate: A Tensor or a floating point value.  The learning rate.
+          beta1: A float value or a constant float tensor. The exponential decay
+            rate for the 1st moment estimates.
+          beta2: A float value or a constant float tensor. The exponential decay
+            rate for the 2nd moment estimates.
+          epsilon: A small constant for numerical stability. This epsilon is
+            "epsilon hat" in the Kingma and Ba paper (in the formula just before
+            Section 2.1), not the epsilon in Algorithm 1 of the paper.
+          use_locking: If True use locks for update operations.
+          name: Optional name for the operations created when applying gradients.
+            Defaults to "Adam".  @compatibility(eager) When eager execution is
+            enabled, `learning_rate`, `beta1`, `beta2`, and `epsilon` can each be a
+            callable that takes no arguments and returns the actual value to use.
+            This can be useful for changing these values across different
+            invocations of optimizer functions. @end_compatibility
+        """
         super(BOMLOptAdam, self).__init__(
             learning_rate, beta1, beta2, epsilon, use_locking, name
         )
 
     def apply_gradients(self, grads_and_vars, global_step=None, name=None):
+        """Apply gradients to variables.
+
+        This is the second part of `minimize()`. It returns an `Operation` that
+        applies gradients.
+
+        Args:
+          grads_and_vars: List of (gradient, variable) pairs as returned by
+            `compute_gradients()`.
+          global_step: Optional `Variable` to increment by one after the
+            variables have been updated.
+          name: Optional name for the returned operation.  Default to the
+            name passed to the `Optimizer` constructor.
+
+        Returns:
+          An `Operation` that applies the specified gradients. If `global_step`
+          was not None, that operation also increments `global_step`.
+
+        Raises:
+          TypeError: If `grads_and_vars` is malformed.
+          ValueError: If none of the variables have gradients.
+          RuntimeError: If you should use `_distributed_apply()` instead.
+        """
         update_op = super(BOMLOptAdam, self).apply_gradients(
             grads_and_vars, global_step, name
         )

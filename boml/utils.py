@@ -127,14 +127,49 @@ def solve_int_or_generator(int_or_generator):
 
 def cross_entropy(pred, label):
     """
-
     :param pred: output of the neural networks
     :param label: the true label paired with the input
-    :return:
+    :return: cross-entropy loss function
     """
     return tf.reduce_mean(
         tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=label)
     )
+
+
+def mse(pred, label):
+    """
+    :param pred: output of the neural networks
+    :param label: the true label paired with the input
+    :return: msw loss function
+    """
+    pred = tf.reshape(pred, [-1])
+    label = tf.reshape(label, [-1])
+    return tf.reduce_mean(tf.square(pred-label))
+
+
+def get_L2Reg(var_list=None, rate=0.0):
+    """
+    Return the L1 regularization item
+    :param var_list: list of parameters
+    :param rate: regularization rate
+    :return: L2_regularization_part
+    """
+    regularizer = tf.contrib.layers.l2_regularizer(rate)
+    reg_l2 = tf.contrib.layers.apply_regularization(regularizer, weights_list=var_list)
+    return reg_l2
+
+
+def get_L1Reg(var_list=None, rate=0.0):
+    """
+    Return the L1 regularization item
+    :param var_list: list of parameters
+    :param rate: regularization rate
+    :return: L1_regularization_part
+    """
+    regularizer = tf.contrib.layers.l1_regularizer(rate)
+    reg_l1 = tf.contrib.layers.apply_regularization(regularizer, weights_list=var_list)
+    return reg_l1
+
 
 
 def classification_acc(pred, label):

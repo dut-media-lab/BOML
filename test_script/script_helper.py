@@ -224,9 +224,9 @@ parser.add_argument(
     "-md",
     "--method",
     type=str,
-    default="MetaRepr",
+    default="MetaFeat",
     metavar="STRING",
-    help="choose which method to use,[MetaRepr,MetaInit]",
+    help="choose which method to use,[MetaFeat,MetaInit]",
 )
 parser.add_argument(
     "-i_d",

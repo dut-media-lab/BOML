@@ -11,11 +11,11 @@ from boml.setup_model import network_utils
 from boml.setup_model.network import BOMLNet
 
 
-class BOMLNetMiniMetaReprV2(BOMLNet):
+class BOMLNetMiniMetaFeatV2(BOMLNet):
     def __init__(
         self,
         _input,
-        name="BOMLNetMiniMetaReprV2",
+        name="BOMLNetMiniMetaFeatV2",
         outer_param_dict=OrderedDict(),
         dim_output=-1,
         model_param_dict=OrderedDict(),
@@ -25,6 +25,18 @@ class BOMLNetMiniMetaReprV2(BOMLNet):
         reuse=False,
         outer_method="Reverse",
     ):
+        """
+        :param _input: original input
+        :param dim_output: dimension of output
+        :param name: scope of meta-learner
+        :param outer_param_dict: dictionary of outer parameters
+        :param model_param_dict:dictonary of model parameters for specific algorithms such t-layer or warp-layer
+        :param task_parameter: dictionary of task-specific parameters or temporary values of task-specific parameters
+        :param use_t: Boolean, whether to use t-layer for neural network construction
+        :param use_warp: Boolean, whether to use warp-layer for neural network construction
+        :param outer_method: the name of outer method
+        :param reuse: Boolean, whether to reuse the parameters
+        """
         self.var_coll = boml.extension.METAPARAMETERS_COLLECTIONS
         self.task_paramter = task_parameter
         self.outer_method = outer_method
@@ -90,7 +102,7 @@ class BOMLNetMiniMetaReprV2(BOMLNet):
         self + tf.reshape(self.out, (-1, 512))
 
     def re_forward(self, new_input=None):
-        return BOMLNetMiniMetaReprV2(
+        return BOMLNetMiniMetaFeatV2(
             _input=new_input if new_input is not None else self.layers[0],
             model_param_dict=self.model_param_dict,
             name=self.name,
@@ -102,11 +114,11 @@ class BOMLNetMiniMetaReprV2(BOMLNet):
         )
 
 
-class BOMLNetOmniglotMetaReprV2(BOMLNet):
+class BOMLNetOmniglotMetaFeatV2(BOMLNet):
     def __init__(
         self,
         _input,
-        name="BOMLNetOmniglotMetaReprV2",
+        name="BOMLNetOmniglotMetaFeatV2",
         outer_param_dict=OrderedDict(),
         dim_output=-1,
         model_param_dict=OrderedDict(),
@@ -115,6 +127,17 @@ class BOMLNetOmniglotMetaReprV2(BOMLNet):
         reuse=False,
         outer_method="Reverse",
     ):
+        """
+        :param _input: original input
+        :param dim_output: dimension of output
+        :param name: scope of meta-learner
+        :param outer_param_dict: dictionary of outer parameters
+        :param model_param_dict:dictonary of model parameters for specific algorithms such t-layer or warp-layer
+        :param use_t: Boolean, whether to use t-layer for neural network construction
+        :param use_warp: Boolean, whether to use warp-layer for neural network construction
+        :param outer_method: the name of outer method
+        :param reuse: Boolean, whether to reuse the parameters
+        """
         self.var_coll = boml.extension.METAPARAMETERS_COLLECTIONS
         self.outer_method = outer_method
         self.dim_output = dim_output
@@ -177,7 +200,7 @@ class BOMLNetOmniglotMetaReprV2(BOMLNet):
         self + tf.reshape(self.out, (-1, 512))
 
     def re_forward(self, new_input=None, task_parameter=OrderedDict()):
-        return BOMLNetOmniglotMetaReprV2(
+        return BOMLNetOmniglotMetaFeatV2(
             new_input if new_input is not None else self.layers[0],
             model_param_dict=self.model_param_dict,
             name=self.name,

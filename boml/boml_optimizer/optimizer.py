@@ -20,7 +20,7 @@ boml_optimizer = importlib.import_module("boml.optimizer")
 
 class BOMLOptimizer(object):
     """
-    Wrapper for performing gradient-based metaparameter optimization
+    Wrapper for performing gradient-based parameter optimization
     """
 
     def __init__(
@@ -32,26 +32,27 @@ class BOMLOptimizer(object):
         experiments=[],
     ):
         """
-        BMLHOptimizer is the main class in `pybml`, which takes responsibility for
+        BMLHOptimizer is the main class in `boml`, which takes responsibility for
         the whole process of model construnction and back propagation.
 
-        :param Method: define basic method for following training process, it should be included in ['MetaInit', 'MetaRepr'],
-         'MetaInit' type includes meta-initialization-based methods like 'MAML, FOMAML, MT-net, WarpGrad';
-         'MetaRepr' type includes meta-feature-based methods like
-         'BDA, RHG, Truncated, Implicit HG, DARTS';
-        :param inner_method: method chosen for solving LLproblem, including ['Trad' ,'Simple', 'Aggr'], 'MetaRepr' type choose
-        either 'Trad' for traditional optimization strategies or 'Aggr' for Gradient Aggragation optimization 'MetaInit' type
-        should choose 'Simple', and set specific parameters for detailed method choices like FOMAML or TNet.
-        :param outer_method: method chosen for solving LLproblem, including ['Reverse' ,'Simple', 'Forward', 'Implcit'],
-        'MetaInit' type should choose Simple, and set specific parameters for detailed method choices like FOMAML
+        :param method: define basic method for following training process, it should be included in
+        ['MetaInit', 'MetaFeat'], 'MetaInit' type includes meta-initialization-based methods like
+        'MAML, FOMAML, MT-net, WarpGrad'; 'MetaFeat' type includes meta-feature-based methods like
+         'BDA, RHG, TRHG, Implicit HG, DARTS';
+        :param inner_method: method chosen for solving LLproblem, including ['Trad' ,'Simple', 'Aggr'],
+        'MetaFeat' type choose either 'Trad' for traditional optimization strategies or 'Aggr' for
+        Gradient Aggregation optimization 'MetaInit' type
+        should choose 'Simple', and set specific parameters for detailed method choices like FMAML or TNet.
+        :param outer_method: method chosen for solving LLproblem, including ['Reverse' ,'Simple', 'Forward', 'Implicit'],
+        'MetaInit' type should choose Simple, and set specific parameters for detailed method choices like FMAML
         :param truncate_iter: specific parameter for Truncated Reverse method, defining number of iterations to truncate
          in the Back propagation process
         :param experiments: list of experiment objects that has already been initialized
         :return :an initialized instance of BMLHOptimizer
         """
-        assert method in ("MetaRepr", "MetaInit"), (
-            "initialize method arguement, should be in list \an [MetaRepr,MetaInitl] "
-            "MetaRepr based methods include [BDA,FHG,RHG,TRHG],"
+        assert method in ("MetaFeat", "MetaInit"), (
+            "initialize method arguement, should be in list \an [MetaFeat,MetaInitl] "
+            "MetaFeat based methods include [BDA,FHG,RHG,TRHG],"
             "HperOptim based methods include [MAML,FOMAML,MSGD]"
         )
         self._method = method
@@ -172,7 +173,7 @@ class BOMLOptimizer(object):
         :param _input: orginal input for neural network construction of task-specific module
         :param meta_learner: returned value of Meta_model function, which is a instance of BMLNet or its child classes
         :param name: name for Base model modules used for BMLNet initialization
-        :param weights_initializer: initializer function for task_specific network, called by 'MetaRepr' method
+        :param weights_initializer: initializer function for task_specific network, called by 'MetaFeat' method
         :return: task-specific model part
         """
         if self.method == "MetaInit":
@@ -194,7 +195,7 @@ class BOMLOptimizer(object):
                 outer_method=self.outer_method,
                 use_warp=meta_learner.use_warp,
             )
-        elif self.method == "MetaRepr":
+        elif self.method == "MetaFeat":
             base_learner = getattr(boml_networks, "BOMLNetFeedForward")(
                 _input=_input,
                 dims=self.data_set.train.dim_target,
@@ -203,7 +204,7 @@ class BOMLOptimizer(object):
             )
         else:
             print(
-                "initialize method arguement, should be in list \an [MetaRepr,MetaInitl]"
+                "initialize method arguement, should be in list \an [MetaFeat,MetaInitl]"
             )
             raise AssertionError
         return base_learner
@@ -214,6 +215,7 @@ class BOMLOptimizer(object):
         learning_rate,
         T,
         var_list=None,
+        experiment=None,
         inner_objective_optimizer="SGD",
         outer_objective=None,
         learn_lr=False,
@@ -226,7 +228,6 @@ class BOMLOptimizer(object):
         first_order=False,
         loss_func=utils.cross_entropy,
         momentum=0.5,
-        experiment=None,
         **inner_kargs
     ):
         """
@@ -288,10 +289,10 @@ class BOMLOptimizer(object):
             "found {} instead".format(type(self.io_opt))
         )
         assert self._method in (
-            "MetaRepr",
+            "MetaFeat",
             "MetaInit",
-        ), "illegal initialization value for argument:method, should be in [MetaRepr, MetaInit]"
-        if self.method == "MetaRepr":
+        ), "illegal initialization value for argument:method, should be in [MetaFeat, MetaInit]"
+        if self.method == "MetaFeat":
             if self.inner_method == "Aggr":
                 assert (
                     outer_objective is not None

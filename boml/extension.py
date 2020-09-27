@@ -8,7 +8,7 @@ import tensorflow as tf
 
 from boml import utils
 
-Meta_Repr_Method = ["MAML", "FOMAML", "Meta-SGD", "MT-net", "WarpGrad"]
+Meta_Repr_Method = ["MAML", "FMAML", "Meta-SGD", "MT-net", "WarpGrad"]
 Meta_Init_Method = ["RHG", "TRHG", "DARTS", "BDA", "Implicit"]
 METHOD_COLLECTIONS = [Meta_Repr_Method, Meta_Init_Method]
 

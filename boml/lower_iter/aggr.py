@@ -81,6 +81,20 @@ class BOMLInnerGradAggr(BOMLInnerGradTrad):
         name=None,
         grad_loss=None,
     ):
+        """
+        :param inner_optimizer: the instance of modified optimizer
+        :param loss_inner: inner objective
+        :param loss_outer: outer objective
+        :param param_dict: dictionary of necessary parameters
+        :param global_step: global step for optimization
+        :param var_list: list of varibles to be optimized
+        :param gate_gradients:
+        :param aggregation_method:
+        :param colocate_gradients_with_ops:
+        :param name:
+        :param grad_loss:
+        :return:
+        """
 
         grads_and_vars_inner = inner_optimizer.compute_gradients(
             loss_inner,

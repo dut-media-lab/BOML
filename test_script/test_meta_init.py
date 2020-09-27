@@ -38,7 +38,6 @@ def build(
     outer_method="Simple",
     use_t=False,
     use_warp=False,
-    first_order=False,
 ):
 
     exs = [dl.BOMLExperiment(metasets) for _ in range(MBS)]
@@ -79,7 +78,7 @@ def build(
             experiment=ex,
             var_list=ex.model.var_list,
             learn_lr=learn_lr,
-            first_order=first_order,
+            first_order=args.first_order,
         )
         ex.errors["validation"] = boml.utils.cross_entropy(
             pred=ex.model.re_forward(ex.x_).out, label=ex.y_
@@ -173,8 +172,7 @@ def train_and_test(
         inner_method,
         outer_method,
         use_t,
-        use_warp,
-        first_order,
+        use_warp
     )
 
     sess = tf.Session(config=boml.utils.set_gpu())
@@ -257,8 +255,7 @@ def build_and_test(
         inner_method,
         outer_method,
         use_t,
-        use_warp,
-        first_order,
+        use_warp
     )
 
     sess = tf.Session(config=boml.utils.set_gpu())

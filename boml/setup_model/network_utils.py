@@ -243,26 +243,22 @@ def maybe_get(obj, i):
     return obj[i] if hasattr(obj, "__getitem__") else obj
 
 
-def merge_dicts(*dicts):
-    return reduce(lambda a, nd: {**a, **nd}, dicts, {})
-
-
-def to_one_hot_enc(seq, dimension=None):
-    da_max = dimension or int(np.max(seq)) + 1
-    _tmp = np.zeros((len(seq), da_max))
-    _tmp[range(len(_tmp)), np.array(seq, dtype=int)] = 1
-    return _tmp
-
-
 def flatten_list(lst):
+    """
+    :param lst: original list
+    :return: flattened list
+    """
     from itertools import chain
 
     return list(chain(*lst))
 
 
 def filter_vars(var_name, scope):
-    import tensorflow as tf
-
+    """
+    :param var_name: name of the variable
+    :param scope: name scope
+    :return: variable with the name in the scope
+    """
     return [
         v
         for v in tf.get_collection(

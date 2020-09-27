@@ -1,4 +1,3 @@
-import os
 from functools import reduce
 
 import numpy as np
@@ -8,6 +7,12 @@ import tensorflow as tf
 
 
 def get_indices_balanced_classes(n_examples, labels, forbidden_indices):
+    """
+    :param n_examples: number of examples
+    :param labels: paired labels
+    :param forbidden_indices:
+    :return:
+    """
     N = len(labels)
     n_classes = len(labels[0])
 
@@ -28,6 +33,10 @@ def get_indices_balanced_classes(n_examples, labels, forbidden_indices):
 
 
 def test_if_balanced(dataset):
+    """
+    :param dataset:
+    :return: just for testing
+    """
     labels = dataset.target
     n_classes = len(labels[0])
     class_counter = [0] * n_classes
@@ -37,10 +46,19 @@ def test_if_balanced(dataset):
 
 
 def maybe_cast_to_scalar(what):
+    """
+    :param what: input
+    :return: return the scalar of input if the length of input equals 1.
+    """
     return what[0] if len(what) == 1 else what
 
 
 def pad(_example, _size):
+    """
+    :param _example:
+    :param _size:
+    :return: performs concatenation
+    """
     return np.concatenate([_example] * _size)
 
 
@@ -68,6 +86,10 @@ def vstack(lst):
 
 
 def convert_sparse_matrix_to_sparse_tensor(X):
+    """
+    :param X: sparse matrix
+    :return: sparse tensor of X
+    """
     if isinstance(X, sc_sp.csr.csr_matrix):
         coo = X.tocoo()
         indices = np.mat([coo.row, coo.col]).transpose()
@@ -78,6 +100,10 @@ def convert_sparse_matrix_to_sparse_tensor(X):
 
 
 def get_data(d_set):
+    """
+    :param d_set: instance of dataset
+    :return: inputs of datasets
+    """
     if hasattr(d_set, "images"):
         data = d_set.images
     elif hasattr(d_set, "data"):
@@ -88,6 +114,10 @@ def get_data(d_set):
 
 
 def get_targets(d_set):
+    """
+    :param d_set: instance of dataset
+    :return: labels of datasets
+    """
     if hasattr(d_set, "labels"):
         return d_set.labels
     elif hasattr(d_set, "target"):
@@ -147,18 +177,14 @@ def as_tuple_or_list(obj):
 
 
 def to_one_hot_enc(seq, dimension=None):
+    """
+
+    :param seq: sequence
+    :param dimension: the dimension of output
+    :return: output of one-hot encoding
+    """
     da_max = dimension or int(np.max(seq)) + 1
     _tmp = np.zeros((len(seq), da_max))
     _tmp[range(len(_tmp)), np.array(seq, dtype=int)] = 1
     return _tmp
-    #
-    # def create_and_set(_p):
-    #     _tmp = np.zeros(da_max)
-    #     _tmp[int(_p)] = 1
-    #     return _tmp
-    #
-    # return np.array([create_and_set(_v) for _v in seq])
 
-
-from_env = os.getenv("DATASETS_FOLDER")
-DATA_FOLDER = from_env

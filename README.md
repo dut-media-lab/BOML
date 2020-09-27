@@ -11,7 +11,7 @@
 
 BOML is a modularized optimization library that unifies several ML algorithms into a common bilevel optimization framework. It provides interfaces to implement popular bilevel optimization algorithms, so that you could quickly build your own meta learning neural network and test its performance.
 
-ReadMe.md file contains brief introduction to implement meta-initialization-based and meta-feature-based methods in few-shot learning field. Except for algorithms which have been proposed, various combinations of lower level and upper level strategies are available. 
+ReadMe.md contains brief introduction to implement meta-initialization-based and meta-feature-based methods in few-shot classification field. Except for algorithms which have been proposed, various combinations of lower level and upper level strategies are available. 
 
 ## Meta Learning 
 
@@ -54,7 +54,7 @@ ex = boml.BOMLExperiment(dataset)
 
 ```
 
-### Build network structure and define hyperparameters
+### Build network structure and define parameters for meta-learner and base-learner
 ```python
 boml_ho = boml.BOMLOptimizer(
     method="MetaInit", inner_method="Simple", outer_method="Simple"
@@ -76,7 +76,7 @@ inner_grad = boml_ho.ll_problem(
 ```
 ### Define UL objectives and UL calculation process
 ```python
-loss_outer = utils.cross_entropy(pred=ex.model.re_forward(ex.x_).out, label=ex.y_)
+loss_outer = utils.cross_entropy(pred=ex.model.re_forward(ex.x_).out, label=ex.y_) # loss function
 boml_ho.ul_problem(
     outer_objective=loss_outer,
     meta_learning_rate=args.meta_lr,
@@ -108,14 +108,14 @@ with tf.Session() as sess:
 ## Related Methods 
  - [Hyperparameter optimization with approximate gradient(HOAG)](https://arxiv.org/abs/1602.02355)
  - [Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks(MAML)](https://arxiv.org/abs/1703.03400)
- - [On First-Order Meta-Learning Algorithms(FOMAML)](https://arxiv.org/abs/1803.02999)
+ - [On First-Order Meta-Learning Algorithms(FMAML)](https://arxiv.org/abs/1703.03400)
  - [Meta-SGD: Learning to Learn Quickly for Few-Shot Learning(Meta-SGD)](https://arxiv.org/pdf/1707.09835.pdf)
  - [Bilevel Programming for Hyperparameter Optimization and Meta-Learning(RHG)](http://export.arxiv.org/pdf/1806.04910)
  - [Truncated Back-propagation for Bilevel Optimization(TG)](https://arxiv.org/pdf/1810.10667.pdf)
  - [Gradient-Based Meta-Learning with Learned Layerwise Metric and Subspace(MT-net)](http://proceedings.mlr.press/v80/lee18a/lee18a.pdf)
  - [Meta-Learning with warped gradient Descent(WarpGrad))](https://arxiv.org/abs/1909.00025)
  - [DARTS: Differentiable Architecture Search(DARTS)](https://arxiv.org/pdf/1806.09055.pdf)
- - [A Generic First-Order Algorithmic Framework for Bi-Level Programming Beyond Lower-Level Singleton(BA)](https://arxiv.org/pdf/2006.04045.pdf)
+ - [A Generic First-Order Algorithmic Framework for Bi-Level Programming Beyond Lower-Level Singleton(BDA)](https://arxiv.org/pdf/2006.04045.pdf)
 
 
 

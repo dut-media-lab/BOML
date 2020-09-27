@@ -8,7 +8,6 @@ import boml.extension
 from test_script.script_helper import *
 
 from shutil import copyfile
-from boml.setup_model import BOMLNetOmniglotMetaReprV1, BOMLNetMiniMetaReprV1
 import boml as boml
 import numpy as np
 import tensorflow as tf
@@ -16,14 +15,8 @@ import tensorflow as tf
 dl.DATASET_FOLDER = "datasets"
 
 map_dict = {
-    "omniglot": {
-        "data_loader": dl.datasets.load_full_dataset.meta_omniglot,
-        "model": BOMLNetOmniglotMetaReprV1,
-    },
-    "miniimagenet": {
-        "data_loader": dl.datasets.load_full_dataset.meta_mini_imagenet,
-        "model": BOMLNetMiniMetaReprV1,
-    },
+    "omniglot": dl.datasets.load_full_dataset.meta_omniglot,
+    "miniimagenet": dl.datasets.load_full_dataset.meta_mini_imagenet
 }
 
 
@@ -46,14 +39,13 @@ def build(
     outer_method=None,
     use_t=False,
     use_warp=True,
-    truncate_iter=-1,
 ):
     exs = [dl.BOMLExperiment(metasets) for _ in range(MBS)]
     boml_ho = boml.BOMLOptimizer(
         method=method,
         inner_method=inner_method,
         outer_method=outer_method,
-        truncate_iter=truncate_iter,
+        truncate_iter=args.truncate_iter,
         experiments=exs,
     )
 
@@ -199,8 +191,7 @@ def train_and_test(
         inner_method,
         outer_method,
         use_t,
-        use_warp,
-        truncate_iter,
+        use_warp
     )
 
     sess = tf.Session(config=boml.utils.set_gpu())
@@ -292,8 +283,7 @@ def build_and_test(
         inner_method,
         outer_method,
         use_t,
-        use_warp,
-        truncate_iter,
+        use_warp
     )
 
     sess = tf.Session(config=boml.utils.set_gpu())
@@ -347,7 +337,6 @@ def test_meta_repr():
             inner_method=args.inner_method,
             outer_method=args.outer_method,
             use_t=args.use_t,
-            truncate_iter=args.truncate_iter,
             logdir=logdir,
             seed=args.seed,
             use_warp=args.use_warp,
@@ -379,7 +368,6 @@ def test_meta_repr():
             outer_method=args.outer_method,
             use_t=args.use_t,
             use_warp=args.use_warp,
-            truncate_iter=args.truncate_iter,
             seed=args.seed,
             lr0=args.lr,
             T=args.T,

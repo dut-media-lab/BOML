@@ -38,6 +38,28 @@ class BOMLNetMetaInitV1(BOMLNet):
         max_pool=False,
         reuse=False,
     ):
+        """
+        :param _input: original input
+        :param dim_output: dimension of output
+        :param name: scope of meta-learner
+        :param outer_param_dict: dictionary of outer parameters
+        :param model_param_dict:dictonary of model parameters for specific algorithms such t-layer or warp-layer
+        :param task_parameter: dictionary of task-specific parameters or temporary values of task-specific parameters
+        :param use_t: Boolean, whether to use t-layer for neural network construction
+        :param use_warp: Boolean, whether to use warp-layer for neural network construction
+        :param outer_method: the name of outer method
+        :param activation: form of activation function
+        :param var_collections: collection to store variables
+        :param conv_initializer: initializer for convolution blocks
+        :param output_weight_initializer: initializer for the fully-connected layer
+        :param norm: form of normalization function
+        :param data_type: default to be tf.float32
+        :param channels: number of channels
+        :param dim_hidden: lists to specify the dimension of hidden layer
+        :param kernel: size of the kernel
+        :param max_pool: Boolean, whether to use max_pool
+        :param reuse: Boolean, whether to reuse the parameters
+        """
         self.task_parameter = task_parameter
         self.kernel = kernel
         self.channels = channels
@@ -78,6 +100,10 @@ class BOMLNetMetaInitV1(BOMLNet):
             print(name, "MODEL CREATED")
 
     def create_outer_parameters(self, var_collections=GraphKeys.METAPARAMETERS):
+        """
+        :param var_collections: name of collections to store the created variables.
+        :return: dictionary to index the created variables.
+        """
         for i in range(len(self.dim_hidden)):
             self.outer_param_dict["conv" + str(i)] = network_utils.get_conv_weight(
                 self, i=i, initializer=self.conv_initializer
