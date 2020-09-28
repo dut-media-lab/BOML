@@ -252,7 +252,6 @@ def build_and_test(
     n_test_episodes=600,
     iterations_to_test=list(range(100000)),
     alpha=0.0,
-    darts=False,
 ):
     params = locals()
     print("params: {}".format(params))
@@ -379,7 +378,6 @@ def test_meta_feat():
             n_test_episodes=args.test_episodes,
             iterations_to_test=args.iterations_to_test,
             alpha=args.alpha,
-            darts=args.darts,
         )
 
 
