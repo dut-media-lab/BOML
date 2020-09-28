@@ -1,3 +1,24 @@
+# MIT License
+
+# Copyright (c) 2020 Yaohua Liu
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 """
 The base class in upper_iter to encapsulate the UL optimization strategies.
 BOMLOptimizer conducts the UL calculation with strategies in upper_iter that calls lower iter during the back propagation process in turn.
@@ -18,7 +39,7 @@ class BOMLOuterGrad(object):
     def __init__(self, name):
         self._inner_grads = set()
         self._inner_objectives = None
-        self._hypergrad_dictionary = defaultdict(list)
+        self._outer_grads_dict = defaultdict(list)
         self._apply_updates = None
 
         self._initialization = None
@@ -129,7 +150,7 @@ class BOMLOuterGrad(object):
             meta_param = boml.extension.meta_parameters(tf.get_variable_scope().name)
 
         assert all(
-            [h in self._hypergrad_dictionary for h in meta_param]
+            [h in self._outer_grads_dict for h in meta_param]
         ), "FINAL ERROR!"
 
         if aggregation_fn is None:
@@ -148,7 +169,7 @@ class BOMLOuterGrad(object):
             return aggr
 
         return [
-            (_aggregate_process_manage_collection(self._hypergrad_dictionary[h]), h)
+            (_aggregate_process_manage_collection(self._outer_grads_dict[h]), h)
             for h in meta_param
         ]
 

@@ -1,10 +1,31 @@
+# MIT License
+
+# Copyright (c) 2020 Yaohua Liu
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 """
 Contains some utility functions to run your training model and evaluate the performance.
 """
 from __future__ import absolute_import, print_function, division
 
 import sys
-
+import pickle
 import numpy as np
 import tensorflow as tf
 
@@ -171,7 +192,6 @@ def get_L1Reg(var_list=None, rate=0.0):
     return reg_l1
 
 
-
 def classification_acc(pred, label):
     return tf.contrib.metrics.accuracy(
         tf.argmax(tf.nn.softmax(pred), 1), tf.argmax(label, 1)
@@ -225,6 +245,35 @@ def isinteger(num):
     return isinstance(num, (int, np.int_, np.int8, np.int16, np.int32, np.int64))
 
 
+class BatchQueueMock:
+    # Class for debugging purposes for multi-thread issues
+    def __init__(self, metadataset, n_batches, batch_size, rand):
+        """
+        :param metadataset: instance of data set
+        :param n_batches: number of batches
+        :param batch_size: size of batch
+        :param rand: int, used for generating random numbers
+        """
+        self.metadataset = metadataset
+        self.n_batches = n_batches
+        self.batch_size = batch_size
+        self.rand = rand
+
+    def get_all_batches(self):
+        """
+        :return:
+        """
+        return [
+            d
+            for d in self.metadataset.generate(
+                self.n_batches, self.batch_size, self.rand
+            )
+        ]
+
+    def get_single_batch(self):
+        return [d for d in self.metadataset.generate(self.n_batches, 1, self.rand)]
+
+
 def feed_dicts(dat_lst, exs):
     """
     Generate the feed_dicts for boml_optimizer.run() with lists of
@@ -247,5 +296,38 @@ def feed_dicts(dat_lst, exs):
     )
 
     return train_fd, valid_fd
+
+
+def feed_dict(data_batch, ex):
+    """
+    Generate the feed_dicts for boml_optimizer.run() with data_batch and the instance of BOMLExperiment
+    :param data_batch: each batch of data for exery iteration
+    :param ex: instance of BOMLExperiment
+    :return:
+    """
+    data_batch = data_batch[0]
+    train_fd = {ex.x: data_batch.train.data, ex.y: data_batch.train.target}
+    valid_fd = {ex.x_: data_batch.test.data, ex.y_: data_batch.test.target}
+    return train_fd, valid_fd
+
+
+def save_obj(file_path, obj):
+    """
+    :param file_path: path to save the pickle file
+    :param obj:
+    :return:
+    """
+    with open(file_path, "wb") as handle:
+        pickle.dump(obj, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def load_obj(file_path):
+    """
+    :param file_path: path to save the pickle file
+    :return:
+    """
+    with open(file_path, "rb") as handle:
+        b = pickle.load(handle)
+    return b
 
 

@@ -23,7 +23,7 @@ parser.add_argument(
     "-d",
     "--dataset",
     type=str,
-    default="miniimagenet",
+    default="omniglot",
     metavar="STRING",
     help="omniglot or miniimagenet.",
 )
@@ -65,7 +65,7 @@ parser.add_argument(
     "-mbs",
     "--meta_batch_size",
     type=int,
-    default=2,
+    default=1,
     metavar="NUMBER",
     help="number of tasks sampled per meta-update",
 )
@@ -73,7 +73,7 @@ parser.add_argument(
     "-mti",
     "--meta_train_iterations",
     type=int,
-    default=50000,
+    default=2000,
     metavar="NUMBER",
     help="number of metatraining iterations.",
 )
@@ -105,7 +105,7 @@ parser.add_argument(
     "-mlr",
     "--meta-lr",
     type=float,
-    default=0.3,
+    default=0.1,
     metavar="NUMBER",
     help="starting meta learning rate",
 )
@@ -276,14 +276,7 @@ parser.add_argument(
     metavar="BOOLEAN",
     help="whether to implement Reptile method",
 )
-parser.add_argument(
-    "-ds",
-    "--darts",
-    type=bool,
-    default=False,
-    metavar="BOOLEAN",
-    help="whether to implement Darts Method",
-)
+
 parser.add_argument(
     "-io",
     "--inner_opt",
@@ -759,7 +752,7 @@ def start_batch_makers(
         worker.start()
 
 
-# Class for debugging purposes for multi-thread issues (used now because it resolves rand issues)
+# Class for debugging purposes for multi-thread issues
 class BatchQueueMock:
     def __init__(self, metadataset, n_batches, batch_size, rand):
         self.metadataset = metadataset

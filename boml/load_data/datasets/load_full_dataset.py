@@ -1,3 +1,24 @@
+# MIT License
+
+# Copyright (c) 2020 Yaohua Liu
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 """
 Module for loading datasets
 """
@@ -279,157 +300,6 @@ def meta_omniglot(
         )
     else:
         std_num_examples = examples_train * std_num_classes
-    alphabets = os.listdir(folder)
-
-    labels_and_images = OrderedDict()
-    for alphabet in alphabets:
-        base_folder = join(folder, alphabet)
-        label_names = os.listdir(base_folder)  # all characters in one alphabet
-        labels_and_images.update(
-            {
-                alphabet + os.path.sep + ln: os.listdir(join(base_folder, ln))
-                # all examples of each character
-                for ln in label_names
-            }
-        )
-
-    # divide between training validation and test meta-datasets
-    _rand = dl.get_rand_state(_rand)
-    all_clss = list(labels_and_images.keys())
-    _rand.shuffle(all_clss)
-    n_splits = n_splits or (0, 1200, 1300, len(all_clss))
-
-    meta_dts = []
-    for start, end in zip(n_splits, n_splits[1:]):
-        meta_dts.append(
-            OmniglotMetaDataset(
-                info={
-                    "base_folder": folder,
-                    "classes": {k: labels_and_images[k] for k in all_clss[start:end]},
-                    "one_hot_enc": one_hot_enc,
-                },
-                num_classes=std_num_classes,
-                num_examples=std_num_examples,
-            )
-        )
-
-    return dl.Datasets.from_list(meta_dts)
-
-
-def meta_omniglot_v2(
-    folder=OMNIGLOT_RESIZED,
-    std_num_classes=None,
-    examples_train=None,
-    examples_test=None,
-    one_hot_enc=True,
-    _rand=0,
-    n_splits=None,
-):
-    """
-    Loading function for Omniglot dataset in learning-to-learn version. Use image data as obtained from
-    https://github.com/cbfinn/maml/blob/master/data/omniglot_resized/resize_images.py
-
-    :param folder: root folder name.
-    :param std_num_classes: standard number of classes for N-way classification
-    :param examples_train:standard number of examples to be picked in each generated per classes for training
-    (eg .1 shot, examples_train=1)
-    :param examples_test: standard number of examples to be picked in each generated per classes for testing
-    :param one_hot_enc: one hot encoding
-    :param _rand: random seed or RandomState for generate training, validation, testing meta-datasets
-                    split
-    :param n_splits: num classes per split
-    :return: a Datasets of MetaDataset s
-    """
-
-    class OmniglotMetaDataset(MetaDataset):
-        def __init__(
-            self,
-            info=None,
-            rotations=None,
-            name="Omniglot",
-            num_classes=None,
-            num_examples=None,
-        ):
-            super().__init__(
-                info, name=name, num_classes=num_classes, num_examples=num_examples
-            )
-            self._loaded_images = defaultdict(lambda: {})
-            self._rotations = rotations or [0, 90, 180, 270]
-            self.num_classes = num_classes
-            assert len(num_examples) > 0
-            self.examples_train = int(num_examples[0] / num_classes)
-            self._img_array = None
-            self.load_all()
-
-        def generate_datasets(self, rand=None, num_classes=None, num_examples=None):
-            rand = dl.get_rand_state(rand)
-
-            if not num_examples:
-                num_examples = self.kwargs["num_examples"]
-            if not num_classes:
-                num_classes = self.kwargs["num_classes"]
-
-            clss = self._loaded_images if self._loaded_images else self.info["classes"]
-
-            random_classes = rand.choice(
-                list(clss.keys()), size=(num_classes,), replace=False
-            )
-            rand_class_dict = {rnd: k for k, rnd in enumerate(random_classes)}
-
-            _dts = []
-            for ns in dl.as_tuple_or_list(num_examples):
-                classes = balanced_choice_wr(random_classes, ns, rand)
-
-                all_images = {cls: list(clss[cls]) for cls in classes}
-                indices, targets = [], []
-                for c in classes:
-                    rand.shuffle(all_images[c])
-                    img_name = all_images[c][0]
-                    all_images[c].remove(img_name)
-                    # sample_info.append({'name': img_name, 'label': c})
-                    indices.append(clss[c][img_name])
-                    targets.append(rand_class_dict[c])
-
-                if self.info["one_hot_enc"]:
-                    targets = dl.to_one_hot_enc(targets, dimension=num_classes)
-
-                data = self._img_array[indices]
-
-                _dts.append(dl.Dataset(data=data, target=targets))
-            return dl.Datasets.from_list(_dts)
-
-        def load_all(self):
-            from scipy.ndimage import imread
-            from scipy.ndimage.interpolation import rotate
-
-            _cls = self.info["classes"]
-            _base_folder = self.info["base_folder"]
-
-            _id = 0
-            flat_data = []
-            flat_targets = []
-            for c in _cls:
-                all_images = list(_cls[c])
-                for img_name in all_images:
-                    img = imread(join(_base_folder, join(c, img_name)))
-                    img = 1.0 - np.reshape(img, (28, 28, 1)) / 255.0
-                    for rot in self._rotations:
-                        img = rotate(img, rot, reshape=False)
-                        self._loaded_images[c + os.path.sep + "rot_" + str(rot)][
-                            img_name
-                        ] = _id
-                        _id += 1
-                        flat_data.append(img)
-                        # flat_targets maybe... no flat targets... they depend on the episode!!
-
-            self._img_array = np.stack(flat_data)
-
-            # end of class
-
-    std_num_examples = (
-        examples_train * std_num_classes,
-        examples_test * std_num_classes,
-    )
     alphabets = os.listdir(folder)
 
     labels_and_images = OrderedDict()

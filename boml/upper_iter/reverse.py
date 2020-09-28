@@ -1,3 +1,24 @@
+# MIT License
+
+# Copyright (c) 2020 Yaohua Liu
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 """
 Subclass of BOMLOuterGrad to implement the UL optimization strategy for most of the `Meta-Feature-Based` methods.
 """
@@ -40,16 +61,12 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
         self, outer_objective, inner_grad, meta_param=None, param_dict=OrderedDict()
     ):
         """
-        Function that adds to the computational graph all the operations needend for computing
-        the hypergradients in a "dynamic" way, without unrolling the entire optimization graph.
-        The resulting computation, while being roughly 2x more expensive then unrolling the
-        optimizaiton dynamics, requires much less (GPU) memory and is more flexible, allowing
-        to set a termination condition to the parameters optimizaiton routine.
-
-        :param inner_grad: OptimzerDict object resulting from the inner objective optimization.
+        Function that adds to the computational graph all the operations needed for computing
+        the outer gradients with the dynamical system.
+        :param inner_grad: BOMLInnerGrad object resulting from the inner objective optimization.
         :param outer_objective: A loss function for the outer parameters (scalar tensor)
         :param meta_param: Optional list of outer parameters to consider. If not provided will get all variables in the
-                            hyperparameter collection in the current scope.
+                            METAPARAMETERS collection in the current scope.
 
         :return: list of outer parameters involved in the computation
         """
@@ -67,7 +84,7 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
 
             alpha_dot_B = tf.gradients(lag_phi_t, meta_param)
 
-            hyper_grad_vars, hyper_grad_step = [], tf.no_op()
+            outer_grad_vars, outer_grad_step = [], tf.no_op()
             for dl_dh, hyper in zip(alpha_dot_B, meta_param):
                 assert dl_dh is not None, BOMLOuterGrad._ERROR_HYPER_DETACHED.format(
                     hyper
@@ -76,10 +93,10 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
                 if dl_dh is not None:
                     hgv = self._create_outergradient(outer_objective, hyper)
 
-                    hyper_grad_step = tf.group(hyper_grad_step, hgv.assign_add(dl_dh))
-                hyper_grad_vars.append(hgv)
+                    outer_grad_step = tf.group(outer_grad_step, hgv.assign_add(dl_dh))
+                outer_grad_vars.append(hgv)
                 # first update hypergradinet then alphas.
-            with tf.control_dependencies([hyper_grad_step]):
+            with tf.control_dependencies([outer_grad_step]):
                 _alpha_iter = tf.group(
                     *[
                         alpha.assign(dl_ds)
@@ -91,14 +108,14 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
             self._alpha_iter = tf.group(self._alpha_iter, _alpha_iter)
             # put all the backward iterations toghether
             [
-                self._hypergrad_dictionary[h].append(hg)
-                for h, hg in zip(meta_param, hyper_grad_vars)
+                self._outer_grads_dict[h].append(hg)
+                for h, hg in zip(meta_param, outer_grad_vars)
             ]
             self._reverse_initializer = tf.group(
                 self._reverse_initializer,
                 tf.variables_initializer(alphas),
                 tf.variables_initializer(
-                    [h for h in hyper_grad_vars if hasattr(h, "initializer")]
+                    [h for h in outer_grad_vars if hasattr(h, "initializer")]
                 ),
             )
             return meta_param
@@ -156,8 +173,6 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
         outer_objective_feed_dicts=None,
         initializer_feed_dict=None,
         param_dict=OrderedDict(),
-        train_batches=None,
-        experiments=[],
         global_step=None,
         session=None,
     ):
@@ -178,8 +193,6 @@ class BOMLOuterGradReverse(BOMLOuterGrad):
 
         T = 0  # this is useful if T_or_generator is indeed a generator...
         for t in utils.solve_int_or_generator(T_or_generator[0]):
-            # nonlocal t  # with nonlocal would not be necessary the variable T... not compatible with 2.7
-
             _fd = inner_objective_feed_dicts
             if self._inner_method == "Aggr":
                 _fd.update(outer_objective_feed_dicts)
