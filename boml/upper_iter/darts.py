@@ -273,7 +273,7 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
         state_feed_dict = utils.merge_dicts(
             *[
                 od.state_feed_dict(h)
-                for od, h in zip(sorted(self._optimizer_dicts), self._history[-1])
+                for od, h in zip(sorted(self._inner_grads), self._history[-1])
             ]
         )
         new_fd = utils.merge_dicts(state_feed_dict, inner_objective_feed_dicts)
