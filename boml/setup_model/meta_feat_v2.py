@@ -140,7 +140,7 @@ class BOMLNetMiniMetaFeatV2(BOMLNet):
             name=self.name,
             dim_output=self.dim_output,
             outer_param_dict=self.outer_param_dict,
-            reuse=True,
+            reuse=tf.AUTO_REUSE,
             outer_method=self.outer_method,
             use_t=self.use_t,
         )
@@ -248,7 +248,7 @@ class BOMLNetOmniglotMetaFeatV2(BOMLNet):
             name=self.name,
             dim_output=self.dim_output,
             outer_param_dict=self.outer_param_dict,
-            reuse=True,
+            reuse=tf.AUTO_REUSE,
             use_t=self.use_t,
             outer_method=self.outer_method,
         )

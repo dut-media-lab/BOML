@@ -243,7 +243,7 @@ class BOMLNetMetaFeatV1(BOMLNet):
             dim_hidden=self.dim_hidden,
             output_weight_initializer=self.output_weight_initializer,
             max_pool=self.max_pool,
-            reuse=True,
+            reuse=tf.AUTO_REUSE,
             outer_method=self.outer_method,
         )
 
