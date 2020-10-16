@@ -138,8 +138,6 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
                     if left_diff_grad is not None:
                         if left_diff_outer_grad is not None:
                             left_diff[_] = (1-param_dict['alpha']) * left_diff_grad + param_dict['alpha'] * left_diff_outer_grad
-                        else:
-                            left_diff[_] = (1-param_dict['alpha']) * left_diff_grad
                     else:
                         if left_diff_outer_grad is not None:
                             left_diff[_] = param_dict['alpha'] * left_diff_outer_grad
@@ -156,8 +154,6 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
                     if right_diff_grad is not None:
                         if right_diff_outer_grad is not None:
                             right_diff[_] = (1-param_dict['alpha']) * right_diff_grad + param_dict['alpha'] * right_diff_outer_grad
-                        else:
-                            right_diff[_] = (1-param_dict['alpha']) * right_diff_grad
                     else:
                         if right_diff_outer_grad is not None:
                             right_diff[_] = param_dict['alpha'] * right_diff_outer_grad
@@ -179,7 +175,7 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
                 assert doo_dh is not None, BOMLOuterGrad._ERROR_HYPER_DETACHED.format(
                     doo_dh
                 )
-                self._hypergrad_dictionary[h].append(doo_dh)
+                self._outer_grads_dict[h].append(doo_dh)
             return meta_param
 
     @staticmethod
