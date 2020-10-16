@@ -178,6 +178,7 @@ class BOMLOptimizer(object):
             **model_args
         )
         self.param_dict["meta_model"] = meta_model
+        self.param_dict["meta_learner"] = meta_learner
         self._meta_model = meta_learner
 
         return meta_learner
