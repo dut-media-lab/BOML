@@ -800,23 +800,3 @@ def redivide_data(
         return new_datasets
 
 
-if __name__ == "__main__":
-    # pass
-    # mmi = meta_mini_imagenet()
-    # # st = mmi.train.generate_datasets(num_classes=10, num_examples=(123, 39))
-    # d1 = mmi.train.all_data(seed=0)
-    # print(d1.train.dim_data, d1.train.dim_target)
-    #
-    # mmiii = meta_mini_imagenet()
-    # # st = mmi.train.generate_datasets(num_classes=10, num_examples=(123, 39))
-    # d2 = mmiii.train.all_data(seed=0)
-    # print(d2.train.dim_data, d2.train.dim_target)
-    #
-    # print(np.equal(d1.train.data[0], d2.train.data[0]))
-
-    res = meta_omniglot_v2(std_num_classes=5, std_num_examples=(10, 20))
-    lst = []
-    while True:
-        lst.append(res.train.generate_datasets())
-        # print(dt.train.data)
-        # print(res)

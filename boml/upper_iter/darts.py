@@ -1,30 +1,6 @@
-# MIT License
-
-# Copyright (c) 2020 Yaohua Liu
-
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-"""
-Subclass of BOMLOuterGrad to implement the UL optimization strategy for `DARTS` method .
-"""
 from __future__ import absolute_import, print_function, division
 
-from collections import OrderedDict
+from collections import OrderedDict, deque
 
 import numpy as np
 
@@ -51,7 +27,7 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
         self._inner_method = inner_method
         self._diff_initializer = tf.no_op()
         self._darts_initializer = tf.no_op()
-        self._history = []
+        self._history = deque(maxlen=1)
 
     # noinspection SpellCheckingInspection
     def compute_gradients(
@@ -64,8 +40,8 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
         optimizaiton dynamics, requires much less (GPU) memory and is more flexible, allowing
         to set a termination condition to the parameters optimizaiton routine.
 
-        :param inner_grad: BOMLInnerGrad object resulting from the LL objective optimization.
-        :param outer_objective: A loss function for the outer parameters
+        :param inner_grad: OptimzerDict object resulting from the inner objective optimization.
+        :param outer_objective: A loss function for the outer parameters (scalar tensor)
         :param meta_param: Optional list of outer parameters to consider. If not provided will get all variables in the
                             hyperparameter collection in the current scope.
         :param param_dict: dictionary to store necessary parameters
@@ -98,12 +74,12 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
                 axis=0, values=utils.vectorize_all(darts_derivatives)
             )
             self.epsilon = 0.01 / tf.norm(tensor=darts_vector, ord=2)
-            darts_derivaives = [
+            darts_derivatives = [
                 self.Epsilon * darts_derivative
                 for darts_derivative in darts_derivatives
             ]
             fin_diff_part = self._create_darts_derivatives(
-                var_list=inner_grad.state, darts_derivatives=darts_derivaives
+                var_list=inner_grad.state, darts_derivatives=darts_derivatives
             )
             self._diff_initializer = tf.group(
                 self._diff_initializer,
@@ -138,16 +114,57 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
                 loss_func(
                     pred=model.re_forward(task_parameter=left_diff_0).out,
                     label=ex.y,
+                    method="MetaRepr",
                 ),
                 xs=meta_param,
             )
+
             right_diff = tf.gradients(
                 loss_func(
                     pred=model.re_forward(task_parameter=right_diff_0).out,
                     label=ex.y,
+                    method="MetaRepr",
                 ),
                 xs=meta_param,
             )
+
+            if self._inner_method == 'Aggr':
+                left_diff_outer = tf.gradients(
+                    loss_func(
+                        pred=model.re_forward(new_input=param_dict['meta_learner'].re_forward(ex.x_).out, task_parameter=left_diff_0).out,
+                        label=ex.y_,
+                        method="MetaRepr",
+                    ),
+                    xs=meta_param,
+                )
+                for _, left_diff_grad, left_diff_outer_grad in zip(range(len(left_diff)), left_diff, left_diff_outer):
+                    if left_diff_grad is not None:
+                        if left_diff_outer_grad is not None:
+                            left_diff[_] = (1-param_dict['alpha']) * left_diff_grad + param_dict['alpha'] * left_diff_outer_grad
+                        else:
+                            left_diff[_] = (1-param_dict['alpha']) * left_diff_grad
+                    else:
+                        if left_diff_outer_grad is not None:
+                            left_diff[_] = param_dict['alpha'] * left_diff_outer_grad
+
+                right_diff_outer = tf.gradients(
+                    loss_func(
+                        pred=model.re_forward(new_input=param_dict['meta_learner'].re_forward(ex.x_).out, task_parameter=right_diff_0).out,
+                        label=ex.y_,
+                        method="MetaRepr",
+                    ),
+                    xs=meta_param,
+                )
+
+                for _, right_diff_grad, right_diff_outer_grad in zip(range(len(right_diff)),right_diff, right_diff_outer):
+                    if right_diff_grad is not None:
+                        if right_diff_outer_grad is not None:
+                            right_diff[_] = (1-param_dict['alpha']) * right_diff_grad + param_dict['alpha'] * right_diff_outer_grad
+                        else:
+                            right_diff[_] = (1-param_dict['alpha']) * right_diff_grad
+                    else:
+                        if right_diff_outer_grad is not None:
+                            right_diff[_] = param_dict['alpha'] * right_diff_outer_grad
 
             # compute the second-order part and add them to the first-order item
             for grad_outer, left_dif, right_dif in zip(
@@ -166,7 +183,7 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
                 assert doo_dh is not None, BOMLOuterGrad._ERROR_HYPER_DETACHED.format(
                     doo_dh
                 )
-                self._outer_grads_dict[h].append(doo_dh)
+                self._hypergrad_dictionary[h].append(doo_dh)
             return meta_param
 
     @staticmethod
@@ -226,19 +243,31 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
 
         _fd = utils.maybe_call(initializer_feed_dict, utils.maybe_eval(global_step, ss))
         self._save_history(ss.run(self.initialization, feed_dict=_fd))
-
         # perform one-step update to the task parameters and store  weights along the optimization path
         _fd = inner_objective_feed_dicts
-        if self._inner_method == "Aggr":
-            _fd.update(outer_objective_feed_dicts)
-            if not alpha.get_shape().as_list():
-                _fd[t_tensor] = float(1.0)
-            else:
-                tmp = np.zeros((alpha.get_shape().as_list()[1], 1))
-                tmp[0][0] = 1.0
-                _fd[t_tensor] = tmp
-        self._save_history(ss.run(self.iteration, feed_dict=_fd))
 
+        for t in range(param_dict['T']):
+            if self._inner_method == "Aggr":
+                _fd.update(outer_objective_feed_dicts)
+                if not alpha.get_shape().as_list():
+                    _fd[t_tensor] = float(1.0)
+                else:
+                    tmp = np.zeros((alpha.get_shape().as_list()[1], 1))
+                    tmp[0][0] = 1.0
+                    _fd[t_tensor] = tmp
+            ss.run(self.iteration, feed_dict=_fd)
+        '''
+        for t in range(param_dict['T']):
+            if self._inner_method == "Aggr":
+                _fd.update(outer_objective_feed_dicts)
+                if not alpha.get_shape().as_list():
+                    _fd[t_tensor] = float(1.0)
+                else:
+                    tmp = np.zeros((alpha.get_shape().as_list()[1], 1))
+                    tmp[0][0] = 1.0
+                    _fd[t_tensor] = tmp
+            self._save_history(ss.run(self.iteration, feed_dict=_fd))
+    '''
         # compute the differentiation part, multiplied by Epsilon with one-step forward pass
         _fd = utils.maybe_call(
             outer_objective_feed_dicts, utils.maybe_eval(global_step, ss)
@@ -246,13 +275,13 @@ class BOMLOuterGradDarts(BOMLOuterGrad):
         darts_init_fd = utils.merge_dicts(_fd, inner_objective_feed_dicts)
         ss.run(self._diff_initializer, feed_dict=darts_init_fd)
 
-        del self._history[-1]  # do not consider the final task parameters
+        # del self._history[-1]  # do not consider the final task parameters
 
         # compute the second-order part and add them to the first-order item
         state_feed_dict = utils.merge_dicts(
             *[
                 od.state_feed_dict(h)
-                for od, h in zip(sorted(self._inner_grads), self._history[-1])
+                for od, h in zip(sorted(self._optimizer_dicts), self._history[-1])
             ]
         )
         new_fd = utils.merge_dicts(state_feed_dict, inner_objective_feed_dicts)

@@ -65,7 +65,7 @@ parser.add_argument(
     "-mbs",
     "--meta_batch_size",
     type=int,
-    default=1,
+    default=2,
     metavar="NUMBER",
     help="number of tasks sampled per meta-update",
 )
@@ -81,7 +81,7 @@ parser.add_argument(
     "-T",
     "--T",
     type=int,
-    default=5,
+    default=3,
     metavar="NUMBER",
     help="number of inner updates during training.",
 )
@@ -105,7 +105,7 @@ parser.add_argument(
     "-mlr",
     "--meta-lr",
     type=float,
-    default=0.1,
+    default=0.001,
     metavar="NUMBER",
     help="starting meta learning rate",
 )
@@ -130,7 +130,7 @@ parser.add_argument(
     "-lr",
     "--lr",
     type=float,
-    default=0.4,
+    default=0.1,
     metavar="NUMBER",
     help="starting learning rate",
 )

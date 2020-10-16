@@ -138,9 +138,6 @@ class BOMLNetMetaFeatV1(BOMLNet):
                 self, i=i, initializer=self.conv_initializer
             )
 
-            self.outer_param_dict["bias" + str(i)] = network_utils.get_bias_weight(
-                self, i=i, initializer=self.bias_initializer
-            )
         [
             tf.add_to_collections(extension.GraphKeys.METAPARAMETERS, hyper)
             for hyper in self.outer_param_dict.values()
@@ -192,23 +189,23 @@ class BOMLNetMetaFeatV1(BOMLNet):
             if self.use_t:
                 self + network_utils.conv_block_t(
                     self,
-                    self.outer_param_dict["conv" + str(i)],
-                    self.outer_param_dict["bias" + str(i)],
-                    self.model_param_dict["conv" + str(i) + "_z"],
+                    conv_weight=self.outer_param_dict["conv" + str(i)],
+                    conv_bias=None,
+                    zweight=self.model_param_dict["conv" + str(i) + "_z"],
                 )
             elif self.use_warp:
                 self + network_utils.conv_block_warp(
                     self,
-                    self.outer_param_dict["conv" + str(i)],
-                    self.outer_param_dict["bias" + str(i)],
-                    self.model_param_dict["conv" + str(i) + "_z"],
-                    self.model_param_dict["bias" + str(i) + "_z"],
+                    cweight=self.outer_param_dict["conv" + str(i)],
+                    bweight=None,
+                    zweight=self.model_param_dict["conv" + str(i) + "_z"],
+                    zbias=self.model_param_dict["bias" + str(i) + "_z"],
                 )
             else:
                 self + network_utils.conv_block(
                     self,
-                    self.outer_param_dict["conv" + str(i)],
-                    self.outer_param_dict["bias" + str(i)],
+                    cweight=self.outer_param_dict["conv" + str(i)],
+                    bweight=None,
                 )
         if self.flatten:
             flattened_shape = reduce(
@@ -230,7 +227,6 @@ class BOMLNetMetaFeatV1(BOMLNet):
         """
         reuses defined convolutional networks with new input and update the output results
         :param new_input: new input with same shape as the old one
-        :param task_parameter: the dictionary of task-specific
         :return: updated instance of BOMLNet
         """
         return BOMLNetMetaFeatV1(

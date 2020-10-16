@@ -454,9 +454,6 @@ class BOMLOptimizer(object):
         if self.outer_method == "Darts" and (
             not hasattr(self.outergradient, "Epsilon")
         ):
-            assert (
-                self.param_dict["T"] == 1
-            ), "Darts requires single gradient step to optimize task parameters"
             assert isinstance(
                 self._outer_gradient, getattr(hyper_grads, "BOMLOuterGradDarts")
             ), "Wrong name for outer method,should be in list [Darts]"

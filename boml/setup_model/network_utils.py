@@ -35,16 +35,14 @@ def conv_block(boml_net, cweight, bweight=None):
     """ Perform, conv, batch norm, nonlinearity, and max pool
     :param boml_net: instance of BOMLNet
     :param cweight: parameter of convolutional filter
-    :param bweight: bias for covolutional filter
+    :param bweight: bias for convolutional filter
     """
     if boml_net.max_pool:
-        conv_out = tf.add(
-            tf.nn.conv2d(boml_net.out, cweight, boml_net.no_stride, "SAME"), bweight
-        )
+        conv_out = tf.nn.conv2d(boml_net.out, cweight, boml_net.no_stride, "SAME")
     else:
-        conv_out = tf.add(
-            tf.nn.conv2d(boml_net.out, cweight, boml_net.stride, "SAME"), bweight
-        )
+        conv_out = tf.nn.conv2d(boml_net.out, cweight, boml_net.stride, "SAME")
+    if bweight is not None:
+        conv_out = tf.add(conv_out, bweight)
 
     if boml_net.batch_norm is not None:
         batch_out = boml_net.batch_norm(
@@ -65,17 +63,15 @@ def conv_block_t(boml_net, conv_weight, conv_bias, zweight):
     """ Perform, conv, batch norm, nonlinearity, and max pool
     :param boml_net: instance of BOMLNet
     :param convweight: parameter of convolutional filter
-    :param conv_bias: bias for covolutional filter
-    :param zweight: parameters of covolutional filter for t-layer"""
+    :param conv_bias: bias for convolutional filter
+    :param zweight: parameters of convolutional filter for t-layer"""
     if boml_net.max_pool:
-        conv_out = tf.add(
-            tf.nn.conv2d(boml_net.out, conv_weight, boml_net.no_stride, "SAME"),
-            conv_bias,
-        )
+        conv_out = tf.nn.conv2d(boml_net.out, conv_weight, boml_net.no_stride, "SAME"),
     else:
-        conv_out = tf.add(
-            tf.nn.conv2d(boml_net.out, conv_weight, boml_net.stride, "SAME"), conv_bias
-        )
+        conv_out = tf.nn.conv2d(boml_net.out, conv_weight, boml_net.stride, "SAME")
+    if conv_bias is not None:
+        conv_out = tf.add(conv_out, conv_bias)
+
     conv_output = tf.nn.conv2d(conv_out, zweight, boml_net.no_stride, "SAME")
 
     if boml_net.batch_norm is not None:
@@ -96,19 +92,17 @@ def conv_block_t(boml_net, conv_weight, conv_bias, zweight):
 def conv_block_warp(boml_net, cweight, bweight, zweight, zbias):
     """ Perform, conv, batch norm, nonlinearity, and max pool
     :param boml_net: instance of BOMLNet
-    :param convweight: parameter of convolutional filter
-    :param conv_bias: bias for covolutional filter
-    :param zweight: parameters of covolutional filter for warp-layer
-    :param zbias: bias of covolutional filter for warp-layer"""
+    :param cweight: parameter of convolutional filter
+    :param bweight: bias for convolutional filter
+    :param zweight: parameters of convolutional filter for warp-layer
+    :param zbias: bias of convolutional filter for warp-layer"""
     if boml_net.max_pool:
-        conv_out = tf.add(
-            tf.nn.conv2d(boml_net.out, cweight, boml_net.no_stride, "SAME"), bweight
-        )
+        conv_out = tf.nn.conv2d(boml_net.out, cweight, boml_net.no_stride, "SAME")
     else:
-        conv_out = tf.add(
-            tf.nn.conv2d(boml_net.out, cweight, boml_net.stride, "SAME"), bweight
-        )
+        conv_out = tf.nn.conv2d(boml_net.out, cweight, boml_net.stride, "SAME")
 
+    if bweight is not None:
+        conv_out = tf.add(conv_out, bweight)
     conv_output = tf.add(
         tf.nn.conv2d(conv_out, zweight, boml_net.no_stride, "SAME"), zbias
     )

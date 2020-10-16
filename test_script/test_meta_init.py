@@ -6,7 +6,6 @@ os.environ["DATASETS_FOLDER"] = "../data/"
 os.environ["EXPERIMENTS_FOLDER"] = "../"
 import boml.extension
 
-import boml as boml
 from test_script.script_helper import *
 import numpy as np
 import inspect, time
