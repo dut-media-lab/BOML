@@ -66,7 +66,7 @@ def conv_block_t(boml_net, conv_weight, conv_bias, zweight):
     :param conv_bias: bias for convolutional filter
     :param zweight: parameters of convolutional filter for t-layer"""
     if boml_net.max_pool:
-        conv_out = tf.nn.conv2d(boml_net.out, conv_weight, boml_net.no_stride, "SAME"),
+        conv_out = tf.nn.conv2d(boml_net.out, conv_weight, boml_net.no_stride, "SAME")
     else:
         conv_out = tf.nn.conv2d(boml_net.out, conv_weight, boml_net.stride, "SAME")
     if conv_bias is not None:

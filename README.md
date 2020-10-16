@@ -33,7 +33,7 @@ Here we illustrate the generic optimization process and hierarchically built str
 </div>
 
 ## Documentation 
-For more detailed information of basic function and construction process, please refer to our [Help Documentation](https://dut-media-lab.github.io/BOML/). Scripts in the directory named test_script are useful for constructing general training process.
+For more detailed information of basic function and construction process, please refer to our [Documentation](https://boml.readthedocs.io) or[Project Page](https://dut-media-lab.github.io/BOML/). Scripts in the directory named test_script are useful for constructing general training process.
 
 Here we give recommended settings for specific hyper paremeters to quickly test performance of popular algorithms.
 
