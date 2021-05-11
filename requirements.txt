@@ -1,5 +1,6 @@
 imageio
 numpy>=1.16.5
+gast==0.2.2
 h5py
 intervaltree
 matplotlib
