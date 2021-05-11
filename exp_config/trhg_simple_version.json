@@ -1,0 +1,20 @@
+{
+  "mode":"train",
+  "dataset":"omniglot",
+  "classes":5,
+  "examples_train":1,
+  "examples_test":15,
+  "T":5,
+  "meta_lr":0.001,
+  "lr":0.1,
+  "meta_batch_size":8,
+  "meta_train_iterations":5000,
+  "method":"MetaFeat",
+  "inner_method": "Trad",
+  "outer_method":"Reverse",
+  "learn_lr":"false",
+  "logdir":".../tmp/",
+  "truncate_iter": 1,
+  "print_interval":100,
+  "save_interval":100
+}

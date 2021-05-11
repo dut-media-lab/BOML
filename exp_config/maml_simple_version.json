@@ -1,0 +1,19 @@
+{
+  "mode":"train",
+  "dataset":"omniglot",
+  "classes":5,
+  "T":5,
+  "meta_lr":0.001,
+  "lr":0.1,
+  "examples_train":1,
+  "examples_test":15,
+  "meta_batch_size":4,
+  "meta_train_iterations":5000,
+  "method":"MetaInit",
+  "inner_method":"Simple",
+  "outer_method":"Simple",
+  "learn_lr":"false",
+  "logdir":"../tmp/",
+  "print_interval":100,
+  "save_interval":100
+}

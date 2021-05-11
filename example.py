@@ -45,4 +45,5 @@ with tf.Session() as sess:
         # meta training step
         boml_ho.run(tr_fd, v_fd)
         if itr % 100 == 0:
-            print(sess.run(loss_inner, utils.merge_dicts(tr_fd, v_fd)))
+            loss_list=sess.run([loss_inner,loss_outer],utils.merge_dicts(tr_fd,v_fd))
+            print('Iteration {}: Inner_loss {} , Outer_loss {}'.format(itr, loss_list[0],loss_list[1]))

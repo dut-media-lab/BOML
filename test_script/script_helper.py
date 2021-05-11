@@ -8,6 +8,7 @@ import tensorflow as tf
 import numpy as np
 from threading import Thread
 from boml import utils
+import json
 parser = argparse.ArgumentParser()
 
 parser.add_argument(
@@ -18,6 +19,11 @@ parser.add_argument(
     metavar="STRING",
     help="mode, can be train or test",
 )
+
+parser.add_argument(
+    '--name_of_args_json_file'
+    , type=str,
+    default="None")
 
 parser.add_argument(
     "-d",
@@ -103,7 +109,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "-mlr",
-    "--meta-lr",
+    "--meta_lr",
     type=float,
     default=0.001,
     metavar="NUMBER",
@@ -366,7 +372,47 @@ parser.add_argument(
 parser.add_argument(
     "-Notes", "--Notes", type=str, default="Notes", help="Something important"
 )
+
+class Bunch(object):
+  def __init__(self, adict):
+    self.__dict__.update(adict)
+
+def extract_args_from_json(json_file_path, args_dict):
+    summary_filename = json_file_path
+    with open(summary_filename) as f:
+        summary_dict = json.load(fp=f)
+
+    for key in summary_dict.keys():
+        if "continue_from" in key:
+            pass
+        elif "gpu_to_use" in key:
+            pass
+        else:
+            args_dict[key] = summary_dict[key]
+
+    return args_dict
+
+
 args = parser.parse_args()
+args_dict = vars(args)
+if args.name_of_args_json_file is not "None":
+    args_dict = extract_args_from_json(args.name_of_args_json_file, args_dict)
+
+for key in list(args_dict.keys()):
+
+    if str(args_dict[key]).lower() == "true":
+        args_dict[key] = True
+    elif str(args_dict[key]).lower() == "false":
+        args_dict[key] = False
+
+    if key == "dataset_path":
+        args_dict[key] = os.path.join(os.environ['DATASET_DIR'], args_dict[key])
+        print(key, os.path.join(os.environ['DATASET_DIR'], args_dict[key]))
+
+    print(key, args_dict[key], type(args_dict[key]))
+
+args = Bunch(args_dict)
+
 
 exp_string = (
     str(args.classes)
