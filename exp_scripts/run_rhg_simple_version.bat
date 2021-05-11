@@ -1,6 +1,3 @@
-#!/bin/sh
-cd ../test_script
-export DATASET_DIR="data/"
-# Activate the relevant virtual environment:
+@echo off
 cd ../test_script
 python test_meta_feat.py --name_of_args_json_file  ../exp_config/rhg_simple_version.json
