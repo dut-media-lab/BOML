@@ -35,6 +35,6 @@ setup(
     ],
     python_requires='>=3.5,<3.8',
     author="Yaohua Liu, Risheng Liu",
-    author_email="liuyaohua@mail.dlut.edu.cn",
+    author_email="yaohualiu@mail.dlut.edu.cn",
     description="A Bilevel Optimizer Library in Python for Meta Learning",
 )

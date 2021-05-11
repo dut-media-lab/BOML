@@ -1,7 +1,5 @@
 imageio
 h5py
-numpy
-scipy
 intervaltree
 matplotlib
 Pillow
